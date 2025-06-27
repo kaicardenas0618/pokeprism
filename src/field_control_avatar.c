@@ -31,6 +31,7 @@
 #include "start_menu.h"
 #include "trainer_see.h"
 #include "trainer_hill.h"
+#include "ui_start_menu.h"
 #include "vs_seeker.h"
 #include "wild_encounter.h"
 #include "constants/event_bg.h"
@@ -223,7 +224,7 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (input->pressedStartButton)
     {
         PlaySE(SE_WIN_OPEN);
-        ShowStartMenu();
+        HeatStartMenu_Init();
         return TRUE;
     }
 
