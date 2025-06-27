@@ -72,8 +72,10 @@ static void Task_HandleSave(u8 taskId);
 
 /* OTHER FUNCTIONS */
 static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount);
+static void HeatStartMenu_UpdateAllSpriteAnimations(void);
 static void HeatStartMenu_LoadSprites(void);
 static void HeatStartMenu_CreateSprites(void);
+static void HeatStartMenu_DestroySprites(void);
 static void HeatStartMenu_SafariZone_CreateSprites(void);
 static void HeatStartMenu_LoadBgGfx(void);
 static void HeatStartMenu_ShowTimeWindow(void);
@@ -143,6 +145,9 @@ struct HeatStartMenu {
 
 static EWRAM_DATA struct HeatStartMenu *sHeatStartMenu = NULL;
 static EWRAM_DATA u8 menuSelected = 0;
+static EWRAM_DATA u8 sLastMenuSelected = 0;
+static EWRAM_DATA u8 sLastMenuPage = 0;
+static EWRAM_DATA u8 sLastVisibleOptionsCount = 0;
 static EWRAM_DATA u8 (*sSaveDialogCallback)(void) = NULL;
 static EWRAM_DATA u8 sSaveDialogTimer = 0;
 static EWRAM_DATA u8 sSaveInfoWindowId = 0;
@@ -460,80 +465,129 @@ static const struct SpriteTemplate gSpriteIconFlag = {
 };
 
 static void SpriteCB_IconPoketch(struct Sprite* sprite) {
-  if (menuSelected == MENU_POKETCH && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_POKETCH) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  }
+    if (menuSelected == MENU_POKETCH) {
+        if (sprite->data[0] == 0)  // just selected
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)  // just deselected
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconPokedex(struct Sprite* sprite) {
-  if (menuSelected == MENU_POKEDEX && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_POKEDEX) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  }
+    if (menuSelected == MENU_POKEDEX) {
+        if (sprite->data[0] == 0)
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconParty(struct Sprite* sprite) {
-  if (menuSelected == MENU_PARTY && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_PARTY) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  }
+    if (menuSelected == MENU_PARTY) {
+        if (sprite->data[0] == 0)
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconBag(struct Sprite* sprite) {
-  if (menuSelected == MENU_BAG && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_BAG) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  } 
+    if (menuSelected == MENU_BAG) {
+        if (sprite->data[0] == 0)
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconTrainerCard(struct Sprite* sprite) {
-  if (menuSelected == MENU_TRAINER_CARD && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_TRAINER_CARD) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  } 
+    if (menuSelected == MENU_TRAINER_CARD) {
+        if (sprite->data[0] == 0)
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconSave(struct Sprite* sprite) {
-  if (menuSelected == MENU_SAVE && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_SAVE) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  } 
+    if (menuSelected == MENU_SAVE) {
+        if (sprite->data[0] == 0)
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconOptions(struct Sprite* sprite) {
-  if (menuSelected == MENU_OPTIONS && sHeatStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sHeatStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_OPTIONS) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  } 
+    if (menuSelected == MENU_OPTIONS) {
+        if (sprite->data[0] == 0)
+        {
+            sprite->data[0] = 1;
+            StartSpriteAnim(sprite, 1);
+            StartSpriteAffineAnim(sprite, 1);
+        }
+    } else {
+        if (sprite->data[0] == 1)
+        {
+            sprite->data[0] = 0;
+            StartSpriteAnim(sprite, 0);
+            StartSpriteAffineAnim(sprite, 0);
+        }
+    }
 }
 
 static void SpriteCB_IconFlag(struct Sprite* sprite) {
@@ -599,21 +653,24 @@ static void ShowSafariBallsWindow(void)
     CopyWindowToVram(sHeatStartMenu->sSafariBallsWindowId, COPYWIN_GFX);
 }
 
-void HeatStartMenu_Init(void) {
-  if (!IsOverworldLinkActive()) {
-    FreezeObjectEvents();
-    PlayerFreeze();
-    StopPlayerAvatar();
-  }
+void HeatStartMenu_Init(void)
+{
+    if (!IsOverworldLinkActive()) {
+        FreezeObjectEvents();
+        PlayerFreeze();
+        StopPlayerAvatar();
+    }
 
-  LockPlayerFieldControls();
+    LockPlayerFieldControls();
 
-  if (sHeatStartMenu == NULL) {
-    sHeatStartMenu = AllocZeroed(sizeof(struct HeatStartMenu));
-  }
+    if (sHeatStartMenu == NULL)
+        sHeatStartMenu = AllocZeroed(sizeof(struct HeatStartMenu));
 
-  if (sHeatStartMenu != NULL)
-  {
+    if (sHeatStartMenu == NULL) {
+        SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
+        return;
+    }
+
     sHeatStartMenu->spriteIdPokedex = SPRITE_NONE;
     sHeatStartMenu->spriteIdParty = SPRITE_NONE;
     sHeatStartMenu->spriteIdBag = SPRITE_NONE;
@@ -622,52 +679,123 @@ void HeatStartMenu_Init(void) {
     sHeatStartMenu->spriteIdSave = SPRITE_NONE;
     sHeatStartMenu->spriteIdOptions = SPRITE_NONE;
     sHeatStartMenu->spriteIdFlag = SPRITE_NONE;
-  }
 
-  if (sHeatStartMenu == NULL) {
-    SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
-    return;
-  }
+    sHeatStartMenu->savedCallback = CB2_ReturnToFieldWithOpenMenu;
+    sHeatStartMenu->loadState = 0;
+    sHeatStartMenu->sStartClockWindowId = 0;
+    sHeatStartMenu->flag = 0;
 
-  sHeatStartMenu->savedCallback = CB2_ReturnToFieldWithOpenMenu;
-  sHeatStartMenu->loadState = 0;
-  sHeatStartMenu->sStartClockWindowId = 0;
-  sHeatStartMenu->flag = 0;
+    // Get current visible count
+    u8 firstVisibleOption;
+    u8 currentVisibleCount;
+    GetVisibleMenuEntriesForPage(&firstVisibleOption, &currentVisibleCount);
 
-  if (GetSafariZoneFlag() == FALSE) { 
-    if (FlagGet(FLAG_SYS_POKENAV_GET) == FALSE && menuSelected == 0) {
-      menuSelected = 255;
+    // If new option(s) unlocked (current visible count > last visible count), reset to first option/page
+    if (currentVisibleCount > sLastVisibleOptionsCount)
+    {
+        menuSelected = firstVisibleOption;
+        sHeatStartMenu->page = 0;
+    }
+    else if (sLastMenuSelected != 255)
+    {
+        // Restore saved selection and page
+        menuSelected = sLastMenuSelected;
+
+        // Recalculate page of saved selection based on current visibility
+        const u8 menuOrder[] = {
+            MENU_POKEDEX,
+            MENU_PARTY,
+            MENU_BAG,
+            MENU_POKETCH,
+            MENU_TRAINER_CARD,
+            MENU_SAVE,
+            MENU_OPTIONS
+        };
+
+        u8 visibleIndex = 0;
+        for (u8 i = 0; i < ARRAY_COUNT(menuOrder); i++)
+        {
+            bool32 visible = FALSE;
+            switch (menuOrder[i])
+            {
+                case MENU_POKEDEX:
+                    visible = FlagGet(FLAG_SYS_POKEDEX_GET);
+                    break;
+                case MENU_PARTY:
+                    visible = FlagGet(FLAG_SYS_POKEMON_GET);
+                    break;
+                case MENU_POKETCH:
+                    visible = FlagGet(FLAG_SYS_POKENAV_GET);
+                    break;
+                default:
+                    visible = TRUE;
+                    break;
+            }
+
+            if (!visible)
+                continue;
+
+            if (menuOrder[i] == sLastMenuSelected)
+            {
+                sHeatStartMenu->page = visibleIndex / MAX_ICONS_PER_PAGE;
+                break;
+            }
+
+            visibleIndex++;
+        }
+    }
+    else
+    {
+        // No saved state, default to first visible option/page
+        menuSelected = firstVisibleOption;
+        sHeatStartMenu->page = 0;
     }
 
-    if (menuSelected == MENU_FLAG) {
-      menuSelected = MENU_POKEDEX;
-    }
+    // Save current visible count for next open
+    sLastVisibleOptionsCount = currentVisibleCount;
 
-    if (menuSelected == 255) {
-      SetSelectedMenu();
-    }
-      
-    HeatStartMenu_LoadSprites();
-    HeatStartMenu_CreateSprites();
-    HeatStartMenu_LoadBgGfx();
-    HeatStartMenu_ShowTimeWindow();
-    sHeatStartMenu->sMenuNameWindowId = AddWindow(&sWindowTemplate_MenuName);
-    HeatStartMenu_UpdateMenuName();
-    CreateTask(Task_HeatStartMenu_HandleMainInput, 0);
-  } else {
-    if (menuSelected == 255 || menuSelected == MENU_POKETCH || menuSelected == MENU_SAVE) {
-      menuSelected = MENU_FLAG;
-    }
+    // Continue normal setup below
 
-    HeatStartMenu_LoadSprites();
-    HeatStartMenu_SafariZone_CreateSprites();
-    HeatStartMenu_LoadBgGfx();
-    ShowSafariBallsWindow();
-    HeatStartMenu_ShowTimeWindow();
-    sHeatStartMenu->sMenuNameWindowId = AddWindow(&sWindowTemplate_MenuName);
-    HeatStartMenu_UpdateMenuName();
-    CreateTask(Task_HeatStartMenu_SafariZone_HandleMainInput, 0);
-  }
+    if (!GetSafariZoneFlag())
+    {
+        if (FlagGet(FLAG_SYS_POKENAV_GET) == FALSE && menuSelected == 0)
+            menuSelected = 255;
+
+        if (menuSelected == MENU_FLAG)
+            menuSelected = MENU_POKEDEX;
+
+        if (menuSelected == 255)
+            SetSelectedMenu();
+
+        HeatStartMenu_LoadSprites();
+        HeatStartMenu_CreateSprites();
+        HeatStartMenu_LoadBgGfx();
+        HeatStartMenu_ShowTimeWindow();
+
+        sHeatStartMenu->sMenuNameWindowId = AddWindow(&sWindowTemplate_MenuName);
+        HeatStartMenu_UpdateMenuName();
+
+        CreateTask(Task_HeatStartMenu_HandleMainInput, 0);
+    }
+    else
+    {
+        // Safari zone fallback logic
+        if (menuSelected == 255 || menuSelected == MENU_POKETCH || menuSelected == MENU_SAVE)
+            menuSelected = MENU_FLAG;
+
+        sHeatStartMenu->page = 0;
+
+        HeatStartMenu_LoadSprites();
+        HeatStartMenu_SafariZone_CreateSprites();
+        HeatStartMenu_LoadBgGfx();
+        ShowSafariBallsWindow();
+        HeatStartMenu_ShowTimeWindow();
+
+        sHeatStartMenu->sMenuNameWindowId = AddWindow(&sWindowTemplate_MenuName);
+        HeatStartMenu_UpdateMenuName();
+
+        CreateTask(Task_HeatStartMenu_SafariZone_HandleMainInput, 0);
+    }
 }
 
 static void HeatStartMenu_LoadSprites(void) {
@@ -676,6 +804,54 @@ static void HeatStartMenu_LoadSprites(void) {
   index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
   LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
   LoadCompressedSpriteSheet(sSpriteSheet_Icon);
+}
+
+static void HeatStartMenu_UpdateAllSpriteAnimations(void)
+{
+    if (!sHeatStartMenu)
+        return;
+
+    u32 spriteIds[] = {
+        sHeatStartMenu->spriteIdPokedex,
+        sHeatStartMenu->spriteIdParty,
+        sHeatStartMenu->spriteIdBag,
+        sHeatStartMenu->spriteIdPoketch,
+        sHeatStartMenu->spriteIdTrainerCard,
+        sHeatStartMenu->spriteIdSave,
+        sHeatStartMenu->spriteIdOptions
+    };
+
+    for (u32 i = 0; i < ARRAY_COUNT(spriteIds); i++)
+    {
+        if (spriteIds[i] != SPRITE_NONE)
+        {
+            struct Sprite* sprite = &gSprites[spriteIds[i]];
+            if (sprite->callback)
+                sprite->callback(sprite);
+        }
+    }
+}
+
+static void HeatStartMenu_DestroySprites(void)
+{
+    #define DESTROY_SPRITE_SAFE(id) \
+        do { \
+            if ((id) != SPRITE_NONE) { \
+                DestroySprite(&gSprites[id]); \
+                FreeSpriteOamMatrix(&gSprites[id]); \
+                (id) = SPRITE_NONE; \
+            } \
+        } while(0)
+
+    // Destroy all sprites unconditionally, ignoring flags.
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPokedex);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdParty);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdBag);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPoketch);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdTrainerCard);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdSave);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdOptions);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdFlag);
 }
 
 static void HeatStartMenu_CreateSprites(void)
@@ -730,6 +906,8 @@ static void HeatStartMenu_CreateSprites(void)
             y += 2;
 
         *iconEntries[i].spriteId = CreateSprite(iconEntries[i].template, x, y, 0);
+        struct Sprite *sprite = &gSprites[*iconEntries[i].spriteId];
+        sprite->data[0] = 0;
         shown++;
     }
 }
@@ -1365,49 +1543,71 @@ void GoToHandleInput(void) {
 
 static void HeatStartMenu_HandleInput_DPADDOWN(void)
 {
-    sHeatStartMenu->flag = 0;
-
     u8 entries[MAX_ICONS_PER_PAGE];
     u8 count;
     GetVisibleMenuEntriesForPage(entries, &count);
 
+    if (count == 0)
+        return;
+
+    u8 oldSelection = menuSelected;
+
     for (u8 i = 0; i < count; i++) {
         if (entries[i] == menuSelected) {
-            menuSelected = entries[(i + 1) % count]; // Wrap forward
-            PlaySE(SE_SELECT);
-            HeatStartMenu_UpdateMenuName();
+            u8 newIndex = (i + 1) % count;
+            if (entries[newIndex] != oldSelection) {
+                menuSelected = entries[newIndex];
+                sHeatStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset so animation triggers again
+                PlaySE(SE_SELECT);
+                HeatStartMenu_UpdateMenuName();
+                HeatStartMenu_UpdateAllSpriteAnimations();
+            }
             return;
         }
     }
 
     // fallback
-    if (count > 0) {
+    if (menuSelected != entries[0]) {
         menuSelected = entries[0];
+        sHeatStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset here as well
+        PlaySE(SE_SELECT);
         HeatStartMenu_UpdateMenuName();
+        HeatStartMenu_UpdateAllSpriteAnimations();
     }
 }
 
 static void HeatStartMenu_HandleInput_DPADUP(void)
 {
-    sHeatStartMenu->flag = 0;
-
     u8 entries[MAX_ICONS_PER_PAGE];
     u8 count;
     GetVisibleMenuEntriesForPage(entries, &count);
 
+    if (count == 0)
+        return;
+
+    u8 oldSelection = menuSelected;
+
     for (u8 i = 0; i < count; i++) {
         if (entries[i] == menuSelected) {
-            menuSelected = entries[(i + count - 1) % count]; // Wrap backward
-            PlaySE(SE_SELECT);
-            HeatStartMenu_UpdateMenuName();
+            u8 newIndex = (i + count - 1) % count;
+            if (entries[newIndex] != oldSelection) {
+                menuSelected = entries[newIndex];
+                sHeatStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset so animation triggers again
+                PlaySE(SE_SELECT);
+                HeatStartMenu_UpdateMenuName();
+                HeatStartMenu_UpdateAllSpriteAnimations();
+            }
             return;
         }
     }
 
     // fallback
-    if (count > 0) {
+    if (menuSelected != entries[0]) {
         menuSelected = entries[0];
+        sHeatStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset here as well
+        PlaySE(SE_SELECT);
         HeatStartMenu_UpdateMenuName();
+        HeatStartMenu_UpdateAllSpriteAnimations();
     }
 }
 
@@ -1462,36 +1662,119 @@ static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount)
     *outCount = count;
 }
 
-static void Task_HeatStartMenu_HandleMainInput(u8 taskId) {
-  u32 index;
-  if (sHeatStartMenu->loadState == 0 && !gPaletteFade.active) {
-    index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
-    LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
-  }
+static void Task_HeatStartMenu_HandleMainInput(u8 taskId)
+{
+    u32 index;
 
-  //HeatStartMenu_UpdateClockDisplay();
-  if (JOY_NEW(A_BUTTON)) {
-    if (sHeatStartMenu->loadState == 0) {
-      if (menuSelected != MENU_SAVE) {
-        FadeScreen(FADE_TO_BLACK, 0);
-      }
-      sHeatStartMenu->loadState = 1;
+    if (sHeatStartMenu->loadState == 0 && !gPaletteFade.active)
+    {
+        // Reload palette every frame to ensure integrity (may be optimized later)
+        index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
+        LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
     }
-  } else if (JOY_NEW(B_BUTTON) && sHeatStartMenu->loadState == 0) {
-    PlaySE(SE_SELECT);
-    HeatStartMenu_ExitAndClearTilemap();  
-    DestroyTask(taskId);
-  } else if (gMain.newKeys & DPAD_DOWN && sHeatStartMenu->loadState == 0) {
-    HeatStartMenu_HandleInput_DPADDOWN();
-  } else if (gMain.newKeys & DPAD_UP && sHeatStartMenu->loadState == 0) {
-    HeatStartMenu_HandleInput_DPADUP();
-  } else if (sHeatStartMenu->loadState == 1) {
-    if (menuSelected != MENU_SAVE) {
-      HeatStartMenu_OpenMenu();
-    } else {
-      DoCleanUpAndStartSaveMenu();
+
+    // --- Handle A press: confirm selection ---
+    if (JOY_NEW(A_BUTTON))
+    {
+        if (sHeatStartMenu->loadState == 0)
+        {
+            sLastMenuSelected = menuSelected;
+            sLastMenuPage = sHeatStartMenu->page;
+
+            if (menuSelected != MENU_SAVE)
+                FadeScreen(FADE_TO_BLACK, 0);
+
+            sHeatStartMenu->loadState = 1;
+        }
     }
-  }
+
+    // --- Handle B press: cancel menu ---
+    else if (JOY_NEW(B_BUTTON) && sHeatStartMenu->loadState == 0)
+    {
+        sLastMenuSelected = menuSelected;
+        sLastMenuPage = sHeatStartMenu->page;
+
+        PlaySE(SE_SELECT);
+        HeatStartMenu_ExitAndClearTilemap();  
+        DestroyTask(taskId);
+    }
+
+    // --- Handle D-pad navigation ---
+    else if (gMain.newKeys & DPAD_DOWN && sHeatStartMenu->loadState == 0)
+    {
+        HeatStartMenu_HandleInput_DPADDOWN();
+    }
+    else if (gMain.newKeys & DPAD_UP && sHeatStartMenu->loadState == 0)
+    {
+        HeatStartMenu_HandleInput_DPADUP();
+    }
+
+    // --- Handle L/R and DPAD_LEFT/DPAD_RIGHT page switching ---
+    else if ((gMain.newKeys & R_BUTTON || gMain.newKeys & L_BUTTON
+          || gMain.newKeys & DPAD_RIGHT || gMain.newKeys & DPAD_LEFT)
+         && sHeatStartMenu->loadState == 0)
+    {
+        u32 oldPage = sHeatStartMenu->page;
+        u8 oldSelection = menuSelected;
+
+        if (gMain.newKeys & R_BUTTON || gMain.newKeys & DPAD_RIGHT)
+        {
+            if (sHeatStartMenu->page + 1 < sHeatStartMenu->totalPages)
+                sHeatStartMenu->page++;
+        }
+        else // L_BUTTON or DPAD_LEFT
+        {
+            if (sHeatStartMenu->page > 0)
+                sHeatStartMenu->page--;
+        }
+
+        if (sHeatStartMenu->page != oldPage)
+        {
+            // Destroy sprites first (unconditionally)
+            HeatStartMenu_DestroySprites();
+
+            // Then free tiles and palettes
+            FreeSpriteTilesByTag(TAG_ICON_GFX);
+            FreeSpritePaletteByTag(TAG_ICON_PAL);
+
+            // Reload palette and sprite sheets
+            HeatStartMenu_LoadSprites();
+
+            // Create sprites for the new page
+            HeatStartMenu_CreateSprites();
+
+            // Restore selection or fallback to first visible entry
+            u8 entries[MAX_ICONS_PER_PAGE];
+            u8 count;
+            GetVisibleMenuEntriesForPage(entries, &count);
+
+            bool8 found = FALSE;
+            for (u8 i = 0; i < count; i++)
+            {
+                if (entries[i] == oldSelection)
+                {
+                    menuSelected = oldSelection;
+                    found = TRUE;
+                    break;
+                }
+            }
+            if (!found && count > 0)
+                menuSelected = entries[0];
+
+            HeatStartMenu_UpdateMenuName();
+            sHeatStartMenu->flag = 0; // Reset hover state
+            PlaySE(SE_SELECT);
+        }
+    }
+
+    // --- Proceed with selected menu ---
+    else if (sHeatStartMenu->loadState == 1)
+    {
+        if (menuSelected != MENU_SAVE)
+            HeatStartMenu_OpenMenu();
+        else
+            DoCleanUpAndStartSaveMenu();
+    }
 }
 
 static void HeatStartMenu_SafariZone_HandleInput_DPADDOWN(void) {
