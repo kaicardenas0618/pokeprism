@@ -20,6 +20,7 @@
 #include "follower_npc.h"
 #include "item_menu.h"
 #include "link.h"
+#include "map_name_popup.h"
 #include "match_call.h"
 #include "metatile_behavior.h"
 #include "overworld.h"
@@ -223,9 +224,20 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         return TRUE;
     if (input->pressedStartButton)
     {
-        PlaySE(SE_WIN_OPEN);
-        HeatStartMenu_Init();
-        return TRUE;
+        if (FuncIsActiveTask(Task_MapNamePopUpWindow))  // Popup still visible
+        {
+            // Close the popup immediately
+            HideMapNamePopUpWindow();
+            PlaySE(SE_WIN_OPEN);
+            HeatStartMenu_Init();
+            return TRUE;
+        }
+        else
+        {
+            PlaySE(SE_WIN_OPEN);
+            HeatStartMenu_Init();
+            return TRUE;
+        }
     }
 
     if (input->tookStep && TryFindHiddenPokemon())
