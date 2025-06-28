@@ -834,16 +834,15 @@ static void HeatStartMenu_UpdateAllSpriteAnimations(void)
 
 static void HeatStartMenu_DestroySprites(void)
 {
-    #define DESTROY_SPRITE_SAFE(id) \
-        do { \
-            if ((id) != SPRITE_NONE) { \
-                DestroySprite(&gSprites[id]); \
-                FreeSpriteOamMatrix(&gSprites[id]); \
-                (id) = SPRITE_NONE; \
-            } \
-        } while(0)
+#define DESTROY_SPRITE_SAFE(id) \
+    do { \
+        if ((id) != SPRITE_NONE) { \
+            FreeSpriteOamMatrix(&gSprites[id]); \
+            DestroySprite(&gSprites[id]); \
+            (id) = SPRITE_NONE; \
+        } \
+    } while(0)
 
-    // Destroy all sprites unconditionally, ignoring flags.
     DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPokedex);
     DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdParty);
     DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdBag);
@@ -852,22 +851,25 @@ static void HeatStartMenu_DestroySprites(void)
     DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdSave);
     DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdOptions);
     DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdFlag);
+
+#undef DESTROY_SPRITE_SAFE
 }
 
 static void HeatStartMenu_CreateSprites(void)
 {
     const struct {
         const struct SpriteTemplate *template;
-        u16 flag;  // 0 = always shown
+        u16 flag;
         u32 *spriteId;
+        u8 menuId;
     } iconEntries[] = {
-        {&gSpriteIconPokedex,     FLAG_SYS_POKEDEX_GET,     &sHeatStartMenu->spriteIdPokedex},
-        {&gSpriteIconParty,       FLAG_SYS_POKEMON_GET,     &sHeatStartMenu->spriteIdParty},
-        {&gSpriteIconBag,         0,                        &sHeatStartMenu->spriteIdBag},
-        {&gSpriteIconPoketch,     FLAG_SYS_POKENAV_GET,     &sHeatStartMenu->spriteIdPoketch},
-        {&gSpriteIconTrainerCard, 0,                        &sHeatStartMenu->spriteIdTrainerCard},
-        {&gSpriteIconSave,        0,                        &sHeatStartMenu->spriteIdSave},
-        {&gSpriteIconOptions,     0,                        &sHeatStartMenu->spriteIdOptions}
+        {&gSpriteIconPokedex,     FLAG_SYS_POKEDEX_GET,     &sHeatStartMenu->spriteIdPokedex,     MENU_POKEDEX},
+        {&gSpriteIconParty,       FLAG_SYS_POKEMON_GET,     &sHeatStartMenu->spriteIdParty,       MENU_PARTY},
+        {&gSpriteIconBag,         0,                        &sHeatStartMenu->spriteIdBag,         MENU_BAG},
+        {&gSpriteIconPoketch,     FLAG_SYS_POKENAV_GET,     &sHeatStartMenu->spriteIdPoketch,     MENU_POKETCH},
+        {&gSpriteIconTrainerCard, 0,                        &sHeatStartMenu->spriteIdTrainerCard, MENU_TRAINER_CARD},
+        {&gSpriteIconSave,        0,                        &sHeatStartMenu->spriteIdSave,        MENU_SAVE},
+        {&gSpriteIconOptions,     0,                        &sHeatStartMenu->spriteIdOptions,     MENU_OPTIONS},
     };
 
     u32 x = 224;
@@ -900,14 +902,18 @@ static void HeatStartMenu_CreateSprites(void)
             break;
 
         u32 y = yBase + shown * ySpacing;
-
-        // Lower the Poketch sprite by 2 pixels
         if (iconEntries[i].template == &gSpriteIconPoketch)
             y += 2;
 
-        *iconEntries[i].spriteId = CreateSprite(iconEntries[i].template, x, y, 0);
-        struct Sprite *sprite = &gSprites[*iconEntries[i].spriteId];
-        sprite->data[0] = 0;
+        u8 spriteId = CreateSprite(iconEntries[i].template, x, y, 0);
+        if (spriteId != MAX_SPRITES) {
+            *iconEntries[i].spriteId = spriteId;
+            struct Sprite *sprite = &gSprites[spriteId];
+            sprite->data[0] = (menuSelected == iconEntries[i].menuId) ? 1 : 0;
+            StartSpriteAnim(sprite, sprite->data[0]);
+            StartSpriteAffineAnim(sprite, sprite->data[0]);
+        }
+
         shown++;
     }
 }
