@@ -577,7 +577,7 @@ static bool8 FieldCB_ReturnToFieldStartMenu(void)
         return FALSE;
     }*/
 
-    HeatStartMenu_Init();
+    StartMenu_Init();
 
     ReturnToFieldOpenStartMenu();
     return TRUE;

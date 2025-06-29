@@ -229,13 +229,13 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
             // Close the popup immediately
             HideMapNamePopUpWindow();
             PlaySE(SE_WIN_OPEN);
-            HeatStartMenu_Init();
+            StartMenu_Init();
             return TRUE;
         }
         else
         {
             PlaySE(SE_WIN_OPEN);
-            HeatStartMenu_Init();
+            StartMenu_Init();
             return TRUE;
         }
     }
