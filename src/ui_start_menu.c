@@ -1002,7 +1002,7 @@ static void HeatStartMenu_ShowLRButtons(u8 currentPage, u8 totalPages)
 
     if (currentPage < totalPages - 1)
     {
-        u8 spriteId = CreateSprite(&gSpriteButtonR, 231, 155, 0);
+        u8 spriteId = CreateSprite(&gSpriteButtonR, 232, 155, 0);
         if (spriteId != MAX_SPRITES)
         {
             sHeatStartMenu->spriteIdRButton = spriteId;
@@ -1136,39 +1136,32 @@ static const u8 gText_Save[]    = _("     Save  ");
 static const u8 gText_Options[] = _("   Options");
 static const u8 gText_Flag[]    = _("   Retire");
 
-static void HeatStartMenu_UpdateMenuName(void) {
-  
-  FillWindowPixelBuffer(sHeatStartMenu->sMenuNameWindowId, PIXEL_FILL(TEXT_COLOR_WHITE));
-  PutWindowTilemap(sHeatStartMenu->sMenuNameWindowId);
+static void HeatStartMenu_UpdateMenuName(void)
+{
+    static const u8 sTextColors[3] = {1, 2, 3}; // background, text, shadow
 
-  switch(menuSelected) {
-    case MENU_POKETCH:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Poketch, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_POKEDEX:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Pokedex, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_PARTY:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Party, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_BAG:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Bag, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_TRAINER_CARD:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Trainer, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_SAVE:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Save, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_OPTIONS:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Options, 1, 0, 0xFF, NULL);
-      break;
-    case MENU_FLAG:
-      AddTextPrinterParameterized(sHeatStartMenu->sMenuNameWindowId, 1, gText_Flag, 1, 0, 0xFF, NULL);
-      break;
-  }
-  CopyWindowToVram(sHeatStartMenu->sMenuNameWindowId, COPYWIN_GFX);
+    FillWindowPixelBuffer(sHeatStartMenu->sMenuNameWindowId, PIXEL_FILL(sTextColors[0]));
+    PutWindowTilemap(sHeatStartMenu->sMenuNameWindowId);
+
+    const u8 *text = NULL;
+    switch (menuSelected)
+    {
+        case MENU_POKETCH:      text = gText_Poketch;      break;
+        case MENU_POKEDEX:      text = gText_Pokedex;      break;
+        case MENU_PARTY:        text = gText_Party;        break;
+        case MENU_BAG:          text = gText_Bag;          break;
+        case MENU_TRAINER_CARD: text = gText_Trainer;      break;
+        case MENU_SAVE:         text = gText_Save;         break;
+        case MENU_OPTIONS:      text = gText_Options;      break;
+        case MENU_FLAG:         text = gText_Flag;         break;
+    }
+
+    if (text != NULL)
+        AddTextPrinterParameterized3(sHeatStartMenu->sMenuNameWindowId, 1, 1, 0, sTextColors, 0xFF, text);
+
+    CopyWindowToVram(sHeatStartMenu->sMenuNameWindowId, COPYWIN_GFX);
 }
+
 
 static void HeatStartMenu_ExitAndClearTilemap(void)
 {
