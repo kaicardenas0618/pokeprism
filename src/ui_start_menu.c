@@ -169,13 +169,13 @@ static const u16 sStartMenuPalette[] = INCBIN_U16("graphics/start_menu/bg.gbapal
 #define TAG_ICON_PAL 0x4654
 #define TAG_BUTTON_PAL 0x4655
 
-// --PAGE-LOGIC---
-#define MAX_ICONS_PER_PAGE 6
-
 static const u32 sIconGfx[] = INCBIN_U32("graphics/start_menu/icons.4bpp.lz");
 static const u32 sButtonGfx[] = INCBIN_U32("graphics/start_menu/buttons.4bpp");
 static const u16 sIconPal[] = INCBIN_U16("graphics/start_menu/icons.gbapal");
 static const u16 sButtonPal[] = INCBIN_U16("graphics/start_menu/buttons.gbapal");
+
+// --PAGE-LOGIC---
+#define MAX_ICONS_PER_PAGE 6
 
 static const struct WindowTemplate sSaveInfoWindowTemplate = {
     .bg = 0,
