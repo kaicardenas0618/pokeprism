@@ -75,9 +75,9 @@ static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount);
 static void HeatStartMenu_UpdateAllSpriteAnimations(void);
 static void HeatStartMenu_LoadSprites(void);
 static void HeatStartMenu_CreateSprites(void);
+static void HeatStartMenu_DestroySprites(void);
 static void HeatStartMenu_ShowLRButtons(u8 currentPage, u8 totalPages);
 static void HeatStartMenu_DestroyLRButtons(void);
-static void HeatStartMenu_DestroySprites(void);
 static void HeatStartMenu_SafariZone_CreateSprites(void);
 static void HeatStartMenu_LoadBgGfx(void);
 static void HeatStartMenu_ShowTimeWindow(void);
@@ -845,16 +845,6 @@ void HeatStartMenu_Init(void)
     HeatStartMenu_ShowLRButtons(sHeatStartMenu->page, sHeatStartMenu->totalPages);
 }
 
-static void HeatStartMenu_LoadSprites(void) {
-    LoadSpriteSheet(sSpriteSheet_Button);
-    LoadSpritePalette(sSpritePal_Button);
-    u32 index;
-    LoadSpritePalette(sSpritePal_Icon);
-    index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
-    LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
-    LoadCompressedSpriteSheet(sSpriteSheet_Icon);
-}
-
 static void HeatStartMenu_UpdateAllSpriteAnimations(void)
 {
     if (!sHeatStartMenu)
@@ -881,29 +871,14 @@ static void HeatStartMenu_UpdateAllSpriteAnimations(void)
     }
 }
 
-static void HeatStartMenu_DestroySprites(void)
-{
-#define DESTROY_SPRITE_SAFE(id) \
-    do { \
-        if ((id) != SPRITE_NONE) { \
-            FreeSpriteOamMatrix(&gSprites[id]); \
-            DestroySprite(&gSprites[id]); \
-            (id) = SPRITE_NONE; \
-        } \
-    } while(0)
-
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPokedex);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdParty);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdBag);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPoketch);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdTrainerCard);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdSave);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdOptions);
-    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdFlag);
-
-    HeatStartMenu_DestroyLRButtons();
-
-#undef DESTROY_SPRITE_SAFE
+static void HeatStartMenu_LoadSprites(void) {
+    LoadSpriteSheet(sSpriteSheet_Button);
+    LoadSpritePalette(sSpritePal_Button);
+    u32 index;
+    LoadSpritePalette(sSpritePal_Icon);
+    index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
+    LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
+    LoadCompressedSpriteSheet(sSpriteSheet_Icon);
 }
 
 static void HeatStartMenu_CreateSprites(void)
@@ -970,6 +945,31 @@ static void HeatStartMenu_CreateSprites(void)
 
         shown++;
     }
+}
+
+static void HeatStartMenu_DestroySprites(void)
+{
+#define DESTROY_SPRITE_SAFE(id) \
+    do { \
+        if ((id) != SPRITE_NONE) { \
+            FreeSpriteOamMatrix(&gSprites[id]); \
+            DestroySprite(&gSprites[id]); \
+            (id) = SPRITE_NONE; \
+        } \
+    } while(0)
+
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPokedex);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdParty);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdBag);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdPoketch);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdTrainerCard);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdSave);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdOptions);
+    DESTROY_SPRITE_SAFE(sHeatStartMenu->spriteIdFlag);
+
+    HeatStartMenu_DestroyLRButtons();
+
+#undef DESTROY_SPRITE_SAFE
 }
 
 static void HeatStartMenu_ShowLRButtons(u8 currentPage, u8 totalPages)
@@ -1779,9 +1779,14 @@ static void Task_HeatStartMenu_HandleMainInput(u8 taskId)
     // Safe palette reload if tag is valid
     if (sHeatStartMenu->loadState == 0 && !gPaletteFade.active)
     {
-        u32 palIndex = IndexOfSpritePaletteTag(TAG_ICON_PAL);
-        if (palIndex != 0xFF)
-            LoadPalette(sIconPal, OBJ_PLTT_ID(palIndex), PLTT_SIZE_4BPP);
+        u32 palIndexIcon = IndexOfSpritePaletteTag(TAG_ICON_PAL);
+        u32 palIndexButton = IndexOfSpritePaletteTag(TAG_BUTTON_PAL);
+
+        if (palIndexIcon != 0xFF)
+            LoadPalette(sIconPal, OBJ_PLTT_ID(palIndexIcon), PLTT_SIZE_4BPP);
+
+        if (palIndexButton != 0xFF)
+            LoadPalette(sButtonPal, OBJ_PLTT_ID(palIndexButton), PLTT_SIZE_4BPP);
     }
 
     // Confirm selection with A
