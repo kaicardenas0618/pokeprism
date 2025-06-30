@@ -6,6 +6,7 @@
 #include "battle_pyramid_bag.h"
 #include "bg.h"
 #include "decompress.h"
+#include "dexnav.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "event_object_lock.h"
@@ -58,7 +59,7 @@
 #include "gba/isagbprint.h"
 
 /* CALLBACKS */
-static void SpriteCB_IconPoketch(struct Sprite* sprite);
+static void SpriteCB_IconDexNav(struct Sprite* sprite);
 static void SpriteCB_IconPokedex(struct Sprite* sprite);
 static void SpriteCB_IconParty(struct Sprite* sprite);
 static void SpriteCB_IconBag(struct Sprite* sprite);
@@ -110,7 +111,7 @@ enum MENU {
   MENU_POKEDEX,
   MENU_PARTY,
   MENU_BAG,
-  MENU_POKETCH,
+  MENU_DEXNAV,
   MENU_TRAINER_CARD,
   MENU_SAVE,
   MENU_OPTIONS,
@@ -139,7 +140,7 @@ struct StartMenu {
     u32 sSafariBallsWindowId;
     u32 flag; // some u32 holding values for controlling the sprite anims and lifetime
     
-    u32 spriteIdPoketch;
+    u32 spriteIdDexNav;
     u32 spriteIdPokedex;
     u32 spriteIdParty;
     u32 spriteIdBag;
@@ -277,19 +278,19 @@ static const struct OamData gOamButton = {
     .paletteNum = 0,
 };
 
-static const union AnimCmd gAnimCmdPoketch_NotSelected[] = {
+static const union AnimCmd gAnimCmdDexNav_NotSelected[] = {
     ANIMCMD_FRAME(112, 0),
     ANIMCMD_JUMP(0),
 };
 
-static const union AnimCmd gAnimCmdPoketch_Selected[] = {
+static const union AnimCmd gAnimCmdDexNav_Selected[] = {
     ANIMCMD_FRAME(0, 0),
     ANIMCMD_JUMP(0),
 };
 
-static const union AnimCmd *const gIconPoketchAnim[] = {
-    gAnimCmdPoketch_NotSelected,
-    gAnimCmdPoketch_Selected,
+static const union AnimCmd *const gIconDexNavAnim[] = {
+    gAnimCmdDexNav_NotSelected,
+    gAnimCmdDexNav_Selected,
 };
 
 static const union AnimCmd gAnimCmdPokedex_NotSelected[] = {
@@ -443,14 +444,14 @@ static const union AffineAnimCmd *const sAffineAnimsIcon[] =
     sAffineAnimIcon_Anim,
 };
 
-static const struct SpriteTemplate gSpriteIconPoketch = {
+static const struct SpriteTemplate gSpriteIconDexNav = {
     .tileTag = TAG_ICON_GFX,
     .paletteTag = TAG_ICON_PAL,
     .oam = &gOamIcon,
-    .anims = gIconPoketchAnim,
+    .anims = gIconDexNavAnim,
     .images = NULL,
     .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconPoketch,
+    .callback = SpriteCB_IconDexNav,
 };
 
 static const struct SpriteTemplate gSpriteIconPokedex = {
@@ -543,8 +544,8 @@ static const struct SpriteTemplate gSpriteButtonR = {
     .callback = SpriteCallbackDummy,
 };
 
-static void SpriteCB_IconPoketch(struct Sprite* sprite) {
-    if (menuSelected == MENU_POKETCH) {
+static void SpriteCB_IconDexNav(struct Sprite* sprite) {
+    if (menuSelected == MENU_DEXNAV) {
         if (sprite->data[0] == 0)  // just selected
         {
             sprite->data[0] = 1;
@@ -710,8 +711,8 @@ static const u8 gText_CurrentTimePM[]    = _("  {STR_VAR_3} {CLEAR_TO 51}{STR_VA
 static const u8 gText_CurrentTimePMOff[] = _("  {STR_VAR_3} {CLEAR_TO 51}{STR_VAR_1} {STR_VAR_2} PM");
 
 static void SetSelectedMenu(void) {
-  if (FlagGet(FLAG_SYS_POKENAV_GET) == TRUE) {
-    menuSelected = MENU_POKETCH;
+  if (FlagGet(FLAG_SYS_DEXNAV_GET) == TRUE) {
+    menuSelected = MENU_DEXNAV;
   } else if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE) {
     menuSelected = MENU_POKEDEX;
   } else if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE) {
@@ -758,7 +759,7 @@ void StartMenu_Init(void)
         .spriteIdPokedex = SPRITE_NONE,
         .spriteIdParty = SPRITE_NONE,
         .spriteIdBag = SPRITE_NONE,
-        .spriteIdPoketch = SPRITE_NONE,
+        .spriteIdDexNav = SPRITE_NONE,
         .spriteIdTrainerCard = SPRITE_NONE,
         .spriteIdSave = SPRITE_NONE,
         .spriteIdOptions = SPRITE_NONE,
@@ -787,7 +788,7 @@ void StartMenu_Init(void)
         menuSelected = sLastMenuSelected;
 
         const u8 menuOrder[] = {
-            MENU_POKEDEX, MENU_PARTY, MENU_BAG, MENU_POKETCH,
+            MENU_POKEDEX, MENU_PARTY, MENU_BAG, MENU_DEXNAV,
             MENU_TRAINER_CARD, MENU_SAVE, MENU_OPTIONS
         };
 
@@ -799,7 +800,7 @@ void StartMenu_Init(void)
             {
                 case MENU_POKEDEX: visible = FlagGet(FLAG_SYS_POKEDEX_GET); break;
                 case MENU_PARTY:   visible = FlagGet(FLAG_SYS_POKEMON_GET); break;
-                case MENU_POKETCH: visible = FlagGet(FLAG_SYS_POKENAV_GET); break;
+                case MENU_DEXNAV: visible = FlagGet(FLAG_SYS_DEXNAV_GET); break;
             }
 
             if (!visible) continue;
@@ -832,7 +833,7 @@ void StartMenu_Init(void)
 
     if (GetSafariZoneFlag())
     {
-        if (menuSelected == 255 || menuSelected == MENU_POKETCH || menuSelected == MENU_SAVE)
+        if (menuSelected == 255 || menuSelected == MENU_DEXNAV || menuSelected == MENU_SAVE)
             menuSelected = MENU_FLAG;
 
         sStartMenu->page = 0;
@@ -843,7 +844,7 @@ void StartMenu_Init(void)
     }
     else
     {
-        if (!FlagGet(FLAG_SYS_POKENAV_GET) && menuSelected == 0)
+        if (!FlagGet(FLAG_SYS_DEXNAV_GET) && menuSelected == 0)
             menuSelected = 255;
 
         if (menuSelected == MENU_FLAG)
@@ -869,7 +870,7 @@ static void StartMenu_UpdateAllSpriteAnimations(void)
         sStartMenu->spriteIdPokedex,
         sStartMenu->spriteIdParty,
         sStartMenu->spriteIdBag,
-        sStartMenu->spriteIdPoketch,
+        sStartMenu->spriteIdDexNav,
         sStartMenu->spriteIdTrainerCard,
         sStartMenu->spriteIdSave,
         sStartMenu->spriteIdOptions
@@ -907,7 +908,7 @@ static void StartMenu_CreateSprites(void)
         {&gSpriteIconPokedex,     FLAG_SYS_POKEDEX_GET,     &sStartMenu->spriteIdPokedex,     MENU_POKEDEX},
         {&gSpriteIconParty,       FLAG_SYS_POKEMON_GET,     &sStartMenu->spriteIdParty,       MENU_PARTY},
         {&gSpriteIconBag,         0,                        &sStartMenu->spriteIdBag,         MENU_BAG},
-        {&gSpriteIconPoketch,     FLAG_SYS_POKENAV_GET,     &sStartMenu->spriteIdPoketch,     MENU_POKETCH},
+        {&gSpriteIconDexNav,      FLAG_SYS_DEXNAV_GET,      &sStartMenu->spriteIdDexNav,     MENU_DEXNAV},
         {&gSpriteIconTrainerCard, 0,                        &sStartMenu->spriteIdTrainerCard, MENU_TRAINER_CARD},
         {&gSpriteIconSave,        0,                        &sStartMenu->spriteIdSave,        MENU_SAVE},
         {&gSpriteIconOptions,     0,                        &sStartMenu->spriteIdOptions,     MENU_OPTIONS},
@@ -943,7 +944,7 @@ static void StartMenu_CreateSprites(void)
             break;
 
         u32 y = yBase + shown * ySpacing;
-        if (iconEntries[i].template == &gSpriteIconPoketch)
+        if (iconEntries[i].template == &gSpriteIconDexNav)
             y += 2;
 
         if (iconEntries[i].template == &gSpriteIconTrainerCard)
@@ -976,7 +977,7 @@ static void StartMenu_DestroySprites(void)
     DESTROY_SPRITE_SAFE(sStartMenu->spriteIdPokedex);
     DESTROY_SPRITE_SAFE(sStartMenu->spriteIdParty);
     DESTROY_SPRITE_SAFE(sStartMenu->spriteIdBag);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdPoketch);
+    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdDexNav);
     DESTROY_SPRITE_SAFE(sStartMenu->spriteIdTrainerCard);
     DESTROY_SPRITE_SAFE(sStartMenu->spriteIdSave);
     DESTROY_SPRITE_SAFE(sStartMenu->spriteIdOptions);
@@ -1234,7 +1235,7 @@ static void StartMenu_UpdateClockDisplay(void)
 }
 */
 
-static const u8 gText_Poketch[] = _("  PokeNav");
+static const u8 gText_DexNav[] = _("   DexNav");
 static const u8 gText_Pokedex[] = _("  Pokédex");
 static const u8 gText_Party[]   = _("    Party ");
 static const u8 gText_Bag[]     = _("      Bag  ");
@@ -1253,7 +1254,7 @@ static void StartMenu_UpdateMenuName(void)
     const u8 *text = NULL;
     switch (menuSelected)
     {
-        case MENU_POKETCH:      text = gText_Poketch;      break;
+        case MENU_DEXNAV:      text = gText_DexNav;      break;
         case MENU_POKEDEX:      text = gText_Pokedex;      break;
         case MENU_PARTY:        text = gText_Party;        break;
         case MENU_BAG:          text = gText_Bag;          break;
@@ -1323,8 +1324,8 @@ static void StartMenu_ExitAndClearTilemap(void)
     if (!GetSafariZoneFlag())
     {
         SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdSave);
-        if (FlagGet(FLAG_SYS_POKENAV_GET))
-            SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdPoketch);
+        if (FlagGet(FLAG_SYS_DEXNAV_GET))
+            SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdDexNav);
     }
     else
     {
@@ -1735,26 +1736,27 @@ static void DoCleanUpAndStartSafariZoneRetire(void) {
 }
  
 static void StartMenu_OpenMenu(void) {
-  switch (menuSelected) {
-    case MENU_POKETCH:
-      DoCleanUpAndChangeCallback(CB2_InitPokeNav);
-      break;
-    case MENU_POKEDEX:
-      DoCleanUpAndChangeCallback(CB2_OpenPokedex);
-      break;
-    case MENU_PARTY: 
-      DoCleanUpAndChangeCallback(CB2_PartyMenuFromStartMenu);
-      break;
-    case MENU_BAG: 
-      DoCleanUpAndChangeCallback(CB2_BagMenuFromStartMenu);
-      break;
-    case MENU_TRAINER_CARD:
-      DoCleanUpAndOpenTrainerCard();
-      break;
-    case MENU_OPTIONS:
-      DoCleanUpAndChangeCallback(CB2_InitOptionMenu);
-      break;
-  }
+    switch (menuSelected) {
+        case MENU_DEXNAV:
+            PlaySE(SE_SELECT);
+            StartMenu_ExitAndClearTilemap();
+            CreateTask(Task_OpenDexNavFromStartMenu, 0);
+        case MENU_POKEDEX:
+            DoCleanUpAndChangeCallback(CB2_OpenPokedex);
+            break;
+        case MENU_PARTY: 
+            DoCleanUpAndChangeCallback(CB2_PartyMenuFromStartMenu);
+            break;
+        case MENU_BAG: 
+            DoCleanUpAndChangeCallback(CB2_BagMenuFromStartMenu);
+            break;
+        case MENU_TRAINER_CARD:
+            DoCleanUpAndOpenTrainerCard();
+            break;
+        case MENU_OPTIONS:
+            DoCleanUpAndChangeCallback(CB2_InitOptionMenu);
+            break;
+    }
 }
 
 void GoToHandleInput(void) {
@@ -1841,7 +1843,7 @@ static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount)
         MENU_POKEDEX,
         MENU_PARTY,
         MENU_BAG,
-        MENU_POKETCH,
+        MENU_DEXNAV,
         MENU_TRAINER_CARD,
         MENU_SAVE,
         MENU_OPTIONS
@@ -1856,8 +1858,8 @@ static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount)
             case MENU_PARTY:
                 visible = FlagGet(FLAG_SYS_POKEMON_GET);
                 break;
-            case MENU_POKETCH:
-                visible = FlagGet(FLAG_SYS_POKENAV_GET);
+            case MENU_DEXNAV:
+                visible = FlagGet(FLAG_SYS_DEXNAV_GET);
                 break;
             default:
                 visible = TRUE;
