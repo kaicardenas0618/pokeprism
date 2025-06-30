@@ -1621,6 +1621,13 @@ static void DexNav_VBlankCB(void)
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
+
+    // Scroll the background on BG2 (diagonally)
+    if (DEXNAV_SCROLLING_BG)
+    {
+        ChangeBgX(2, 64, BG_COORD_ADD);
+        ChangeBgY(2, 64, BG_COORD_ADD);
+    }
 }
 
 static void DexNav_MainCB(void)
