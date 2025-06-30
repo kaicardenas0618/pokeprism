@@ -157,6 +157,8 @@ struct StartMenu {
     u8 totalPages;
 };
 
+extern const u16 gFieldEffectObjectPalette0[];
+
 static EWRAM_DATA struct StartMenu *sStartMenu = NULL;
 static EWRAM_DATA u8 menuSelected = 0;
 static EWRAM_DATA u8 sLastMenuSelected = 0;
@@ -1368,13 +1370,13 @@ static void DoCleanUpAndOpenTrainerCard(void) {
     StartMenu_ExitAndClearTilemap();
     CleanupOverworldWindowsAndTilemaps();
     if (IsOverworldLinkActive() || InUnionRoom()) {
-      ShowPlayerTrainerCard(CB2_ReturnToFieldWithOpenMenu); // Display trainer card
+      ShowPlayerTrainerCard(CB2_ReturnToField); // Display trainer card
       DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
     } else if (FlagGet(FLAG_SYS_FRONTIER_PASS)) {
-      ShowFrontierPass(CB2_ReturnToFieldWithOpenMenu); // Display frontier pass
+      ShowFrontierPass(CB2_ReturnToField); // Display frontier pass
       DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
     } else {
-      ShowPlayerTrainerCard(CB2_ReturnToFieldWithOpenMenu); // Display trainer card
+      ShowPlayerTrainerCard(CB2_ReturnToField); // Display trainer card
       DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
     }
   }
@@ -1740,6 +1742,9 @@ static void StartMenu_OpenMenu(void) {
         case MENU_DEXNAV:
             PlaySE(SE_SELECT);
             StartMenu_ExitAndClearTilemap();
+
+            LoadPalette(gFieldEffectObjectPalette0, OBJ_PLTT_ID(0), PLTT_SIZE_4BPP);
+
             CreateTask(Task_OpenDexNavFromStartMenu, 0);
         case MENU_POKEDEX:
             DoCleanUpAndChangeCallback(CB2_OpenPokedex);
@@ -1754,6 +1759,7 @@ static void StartMenu_OpenMenu(void) {
             DoCleanUpAndOpenTrainerCard();
             break;
         case MENU_OPTIONS:
+            FlagSet(FLAG_OPTIONS_FROM_START_MENU);
             DoCleanUpAndChangeCallback(CB2_InitOptionMenu);
             break;
     }
@@ -1904,6 +1910,11 @@ static void Task_StartMenu_HandleMainInput(u8 taskId)
     {
         sLastMenuSelected = menuSelected;
         sLastMenuPage = sStartMenu->page;
+
+        if (menuSelected != MENU_DEXNAV)
+        {
+            PlaySE(SE_SELECT);
+        }
 
         if (menuSelected != MENU_SAVE)
             FadeScreen(FADE_TO_BLACK, 0);
