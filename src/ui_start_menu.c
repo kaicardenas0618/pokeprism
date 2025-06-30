@@ -34,6 +34,7 @@
 #include "pokedex.h"
 #include "pokemon_icon.h"
 #include "pokenav.h"
+#include "region_map.h"
 #include "safari_zone.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -83,8 +84,9 @@ static void StartMenu_CreatePartyMiniIcons(void);
 static void StartMenu_DestroyPartyMiniIcons(void);
 static void StartMenu_SafariZone_CreateSprites(void);
 static void StartMenu_LoadBgGfx(void);
-static void StartMenu_ShowTimeWindow(void);
+//static void StartMenu_ShowTimeWindow(void);
 //static void StartMenu_UpdateClockDisplay(void);
+static void StartMenu_ShowMapNameWindow(void);
 static void StartMenu_UpdateMenuName(void);
 static u8 RunSaveCallback(void);
 static u8 SaveDoSaveCallback(void);
@@ -131,7 +133,8 @@ enum SAVE_STATES {
 struct StartMenu {
     MainCallback savedCallback;
     u32 loadState;
-    u32 sStartClockWindowId;
+    //u32 sStartClockWindowId;
+    u32 sMapNameWindowId;
     u32 sMenuNameWindowId;
     u32 sSafariBallsWindowId;
     u32 flag; // some u32 holding values for controlling the sprite anims and lifetime
@@ -192,7 +195,7 @@ static const struct WindowTemplate sSaveInfoWindowTemplate = {
     .baseBlock = 8
 };
 
-static const struct WindowTemplate sWindowTemplate_StartClock = {
+static const struct WindowTemplate sWindowTemplate_MapName = {
   .bg = 0, 
   .tilemapLeft = 2, 
   .tilemapTop = 17, 
@@ -820,7 +823,8 @@ void StartMenu_Init(void)
 
     StartMenu_LoadSprites();
     StartMenu_LoadBgGfx();
-    StartMenu_ShowTimeWindow();
+    //StartMenu_ShowTimeWindow();
+    StartMenu_ShowMapNameWindow();
     StartMenu_DestroyPartyMiniIcons();
 
     sStartMenu->sMenuNameWindowId = AddWindow(&sWindowTemplate_MenuName);
@@ -1139,6 +1143,27 @@ static void StartMenu_LoadBgGfx(void) {
   ScheduleBgCopyTilemapToVram(0);
 }
 
+static void StartMenu_ShowMapNameWindow(void)
+{
+    sStartMenu->sMapNameWindowId = AddWindow(&sWindowTemplate_MapName);
+    FillWindowPixelBuffer(sStartMenu->sMapNameWindowId, PIXEL_FILL(TEXT_COLOR_WHITE));
+    PutWindowTilemap(sStartMenu->sMapNameWindowId);
+
+    u8 mapName[MAP_NAME_LENGTH + 1];
+    GetMapName(mapName, gMapHeader.regionMapSectionId, 0);
+
+    s32 pixelWidth = GetStringWidth(FONT_NORMAL, mapName, 0);
+    s32 windowWidthPx = sWindowTemplate_MapName.width * 8;
+    s32 xOffset = ((windowWidthPx - pixelWidth) / 2) + 1;
+
+    if (xOffset < 3)
+        xOffset = 3;
+
+    AddTextPrinterParameterized(sStartMenu->sMapNameWindowId, FONT_NORMAL, mapName, xOffset, 1, TEXT_SKIP_DRAW, NULL);
+    CopyWindowToVram(sStartMenu->sMapNameWindowId, COPYWIN_GFX);
+}
+
+/*
 static void StartMenu_ShowTimeWindow(void)
 {
     u8 analogHour;
@@ -1166,8 +1191,10 @@ static void StartMenu_ShowTimeWindow(void)
 	AddTextPrinterParameterized(sStartMenu->sStartClockWindowId, 1, gStringVar4, 0, 1, 0xFF, NULL);
 	CopyWindowToVram(sStartMenu->sStartClockWindowId, COPYWIN_GFX);
 }
+*/
 
-/*static void StartMenu_UpdateClockDisplay(void)
+/*
+static void StartMenu_UpdateClockDisplay(void)
 {
     u8 analogHour;
 
@@ -1204,7 +1231,8 @@ static void StartMenu_ShowTimeWindow(void)
     
 	AddTextPrinterParameterized(sStartMenu->sStartClockWindowId, 1, gStringVar4, 0, 1, 0xFF, NULL);
 	CopyWindowToVram(sStartMenu->sStartClockWindowId, COPYWIN_GFX);
-}*/
+}
+*/
 
 static const u8 gText_Poketch[] = _("  PokeNav");
 static const u8 gText_Pokedex[] = _("  Pokédex");
@@ -1249,12 +1277,12 @@ static void StartMenu_ExitAndClearTilemap(void)
 
     // Clear and remove menu windows
     FillWindowPixelBuffer(sStartMenu->sMenuNameWindowId, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-    FillWindowPixelBuffer(sStartMenu->sStartClockWindowId, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+    FillWindowPixelBuffer(sStartMenu->sMapNameWindowId, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
     ClearWindowTilemap(sStartMenu->sMenuNameWindowId);
-    ClearWindowTilemap(sStartMenu->sStartClockWindowId);
+    ClearWindowTilemap(sStartMenu->sMapNameWindowId);
     CopyWindowToVram(sStartMenu->sMenuNameWindowId, COPYWIN_GFX);
-    CopyWindowToVram(sStartMenu->sStartClockWindowId, COPYWIN_GFX);
-    RemoveWindow(sStartMenu->sStartClockWindowId);
+    CopyWindowToVram(sStartMenu->sMapNameWindowId, COPYWIN_GFX);
+    RemoveWindow(sStartMenu->sMapNameWindowId);
     RemoveWindow(sStartMenu->sMenuNameWindowId);
 
     if (GetSafariZoneFlag())
