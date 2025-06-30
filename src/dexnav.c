@@ -135,6 +135,7 @@ struct DexNavGUI
 EWRAM_DATA static struct DexNavSearch *sDexNavSearchDataPtr = NULL;
 EWRAM_DATA static struct DexNavGUI *sDexNavUiDataPtr = NULL;
 EWRAM_DATA static u8 *sBg1TilemapBuffer = NULL;
+EWRAM_DATA static u8 *sBg2TilemapBuffer = NULL;
 EWRAM_DATA u16 gDexNavSpecies = SPECIES_NONE;
 
 //// Function Declarations
@@ -167,6 +168,7 @@ static void DrawHiddenSearchWindow(u8 width);
 static const u32 sDexNavGuiTiles[] = INCBIN_U32("graphics/dexnav/gui_tiles.4bpp.lz");
 static const u32 sDexNavGuiTilemap[] = INCBIN_U32("graphics/dexnav/gui_tilemap.bin.lz");
 static const u32 sDexNavGuiPal[] = INCBIN_U32("graphics/dexnav/gui.gbapal");
+static const u32 sDexNavBgTilemap[] = INCBIN_U32("graphics/dexnav/scroll_bg.bin.lz");
 
 static const u32 sSelectionCursorGfx[] = INCBIN_U32("graphics/dexnav/cursor.4bpp.lz");
 static const u16 sSelectionCursorPal[] = INCBIN_U16("graphics/dexnav/cursor.gbapal");
@@ -1592,19 +1594,25 @@ static u8 GetEncounterLevelFromMapData(u16 species, enum EncounterType environme
 ///////////
 /// GUI ///
 ///////////
-static const struct BgTemplate sDexNavMenuBgTemplates[2] =
+static const struct BgTemplate sDexNavMenuBgTemplates[3] =
 {
     {
         .bg = 0,
-        .charBaseIndex = 0,
-        .mapBaseIndex = 31,
-        .priority = 0
+        .charBaseIndex = 0,  // DO NOT TOUCH - this is for text/icons
+        .mapBaseIndex  = 31,
+        .priority      = 0
     },
     {
         .bg = 1,
-        .charBaseIndex = 3,
-        .mapBaseIndex = 30,
-        .priority = 1
+        .charBaseIndex = 3,  // GUI graphics
+        .mapBaseIndex  = 30,
+        .priority      = 1
+    },
+    {
+        .bg = 2,
+        .charBaseIndex = 2,  // background
+        .mapBaseIndex  = 29,
+        .priority      = 2
     }
 };
 
@@ -1628,19 +1636,41 @@ static bool8 DexNav_InitBgs(void)
 {
     ResetVramOamAndBgCntRegs();
     ResetAllBgsCoordinates();
-    sBg1TilemapBuffer = Alloc(0x800);
-    if (sBg1TilemapBuffer == NULL)
-        return FALSE;
 
+    sBg2TilemapBuffer = Alloc(0x800);  // background
+    if (sBg2TilemapBuffer == NULL)
+        return FALSE;
+    memset(sBg2TilemapBuffer, 0, 0x800);
+
+    sBg1TilemapBuffer = Alloc(0x800);  // GUI
+    if (sBg1TilemapBuffer == NULL)
+    {
+        Free(sBg2TilemapBuffer);
+        return FALSE;
+    }
     memset(sBg1TilemapBuffer, 0, 0x800);
+
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sDexNavMenuBgTemplates, NELEMS(sDexNavMenuBgTemplates));
+
     SetBgTilemapBuffer(1, sBg1TilemapBuffer);
+    SetBgTilemapBuffer(2, sBg2TilemapBuffer);
+
     ScheduleBgCopyTilemapToVram(1);
-    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_1D_MAP | DISPCNT_OBJ_ON);
-    SetGpuReg(REG_OFFSET_BLDCNT , 0);
+    ScheduleBgCopyTilemapToVram(2);
+
+    SetGpuReg(REG_OFFSET_DISPCNT,
+        DISPCNT_OBJ_1D_MAP |
+        DISPCNT_OBJ_ON     |
+        DISPCNT_BG0_ON     |  // text/icons
+        DISPCNT_BG1_ON     |  // GUI
+        DISPCNT_BG2_ON);      // BG
+
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
     ShowBg(0);
     ShowBg(1);
+    ShowBg(2);
+
     return TRUE;
 }
 
@@ -1650,20 +1680,33 @@ static bool8 DexNav_LoadGraphics(void)
     {
     case 0:
         ResetTempTileDataBuffers();
+
+        // GUI tiles to char base 3 (BG1)
         DecompressAndCopyTileDataToVram(1, sDexNavGuiTiles, 0, 0, 0);
+        // BG tiles to char base 2 (BG2) manually
+        LZ77UnCompVram(sDexNavGuiTiles, (void *)BG_CHAR_ADDR(2));
+
         sDexNavUiDataPtr->state++;
         break;
+
     case 1:
         if (FreeTempTileDataBuffersIfPossible() != TRUE)
         {
             LZDecompressWram(sDexNavGuiTilemap, sBg1TilemapBuffer);
+            LZDecompressWram(sDexNavBgTilemap,  sBg2TilemapBuffer);
+
+            ScheduleBgCopyTilemapToVram(1);
+            ScheduleBgCopyTilemapToVram(2);
+
             sDexNavUiDataPtr->state++;
         }
         break;
+
     case 2:
         LoadPalette(sDexNavGuiPal, 0, 32);
         sDexNavUiDataPtr->state++;
         break;
+
     default:
         sDexNavUiDataPtr->state = 0;
         return TRUE;
