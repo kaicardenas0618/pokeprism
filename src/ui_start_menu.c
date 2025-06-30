@@ -35,6 +35,7 @@
 #include "pokedex.h"
 #include "pokemon_icon.h"
 #include "pokenav.h"
+#include "quests.h"
 #include "region_map.h"
 #include "safari_zone.h"
 #include "save.h"
@@ -106,6 +107,7 @@ static void ShowSaveInfoWindow(void);
 static u8 SaveConfirmSaveCallback(void);
 static void InitSave(void);
 static u8 GetTotalPageCount(void);
+static void CB2_OpenQuestMenuFromStartMenu(void);
 
 /* ENUMs */
 enum MENU {
@@ -1817,7 +1819,7 @@ static void StartMenu_OpenMenu(void) {
             DoCleanUpAndChangeCallback(CB2_BagMenuFromStartMenu);
             break;
         case MENU_QUESTS: 
-            DoCleanUpAndChangeCallback(CB2_BagMenuFromStartMenu);
+            DoCleanUpAndChangeCallback(CB2_OpenQuestMenuFromStartMenu);
             break;
         case MENU_TRAINER_CARD:
             DoCleanUpAndOpenTrainerCard();
@@ -2151,4 +2153,9 @@ static u8 GetTotalPageCount(void)
     u8 count;
     GetVisibleMenuEntriesForPage(entries, &count);
     return (count + MAX_ICONS_PER_PAGE - 1) / MAX_ICONS_PER_PAGE;
+}
+
+static void CB2_OpenQuestMenuFromStartMenu(void)
+{
+    QuestMenu_Init(0, CB2_ReturnToField);
 }
