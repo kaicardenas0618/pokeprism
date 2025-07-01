@@ -67,6 +67,7 @@ struct QuestMenuStaticResources
 // RAM
 EWRAM_DATA static struct QuestMenuResources *sStateDataPtr = NULL;
 EWRAM_DATA static u8 *sBg1TilemapBuffer = NULL;
+EWRAM_DATA static u8 *sBg2TilemapBuffer = NULL;
 EWRAM_DATA static struct ListMenuItem *sListMenuItems = NULL;
 EWRAM_DATA static struct QuestMenuStaticResources sListMenuState = {0};
 EWRAM_DATA static u8 sItemMenuIconSpriteIds[12] = {0};        // from pokefirered src/item_menu_icons.c
@@ -206,6 +207,8 @@ static const u32 sQuestMenuBgPals[] =
         INCBIN_U32("graphics/quest_menu/menu.gbapal");
 static const u32 sQuestMenuTilemap[] =
         INCBIN_U32("graphics/quest_menu/menu.bin.lz");
+static const u32 sQuestMenuBGTilemap[] =
+        INCBIN_U32("graphics/quest_menu/scroll_bg.bin.lz");
 
 //Strings used for the Quest Menu
 static const u8 sText_Empty[] = _("");
@@ -866,22 +869,29 @@ static const struct SideQuest sSideQuests[QUEST_COUNT] =
 ///////////////////////////////////////////////////////////////////////////////
 
 //BG layer defintions
-static const struct BgTemplate sQuestMenuBgTemplates[2] =
+static const struct BgTemplate sQuestMenuBgTemplates[3] =
 {
-	{
-		//All text and content is loaded to this window
-		.bg = 0,
-		.charBaseIndex = 0,
-		.mapBaseIndex = 31,
-		.priority = 1
-	},
-	{
-		///Backgrounds and UI elements are loaded to this window
-		.bg = 1,
-		.charBaseIndex = 3,
-		.mapBaseIndex = 30,
-		.priority = 2
-	}
+    {
+        // BG0 — Text, icons, content
+        .bg = 0,
+        .charBaseIndex = 0,
+        .mapBaseIndex = 31,
+        .priority = 1
+    },
+    {
+        // BG1 — UI elements
+        .bg = 1,
+        .charBaseIndex = 3,
+        .mapBaseIndex = 30,
+        .priority = 2
+    },
+    {
+        // BG2 — Scrolling background
+        .bg = 2,
+        .charBaseIndex = 2,
+        .mapBaseIndex = 29,
+        .priority = 3
+    }
 };
 
 //Window definitions
@@ -1003,9 +1013,16 @@ static void MainCB(void)
 
 static void VBlankCB(void)
 {
-	LoadOam();
-	ProcessSpriteCopyRequests();
-	TransferPlttBuffer();
+    LoadOam();
+    ProcessSpriteCopyRequests();
+    TransferPlttBuffer();
+
+    // Scroll the background on BG2 (diagonally)
+    if (SCROLLING_BGS)
+    {
+        ChangeBgX(2, 64, BG_COORD_ADD);
+        ChangeBgY(2, 64, BG_COORD_ADD);
+    }
 }
 
 static void RunSetup(void)
@@ -1149,32 +1166,50 @@ static bool8 SetupGraphics(void)
 
 static bool8 LoadGraphics(void)
 {
-	switch (sStateDataPtr->data[0])
-	{
-		case 0:
-			ResetTempTileDataBuffers();
-			DecompressAndCopyTileDataToVram(1, sQuestMenuTiles, 0, 0, 0);
-			sStateDataPtr->data[0]++;
-			break;
-		case 1:
-			if (FreeTempTileDataBuffersIfPossible() != TRUE)
-			{
-				LZDecompressWram(sQuestMenuTilemap, sBg1TilemapBuffer);
-				sStateDataPtr->data[0]++;
-			}
-			break;
-		case 2:
-			LoadPalette(sQuestMenuBgPals, 0x00, 0x60);
-			sStateDataPtr->data[0]++;
-			break;
-		case 3:
-			sStateDataPtr->data[0]++;
-			break;
-		default:
-			sStateDataPtr->data[0] = 0;
-			return TRUE;
-	}
-	return FALSE;
+    switch (sStateDataPtr->data[0])
+    {
+        case 0:
+            ResetTempTileDataBuffers();
+
+            // Load UI tiles to BG1 (char base 3)
+            DecompressAndCopyTileDataToVram(1, sQuestMenuTiles, 0, 0, 0);
+
+            // Load background tiles directly to BG2 (char base 2)
+            LZ77UnCompVram(sQuestMenuTiles, (void *)BG_CHAR_ADDR(2));
+
+            sStateDataPtr->data[0]++;
+            break;
+
+        case 1:
+            if (FreeTempTileDataBuffersIfPossible() != TRUE)
+            {
+                // Decompress UI tilemap to BG1
+                LZDecompressWram(sQuestMenuTilemap, sBg1TilemapBuffer);
+
+                // Decompress background tilemap to BG2
+                LZDecompressWram(sQuestMenuBGTilemap, sBg2TilemapBuffer);
+
+                ScheduleBgCopyTilemapToVram(1);
+                ScheduleBgCopyTilemapToVram(2);
+
+                sStateDataPtr->data[0]++;
+            }
+            break;
+
+        case 2:
+            LoadPalette(sQuestMenuBgPals, 0x00, 0x60);
+            sStateDataPtr->data[0]++;
+            break;
+
+        case 3:
+            sStateDataPtr->data[0]++;
+            break;
+
+        default:
+            sStateDataPtr->data[0] = 0;
+            return TRUE;
+    }
+    return FALSE;
 }
 
 static void QuestMenu_InitWindows(void)
@@ -1195,24 +1230,46 @@ static void QuestMenu_InitWindows(void)
 
 static bool8 InitBackgrounds(void)
 {
-	ResetAllBgsCoordinatesAndBgCntRegs();
-	sBg1TilemapBuffer = Alloc(0x800);
-	if (sBg1TilemapBuffer == NULL)
-	{
-		return FALSE;
-	}
+    ResetAllBgsCoordinatesAndBgCntRegs();
 
-	memset(sBg1TilemapBuffer, 0, 0x800);
-	ResetBgsAndClearDma3BusyFlags(0);
-	InitBgsFromTemplates(0, sQuestMenuBgTemplates,
-	                     NELEMS(sQuestMenuBgTemplates));
-	SetBgTilemapBuffer(1, sBg1TilemapBuffer);
-	ScheduleBgCopyTilemapToVram(1);
-	SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_1D_MAP | DISPCNT_OBJ_ON);
-	SetGpuReg(REG_OFFSET_BLDCNT, 0);
-	ShowBg(0);
-	ShowBg(1);
-	return TRUE;
+    // Allocate BG1 (UI)
+    sBg1TilemapBuffer = Alloc(0x800);
+    if (sBg1TilemapBuffer == NULL)
+        return FALSE;
+    memset(sBg1TilemapBuffer, 0, 0x800);
+
+    // Allocate BG2 (scrolling background)
+    sBg2TilemapBuffer = Alloc(0x800);
+    if (sBg2TilemapBuffer == NULL)
+    {
+        Free(sBg1TilemapBuffer);
+        return FALSE;
+    }
+    memset(sBg2TilemapBuffer, 0, 0x800);
+
+    ResetBgsAndClearDma3BusyFlags(0);
+    InitBgsFromTemplates(0, sQuestMenuBgTemplates, NELEMS(sQuestMenuBgTemplates));
+
+    SetBgTilemapBuffer(1, sBg1TilemapBuffer);
+    SetBgTilemapBuffer(2, sBg2TilemapBuffer);
+
+    ScheduleBgCopyTilemapToVram(1);
+    ScheduleBgCopyTilemapToVram(2);
+
+    SetGpuReg(REG_OFFSET_DISPCNT,
+        DISPCNT_OBJ_1D_MAP |
+        DISPCNT_OBJ_ON     |
+        DISPCNT_BG0_ON     |
+        DISPCNT_BG1_ON     |
+        DISPCNT_BG2_ON);
+
+    SetGpuReg(REG_OFFSET_BLDCNT, 0);
+
+    ShowBg(0);
+    ShowBg(1);
+    ShowBg(2);
+
+    return TRUE;
 }
 
 static void InitItems(void)
@@ -2422,17 +2479,17 @@ static void PrintNumQuests(void)
 {
 	StringExpandPlaceholders(gStringVar4, sText_QuestNumberDisplay);
 	QuestMenu_AddTextPrinterParameterized(2, 0, gStringVar4, 167, 1, 0, 1, 0,
-	                                      0);
+	                                      4);
 }
 static void PrintMenuContext(void)
 {
 	QuestMenu_AddTextPrinterParameterized(2, 0,
-	                                      questNameArray[QUEST_ARRAY_COUNT], 10, 1, 0, 1, 0, 0);
+	                                      questNameArray[QUEST_ARRAY_COUNT], 10, 1, 0, 1, 0, 4);
 }
 static void PrintTypeFilterButton(void)
 {
 	QuestMenu_AddTextPrinterParameterized(2, 0, sText_Type, 198, 1,
-	                                      0, 1, 0, 0);
+	                                      0, 1, 0, 4);
 
 }
 
