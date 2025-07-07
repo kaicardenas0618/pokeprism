@@ -1,29 +1,13 @@
 # GBA rom header
-TITLE       := POKEMON EMER
-GAME_CODE   := BPEE
+TITLE       := POKEMON PRIS
+GAME_CODE   := BPPM
 MAKER_CODE  := 01
 REVISION    := 0
 KEEP_TEMPS  ?= 0
 
-ROM_VARIANT ?= black
-
-PROJECT_ROOT := $(shell pwd)
-
-# Variant-specific settings
-ifeq ($(ROM_VARIANT),black)
-  TITLE := POKEMON BLACK
-  GAME_CODE := BPBE
-  FILE_NAME := pokeblackprism
-else ifeq ($(ROM_VARIANT),white)
-  TITLE := POKEMON WHITE
-  GAME_CODE := BWBE
-  FILE_NAME := pokewhiteprism
-else
-  $(error Invalid ROM_VARIANT "$(ROM_VARIANT)". Use ROM_VARIANT=black or ROM_VARIANT=white)
-endif
-
 # `File name`.gba
-BUILD_DIR := build/$(ROM_VARIANT)
+FILE_NAME := pokeprism
+BUILD_DIR := build
 
 # Compares the ROM to a checksum of the original - only makes sense using when non-modern
 COMPARE     ?= 0
@@ -47,13 +31,7 @@ ifeq (debug,$(MAKECMDGOALS))
 endif
 
 # Default make rule
-all: black white
-
-black:
-	$(MAKE) ROM_VARIANT=black rom
-
-white:
-	$(MAKE) ROM_VARIANT=white rom
+all: rom
 
 # Toolchain selection
 TOOLCHAIN := $(DEVKITARM)
@@ -139,7 +117,7 @@ O_LEVEL ?= g
 else
 O_LEVEL ?= 2
 endif
-CPPFLAGS := $(INCLUDE_CPP_ARGS) -Wno-trigraphs -DMODERN=1 -DTESTING=$(TEST) -std=gnu17 -DVERSION_$(shell echo $(ROM_VARIANT) | tr a-z A-Z)
+CPPFLAGS := $(INCLUDE_CPP_ARGS) -Wno-trigraphs -DMODERN=1 -DTESTING=$(TEST) -std=gnu17
 ARMCC := $(PREFIX)gcc
 PATH_ARMCC := PATH="$(PATH)" $(ARMCC)
 CC1 := $(shell $(PATH_ARMCC) --print-prog-name=cc1) -quiet
@@ -154,7 +132,7 @@ ifeq ($(UNUSED_ERROR),0)
   endif
 endif
 LIBPATH := -L "$(dir $(shell $(PATH_ARMCC) -mthumb -print-file-name=libgcc.a))" -L "$(dir $(shell $(PATH_ARMCC) -mthumb -print-file-name=libnosys.a))" -L "$(dir $(shell $(PATH_ARMCC) -mthumb -print-file-name=libc.a))"
-LIB := $(LIBPATH) -lc -lnosys -lgcc -L$(PROJECT_ROOT)/libagbsyscall -lagbsyscall
+LIB := $(LIBPATH) -lc -lnosys -lgcc -L../../libagbsyscall -lagbsyscall
 # Enable debug info if set
 ifeq ($(DINFO),1)
   override CFLAGS += -g
@@ -339,7 +317,7 @@ clean-assets:
 	rm -f $(DATA_ASM_SUBDIR)/layouts/layouts.inc $(DATA_ASM_SUBDIR)/layouts/layouts_table.inc
 	rm -f $(DATA_ASM_SUBDIR)/maps/connections.inc $(DATA_ASM_SUBDIR)/maps/events.inc $(DATA_ASM_SUBDIR)/maps/groups.inc $(DATA_ASM_SUBDIR)/maps/headers.inc $(DATA_SRC_SUBDIR)/map_group_count.h
 	find sound -iname '*.bin' -exec rm {} +
-	find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' -o -iname '*.latfont' -o -iname '*.hwjpnfont' -o -iname '*.smol' -o -iname '*.smolTM' -o -iname '*.Identifier' -o -iname '*.fwjpnfont' \) -exec rm {} +
+	find . \( -iname '*.1bpp' -o -iname '*.4bpp' -o -iname '*.8bpp' -o -iname '*.gbapal' -o -iname '*.lz' -o -iname '*.rl' -o -iname '*.latfont' -o -iname '*.hwjpnfont' -o -iname '*.fwjpnfont' -o -iname '*.smol' -o -iname '*.smolTM' -o -iname '*.Identifier' \) -exec rm {} +
 	find $(DATA_ASM_SUBDIR)/maps \( -iname 'connections.inc' -o -iname 'events.inc' -o -iname 'header.inc' \) -exec rm {} +
 
 tidy: tidymodern tidycheck tidydebug
@@ -503,7 +481,7 @@ libagbsyscall:
 # Elf from object files
 LDFLAGS = -Map ../../$(MAP)
 $(ELF): $(LD_SCRIPT) $(LD_SCRIPT_DEPS) $(OBJS) libagbsyscall
-	@cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T $(PROJECT_ROOT)/$(LD_SCRIPT) --print-memory-usage -o $(PROJECT_ROOT)/$@ $(OBJS_REL) $(LIB) | cat
+	@cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T ../../$< --print-memory-usage -o ../../$@ $(OBJS_REL) $(LIB) | cat
 	@echo "cd $(OBJ_DIR) && $(LD) $(LDFLAGS) -T ../../$< --print-memory-usage -o ../../$@ <objs> <libs> | cat"
 	$(FIX) $@ -t"$(TITLE)" -c$(GAME_CODE) -m$(MAKER_CODE) -r$(REVISION) --silent
 
