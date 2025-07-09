@@ -950,7 +950,7 @@ static bool8 AllocPartyMenuBgGfx(void)
 
     case 9:
         // Decompress scrolling BG tilemap to allocated buffer for BG3
-        LZDecompressWram(sPartyMenuScrollingBgTilemap, sPartyScrollingBgTilemapBuffer);
+        DecompressDataWithHeaderWram(sPartyMenuScrollingBgTilemap, sPartyScrollingBgTilemapBuffer);
         ScheduleBgCopyTilemapToVram(3);
         sPartyMenuInternal->data[0]++;
         break;
