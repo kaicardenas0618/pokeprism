@@ -7336,7 +7336,7 @@ u32 GetBattleMoveTarget(u16 move, u8 setTarget)
                 else
                     battlerAbilityOnField = IsAbilityOnOpposingSide(targetBattler, ABILITY_LIGHTNING_ROD);
 
-                if (battlerAbilityOnField > 0 && (battlerAbilityOnField - 1) != gBattlerAttacker)
+                if (battlerAbilityOnField > 0)
                 {
                     targetBattler = battlerAbilityOnField - 1;
                     RecordAbilityBattle(targetBattler, gBattleMons[targetBattler].ability);
@@ -7350,7 +7350,7 @@ u32 GetBattleMoveTarget(u16 move, u8 setTarget)
                 else
                     battlerAbilityOnField = IsAbilityOnOpposingSide(targetBattler, ABILITY_STORM_DRAIN);
 
-                if (battlerAbilityOnField > 0 && (battlerAbilityOnField - 1) != gBattlerAttacker)
+                if (battlerAbilityOnField > 0)
                 {
                     targetBattler = battlerAbilityOnField - 1;
                     RecordAbilityBattle(targetBattler, gBattleMons[targetBattler].ability);
@@ -8084,20 +8084,10 @@ static inline u32 CalcMoveBasePower(struct DamageContext *ctx)
         basePower = sSpeedDiffPowerTable[speed];
         break;
     case EFFECT_GYRO_BALL:
-        {
-            u32 attackerSpeed = GetBattlerTotalSpeedStat(battlerAtk);
-            if (attackerSpeed == 0)
-            {
-                basePower = 1;
-            }
-            else
-            {
-                basePower = ((25 * GetBattlerTotalSpeedStat(battlerDef)) / attackerSpeed) + 1;
-                if (basePower > 150)
-                    basePower = 150;
-            }
-            break;
-        }
+        basePower = ((25 * GetBattlerTotalSpeedStat(battlerDef)) / GetBattlerTotalSpeedStat(battlerAtk)) + 1;
+        if (basePower > 150)
+            basePower = 150;
+        break;
     case EFFECT_ECHOED_VOICE:
         // gBattleStruct->sameMoveTurns incremented in ppreduce
         if (gBattleStruct->sameMoveTurns[battlerAtk] != 0)
