@@ -1184,10 +1184,10 @@ static bool8 LoadGraphics(void)
             if (FreeTempTileDataBuffersIfPossible() != TRUE)
             {
                 // Decompress UI tilemap to BG1
-                LZDecompressWram(sQuestMenuTilemap, sBg1TilemapBuffer);
+                DecompressDataWithHeaderWram(sQuestMenuTilemap, sBg1TilemapBuffer);
 
                 // Decompress background tilemap to BG2
-                LZDecompressWram(sQuestMenuBGTilemap, sBg2TilemapBuffer);
+                DecompressDataWithHeaderWram(sQuestMenuBGTilemap, sBg2TilemapBuffer);
 
                 ScheduleBgCopyTilemapToVram(1);
                 ScheduleBgCopyTilemapToVram(2);
