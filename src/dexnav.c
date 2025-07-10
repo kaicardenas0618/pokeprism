@@ -227,8 +227,8 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
 };
 
 //gui font
-static const u8 sDexNavFontColor[3] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY};
-static const u8 sDexNavFontColorNoShadow[3] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_WHITE, TEXT_COLOR_TRANSPARENT};
+static const u8 sDexNavFontColor[3] = {TEXT_COLOR_TRANSPARENT, 10, 11};
+static const u8 sDexNavFontColorNoShadow[3] = {0, 10, 0};
 
 //search window font
 static const u8 sSearchFontColor[3] = {0, 15, 13};

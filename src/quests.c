@@ -231,7 +231,7 @@ static const u8 sText_StartForMore[] =
 static const u8 sText_ReturnRecieveReward[] =
       _("Return to {STR_VAR_2}\nto recieve your reward!");
 static const u8 sText_SubQuestButton[] = _(" {A_BUTTON}");
-static const u8 sText_Type[] = _("{R_BUTTON}Type");
+static const u8 sText_Type[] = _("{R_BUTTON} Type");
 static const u8 sText_Caught[] = _("Caught");
 static const u8 sText_Found[] = _("Found");
 static const u8 sText_Read[] = _("Read");
@@ -936,7 +936,7 @@ static const u8 sQuestMenuWindowFontColors[][4] =
 	{
 		//Header of Quest Menu
 		TEXT_COLOR_TRANSPARENT,
-		TEXT_COLOR_DARK_GRAY,
+		10,
 		TEXT_COLOR_TRANSPARENT
 	},
 	{
@@ -960,7 +960,7 @@ static const u8 sQuestMenuWindowFontColors[][4] =
 	{
 		//Footer flavor text
 		TEXT_COLOR_TRANSPARENT,
-		TEXT_COLOR_WHITE,
+		10,
 		TEXT_COLOR_TRANSPARENT
 	},
 };
