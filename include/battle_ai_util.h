@@ -23,6 +23,15 @@ enum DamageCalcContext
     AI_ATTACKING,
 };
 
+// Higher priority at the bottom; note that these are used in the formula MAX_MON_MOVES ^ AiCompareMovesPriority, which must fit within a u32.
+// In expansion where MAX_MON_MOVES is 4, this means that AiCompareMovesPriority can range from 0 - 15 inclusive.
+enum AiCompareMovesPriority
+{
+    PRIORITY_EFFECT,
+    PRIORITY_ACCURACY,
+    PRIORITY_NOT_CHARGING
+};
+
 enum AIPivot
 {
     DONT_PIVOT,
@@ -60,6 +69,7 @@ u32 AI_GetDamage(u32 battlerAtk, u32 battlerDef, u32 moveIndex, enum DamageCalcC
 bool32 IsAiVsAiBattle(void);
 bool32 BattlerHasAi(u32 battlerId);
 bool32 IsAiBattlerAware(u32 battlerId);
+bool32 IsAiBattlerAssumingStab(void);
 void ClearBattlerMoveHistory(u32 battlerId);
 void RecordLastUsedMoveBy(u32 battlerId, u32 move);
 void RecordAllMoves(u32 battler);
