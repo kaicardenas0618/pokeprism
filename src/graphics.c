@@ -1945,7 +1945,7 @@ const u32 gHoennTrainerCardFront_Tilemap[] = INCBIN_U32("graphics/trainer_card/f
 const u32 gHoennTrainerCardBack_Tilemap[] = INCBIN_U32("graphics/trainer_card/back.bin.smolTM");
 const u32 gHoennTrainerCardFrontLink_Tilemap[] = INCBIN_U32("graphics/trainer_card/front_link.bin.smolTM");
 
-const u16 gKantoTrainerCardBlue_Pal[] = INCBIN_U16("graphics/trainer_card/frlg/blue.gbapal");
+const u16 gKantoTrainerCardGreen_Pal[] = INCBIN_U16("graphics/trainer_card/frlg/green.gbapal");
 const u32 gKantoTrainerCard_Gfx[] = INCBIN_U32("graphics/trainer_card/frlg/tiles.4bpp.smol");
 const u32 gKantoTrainerCardBg_Tilemap[] = INCBIN_U32("graphics/trainer_card/frlg/bg.bin.smolTM");
 const u32 gKantoTrainerCardFront_Tilemap[] = INCBIN_U32("graphics/trainer_card/frlg/front.bin.smolTM");

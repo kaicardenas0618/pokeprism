@@ -172,9 +172,9 @@ static void LoadMonIconGfx(void);
 static const u32 sTrainerCardStickers_Gfx[]      = INCBIN_U32("graphics/trainer_card/frlg/stickers.4bpp.smol");
 static const u16 sUnused_Pal[]                   = INCBIN_U16("graphics/trainer_card/unused.gbapal");
 static const u16 sHoennTrainerCardBronze_Pal[]   = INCBIN_U16("graphics/trainer_card/bronze.gbapal");
-static const u16 sKantoTrainerCardGreen_Pal[]    = INCBIN_U16("graphics/trainer_card/frlg/green.gbapal");
+static const u16 sKantoTrainerCardBronze_Pal[]    = INCBIN_U16("graphics/trainer_card/frlg/bronze.gbapal");
 static const u16 sHoennTrainerCardCopper_Pal[]   = INCBIN_U16("graphics/trainer_card/copper.gbapal");
-static const u16 sKantoTrainerCardBronze_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/bronze.gbapal");
+static const u16 sKantoTrainerCardCopper_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/copper.gbapal");
 static const u16 sHoennTrainerCardSilver_Pal[]   = INCBIN_U16("graphics/trainer_card/silver.gbapal");
 static const u16 sKantoTrainerCardSilver_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/silver.gbapal");
 static const u16 sHoennTrainerCardGold_Pal[]     = INCBIN_U16("graphics/trainer_card/gold.gbapal");
@@ -272,9 +272,9 @@ static const u16 *const sHoennTrainerCardPals[] =
 
 static const u16 *const sKantoTrainerCardPals[] =
 {
-    gKantoTrainerCardBlue_Pal,   // Default (0 stars)
-    sKantoTrainerCardGreen_Pal,  // 1 star
-    sKantoTrainerCardBronze_Pal, // 2 stars
+    gKantoTrainerCardGreen_Pal,   // Default (0 stars)
+    sKantoTrainerCardBronze_Pal,  // 1 star
+    sKantoTrainerCardCopper_Pal, // 2 stars
     sKantoTrainerCardSilver_Pal, // 3 stars
     sKantoTrainerCardGold_Pal,   // 4 stars
 };
