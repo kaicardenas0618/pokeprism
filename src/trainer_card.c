@@ -82,7 +82,7 @@ struct TrainerCardData
     struct TrainerCard trainerCard;
     u16 frontTilemap[600];
     u16 backTilemap[600];
-    u16 bgTilemap[600];
+    u32 bgTilemap[600];
     u8 badgeTiles[0x80 * NUM_BADGES];
     u8 stickerTiles[0x200];
     u8 cardTiles[0x2300];
@@ -105,7 +105,7 @@ static void CloseTrainerCard(u8 task);
 static bool8 PrintAllOnCardFront(void);
 static void DrawTrainerCardWindow(u8);
 static void CreateTrainerCardTrainerPic(void);
-static void DrawCardScreenBackground(u16 *);
+static void DrawCardScreenBackground(const u32 *tilemapU32);
 static void DrawCardFrontOrBack(u16 *);
 static void DrawStarsAndBadgesOnCard(void);
 static void PrintTimeOnCard(void);
@@ -171,16 +171,14 @@ static void LoadMonIconGfx(void);
 
 static const u32 sTrainerCardStickers_Gfx[]      = INCBIN_U32("graphics/trainer_card/frlg/stickers.4bpp.smol");
 static const u16 sUnused_Pal[]                   = INCBIN_U16("graphics/trainer_card/unused.gbapal");
+static const u16 sHoennTrainerCardOrange_Pal[]   = INCBIN_U16("graphics/trainer_card/orange.gbapal");
+static const u16 sKantoTrainerCardOrange_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/orange.gbapal");
 static const u16 sHoennTrainerCardBronze_Pal[]   = INCBIN_U16("graphics/trainer_card/bronze.gbapal");
-static const u16 sKantoTrainerCardGreen_Pal[]    = INCBIN_U16("graphics/trainer_card/frlg/green.gbapal");
-static const u16 sHoennTrainerCardCopper_Pal[]   = INCBIN_U16("graphics/trainer_card/copper.gbapal");
-static const u16 sKantoTrainerCardBronze_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/bronze.gbapal");
+static const u16 sKantoTrainerCardBronze_Pal[]    = INCBIN_U16("graphics/trainer_card/frlg/bronze.gbapal");;
 static const u16 sHoennTrainerCardSilver_Pal[]   = INCBIN_U16("graphics/trainer_card/silver.gbapal");
 static const u16 sKantoTrainerCardSilver_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/silver.gbapal");
 static const u16 sHoennTrainerCardGold_Pal[]     = INCBIN_U16("graphics/trainer_card/gold.gbapal");
 static const u16 sKantoTrainerCardGold_Pal[]     = INCBIN_U16("graphics/trainer_card/frlg/gold.gbapal");
-static const u16 sHoennTrainerCardFemaleBg_Pal[] = INCBIN_U16("graphics/trainer_card/female_bg.gbapal");
-static const u16 sKantoTrainerCardFemaleBg_Pal[] = INCBIN_U16("graphics/trainer_card/frlg/female_bg.gbapal");
 static const u16 sHoennTrainerCardBadges_Pal[]   = INCBIN_U16("graphics/trainer_card/badges.gbapal");
 static const u16 sKantoTrainerCardBadges_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/badges.gbapal");
 static const u16 sTrainerCardStar_Pal[]          = INCBIN_U16("graphics/trainer_card/star.gbapal");
@@ -266,23 +264,23 @@ static const struct WindowTemplate sTrainerCardWindowTemplates[] =
 static const u16 *const sHoennTrainerCardPals[] =
 {
     gHoennTrainerCardGreen_Pal,  // Default (0 stars)
-    sHoennTrainerCardBronze_Pal, // 1 star
-    sHoennTrainerCardCopper_Pal, // 2 stars
+    sHoennTrainerCardOrange_Pal, // 1 star
+    sHoennTrainerCardBronze_Pal, // 2 stars
     sHoennTrainerCardSilver_Pal, // 3 stars
     sHoennTrainerCardGold_Pal,   // 4 stars
 };
 
 static const u16 *const sKantoTrainerCardPals[] =
 {
-    gKantoTrainerCardBlue_Pal,   // Default (0 stars)
-    sKantoTrainerCardGreen_Pal,  // 1 star
+    gKantoTrainerCardGreen_Pal,  // Default (0 stars)
+    sKantoTrainerCardOrange_Pal, // 1 star
     sKantoTrainerCardBronze_Pal, // 2 stars
     sKantoTrainerCardSilver_Pal, // 3 stars
     sKantoTrainerCardGold_Pal,   // 4 stars
 };
 
 static const u8 sTrainerCardTextColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
-static const u8 sTrainerCardStatColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_RED};
+static const u8 sTrainerCardStatColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_BLUE, TEXT_COLOR_LIGHT_GRAY};
 static const u8 sTimeColonInvisibleTextColors[6] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_TRANSPARENT, TEXT_COLOR_TRANSPARENT};
 
 static const u8 sTrainerPicOffset[2][GENDER_COUNT][2] =
@@ -336,6 +334,12 @@ static void VblankCb_TrainerCard(void)
     BlinkTimeColon();
     if (sData->allowDMACopy)
         DmaCopy16(3, &gScanlineEffectRegBuffers[0], &gScanlineEffectRegBuffers[1], 0x140);
+    
+    if (SCROLLING_BGS)
+    {
+        ChangeBgX(2, 64, BG_COORD_ADD);
+        ChangeBgY(2, 64, BG_COORD_ADD);
+    }
 }
 
 static void HblankCb_TrainerCard(void)
@@ -491,15 +495,16 @@ static void Task_TrainerCard(u8 taskId)
         }
         else if (JOY_NEW(A_BUTTON))
         {
-           if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
-           {
-               sData->mainState = STATE_WAIT_LINK_PARTNER;
-           }
-           else
-           {
-               BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
-               sData->mainState = STATE_CLOSE_CARD;
-           }
+            if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
+            {
+                sData->mainState = STATE_WAIT_LINK_PARTNER;
+            }
+            else
+            {
+                FlipTrainerCard();
+                sData->mainState = STATE_WAIT_FLIP_TO_FRONT;
+                PlaySE(SE_RG_CARD_FLIP);
+            }
         }
         break;
     case STATE_WAIT_LINK_PARTNER:
@@ -536,9 +541,15 @@ static bool8 LoadCardGfx(void)
     {
     case 0:
         if (sData->cardType != CARD_TYPE_FRLG)
+        {
             DecompressDataWithHeaderWram(gHoennTrainerCardBg_Tilemap, sData->bgTilemap);
+            DrawCardScreenBackground(sData->bgTilemap);
+        }
         else
+        {
             DecompressDataWithHeaderWram(gKantoTrainerCardBg_Tilemap, sData->bgTilemap);
+            DrawCardScreenBackground(sData->bgTilemap);
+        }
         break;
     case 1:
         if (sData->cardType != CARD_TYPE_FRLG)
@@ -1014,26 +1025,21 @@ static void PrintNameOnCardFront(void)
         AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, 16, 33, sTrainerCardTextColors, TEXT_SKIP_DRAW, buffer);
 }
 
+#define TRAINER_ID_CENTER_X 177
+
 static void PrintIdOnCard(void)
 {
     u8 buffer[32];
     u8 *txtPtr;
     s32 xPos;
-    u32 top;
+    u32 yPos = 9;
+
     txtPtr = StringCopy(buffer, gText_TrainerCardIDNo);
     ConvertIntToDecimalStringN(txtPtr, sData->trainerCard.trainerId, STR_CONV_MODE_LEADING_ZEROS, 5);
-    if (sData->cardType == CARD_TYPE_FRLG)
-    {
-        xPos = GetStringCenterAlignXOffset(FONT_NORMAL, buffer, 80) + 132;
-        top = 9;
-    }
-    else
-    {
-        xPos = GetStringCenterAlignXOffset(FONT_NORMAL, buffer, 96) + 120;
-        top = 9;
-    }
 
-    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, xPos, top, sTrainerCardTextColors, TEXT_SKIP_DRAW, buffer);
+    xPos = TRAINER_ID_CENTER_X - (GetStringWidth(FONT_NORMAL, buffer, 0) / 2);
+
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, xPos, yPos, sTrainerCardTextColors, TEXT_SKIP_DRAW, buffer);
 }
 
 static void PrintMoneyOnCard(void)
@@ -1423,7 +1429,7 @@ static u8 SetCardBgsAndPals(void)
 {
     switch (sData->bgPalLoadState)
     {
-    case 0:
+    case 0: 
         LoadBgTiles(3, sData->badgeTiles, ARRAY_COUNT(sData->badgeTiles), 0);
         break;
     case 1:
@@ -1434,15 +1440,11 @@ static u8 SetCardBgsAndPals(void)
         {
             LoadPalette(sHoennTrainerCardPals[sData->trainerCard.stars], BG_PLTT_ID(0), 3 * PLTT_SIZE_4BPP);
             LoadPalette(sHoennTrainerCardBadges_Pal, BG_PLTT_ID(3), PLTT_SIZE_4BPP);
-            if (sData->trainerCard.gender != MALE)
-                LoadPalette(sHoennTrainerCardFemaleBg_Pal, BG_PLTT_ID(1), PLTT_SIZE_4BPP);
         }
         else
         {
             LoadPalette(sKantoTrainerCardPals[sData->trainerCard.stars], BG_PLTT_ID(0), 3 * PLTT_SIZE_4BPP);
             LoadPalette(sKantoTrainerCardBadges_Pal, BG_PLTT_ID(3), PLTT_SIZE_4BPP);
-            if (sData->trainerCard.gender != MALE)
-                LoadPalette(sKantoTrainerCardFemaleBg_Pal, BG_PLTT_ID(1), PLTT_SIZE_4BPP);
         }
         LoadPalette(sTrainerCardStar_Pal, BG_PLTT_ID(4), PLTT_SIZE_4BPP);
         break;
@@ -1461,21 +1463,23 @@ static u8 SetCardBgsAndPals(void)
     return 0;
 }
 
-static void DrawCardScreenBackground(u16 *ptr)
+static void DrawCardScreenBackground(const u32 *tilemapU32)
 {
-    s16 i, j;
     u16 *dst = sData->bgTilemapBuffer;
+    s32 i;
 
-    for (i = 0; i < 20; i++)
+    // Convert 1024 entries (32x32) from 512 u32s into u16s
+    for (i = 0; i < 1024; i++)
     {
-        for (j = 0; j < 32; j++)
-        {
-            if (j < 30)
-                dst[32 * i + j] = ptr[30 * i + j];
-            else
-                dst[32 * i + j] = ptr[0];
-        }
+        u32 val = tilemapU32[i / 2];
+        if (i % 2 == 0)
+            dst[i] = val & 0xFFFF;
+        else
+            dst[i] = val >> 16;
     }
+
+    // Set and upload to BG2
+    SetBgTilemapBuffer(2, dst);
     CopyBgTilemapBufferToVram(2);
 }
 
