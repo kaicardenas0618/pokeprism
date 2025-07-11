@@ -171,10 +171,10 @@ static void LoadMonIconGfx(void);
 
 static const u32 sTrainerCardStickers_Gfx[]      = INCBIN_U32("graphics/trainer_card/frlg/stickers.4bpp.smol");
 static const u16 sUnused_Pal[]                   = INCBIN_U16("graphics/trainer_card/unused.gbapal");
+static const u16 sHoennTrainerCardOrange_Pal[]   = INCBIN_U16("graphics/trainer_card/orange.gbapal");
+static const u16 sKantoTrainerCardOrange_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/orange.gbapal");
 static const u16 sHoennTrainerCardBronze_Pal[]   = INCBIN_U16("graphics/trainer_card/bronze.gbapal");
-static const u16 sKantoTrainerCardBronze_Pal[]    = INCBIN_U16("graphics/trainer_card/frlg/bronze.gbapal");
-static const u16 sHoennTrainerCardCopper_Pal[]   = INCBIN_U16("graphics/trainer_card/copper.gbapal");
-static const u16 sKantoTrainerCardCopper_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/copper.gbapal");
+static const u16 sKantoTrainerCardBronze_Pal[]    = INCBIN_U16("graphics/trainer_card/frlg/bronze.gbapal");;
 static const u16 sHoennTrainerCardSilver_Pal[]   = INCBIN_U16("graphics/trainer_card/silver.gbapal");
 static const u16 sKantoTrainerCardSilver_Pal[]   = INCBIN_U16("graphics/trainer_card/frlg/silver.gbapal");
 static const u16 sHoennTrainerCardGold_Pal[]     = INCBIN_U16("graphics/trainer_card/gold.gbapal");
@@ -264,23 +264,23 @@ static const struct WindowTemplate sTrainerCardWindowTemplates[] =
 static const u16 *const sHoennTrainerCardPals[] =
 {
     gHoennTrainerCardGreen_Pal,  // Default (0 stars)
-    sHoennTrainerCardBronze_Pal, // 1 star
-    sHoennTrainerCardCopper_Pal, // 2 stars
+    sHoennTrainerCardOrange_Pal, // 1 star
+    sHoennTrainerCardBronze_Pal, // 2 stars
     sHoennTrainerCardSilver_Pal, // 3 stars
     sHoennTrainerCardGold_Pal,   // 4 stars
 };
 
 static const u16 *const sKantoTrainerCardPals[] =
 {
-    gKantoTrainerCardGreen_Pal,   // Default (0 stars)
-    sKantoTrainerCardBronze_Pal,  // 1 star
-    sKantoTrainerCardCopper_Pal, // 2 stars
+    gKantoTrainerCardGreen_Pal,  // Default (0 stars)
+    sKantoTrainerCardOrange_Pal, // 1 star
+    sKantoTrainerCardBronze_Pal, // 2 stars
     sKantoTrainerCardSilver_Pal, // 3 stars
     sKantoTrainerCardGold_Pal,   // 4 stars
 };
 
 static const u8 sTrainerCardTextColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
-static const u8 sTrainerCardStatColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_RED};
+static const u8 sTrainerCardStatColors[] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_LIGHT_GREEN, TEXT_COLOR_LIGHT_GRAY};
 static const u8 sTimeColonInvisibleTextColors[6] = {TEXT_COLOR_TRANSPARENT, TEXT_COLOR_TRANSPARENT, TEXT_COLOR_TRANSPARENT};
 
 static const u8 sTrainerPicOffset[2][GENDER_COUNT][2] =
@@ -1025,26 +1025,21 @@ static void PrintNameOnCardFront(void)
         AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, 16, 33, sTrainerCardTextColors, TEXT_SKIP_DRAW, buffer);
 }
 
+#define TRAINER_ID_CENTER_X 177
+
 static void PrintIdOnCard(void)
 {
     u8 buffer[32];
     u8 *txtPtr;
     s32 xPos;
-    u32 top;
+    u32 yPos = 9;
+
     txtPtr = StringCopy(buffer, gText_TrainerCardIDNo);
     ConvertIntToDecimalStringN(txtPtr, sData->trainerCard.trainerId, STR_CONV_MODE_LEADING_ZEROS, 5);
-    if (sData->cardType == CARD_TYPE_FRLG)
-    {
-        xPos = GetStringCenterAlignXOffset(FONT_NORMAL, buffer, 80) + 132;
-        top = 9;
-    }
-    else
-    {
-        xPos = GetStringCenterAlignXOffset(FONT_NORMAL, buffer, 96) + 120;
-        top = 9;
-    }
 
-    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, xPos, top, sTrainerCardTextColors, TEXT_SKIP_DRAW, buffer);
+    xPos = TRAINER_ID_CENTER_X - (GetStringWidth(FONT_NORMAL, buffer, 0) / 2);
+
+    AddTextPrinterParameterized3(WIN_CARD_TEXT, FONT_NORMAL, xPos, yPos, sTrainerCardTextColors, TEXT_SKIP_DRAW, buffer);
 }
 
 static void PrintMoneyOnCard(void)
