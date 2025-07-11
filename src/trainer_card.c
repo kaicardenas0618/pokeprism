@@ -82,7 +82,7 @@ struct TrainerCardData
     struct TrainerCard trainerCard;
     u16 frontTilemap[600];
     u16 backTilemap[600];
-    u16 bgTilemap[600];
+    u32 bgTilemap[600];
     u8 badgeTiles[0x80 * NUM_BADGES];
     u8 stickerTiles[0x200];
     u8 cardTiles[0x2300];
@@ -105,7 +105,7 @@ static void CloseTrainerCard(u8 task);
 static bool8 PrintAllOnCardFront(void);
 static void DrawTrainerCardWindow(u8);
 static void CreateTrainerCardTrainerPic(void);
-static void DrawCardScreenBackground(u16 *);
+static void DrawCardScreenBackground(const u32 *tilemapU32);
 static void DrawCardFrontOrBack(u16 *);
 static void DrawStarsAndBadgesOnCard(void);
 static void PrintTimeOnCard(void);
@@ -336,6 +336,12 @@ static void VblankCb_TrainerCard(void)
     BlinkTimeColon();
     if (sData->allowDMACopy)
         DmaCopy16(3, &gScanlineEffectRegBuffers[0], &gScanlineEffectRegBuffers[1], 0x140);
+    
+    if (SCROLLING_BGS)
+    {
+        ChangeBgX(2, 64, BG_COORD_ADD);
+        ChangeBgY(2, 64, BG_COORD_ADD);
+    }
 }
 
 static void HblankCb_TrainerCard(void)
@@ -536,9 +542,15 @@ static bool8 LoadCardGfx(void)
     {
     case 0:
         if (sData->cardType != CARD_TYPE_FRLG)
+        {
             DecompressDataWithHeaderWram(gHoennTrainerCardBg_Tilemap, sData->bgTilemap);
+            DrawCardScreenBackground(sData->bgTilemap);
+        }
         else
+        {
             DecompressDataWithHeaderWram(gKantoTrainerCardBg_Tilemap, sData->bgTilemap);
+            DrawCardScreenBackground(sData->bgTilemap);
+        }
         break;
     case 1:
         if (sData->cardType != CARD_TYPE_FRLG)
@@ -1461,21 +1473,23 @@ static u8 SetCardBgsAndPals(void)
     return 0;
 }
 
-static void DrawCardScreenBackground(u16 *ptr)
+static void DrawCardScreenBackground(const u32 *tilemapU32)
 {
-    s16 i, j;
     u16 *dst = sData->bgTilemapBuffer;
+    s32 i;
 
-    for (i = 0; i < 20; i++)
+    // Convert 1024 entries (32x32) from 512 u32s into u16s
+    for (i = 0; i < 1024; i++)
     {
-        for (j = 0; j < 32; j++)
-        {
-            if (j < 30)
-                dst[32 * i + j] = ptr[30 * i + j];
-            else
-                dst[32 * i + j] = ptr[0];
-        }
+        u32 val = tilemapU32[i / 2];
+        if (i % 2 == 0)
+            dst[i] = val & 0xFFFF;
+        else
+            dst[i] = val >> 16;
     }
+
+    // Set and upload to BG2
+    SetBgTilemapBuffer(2, dst);
     CopyBgTilemapBufferToVram(2);
 }
 
