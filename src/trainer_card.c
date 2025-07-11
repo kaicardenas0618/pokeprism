@@ -497,15 +497,16 @@ static void Task_TrainerCard(u8 taskId)
         }
         else if (JOY_NEW(A_BUTTON))
         {
-           if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
-           {
-               sData->mainState = STATE_WAIT_LINK_PARTNER;
-           }
-           else
-           {
-               BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
-               sData->mainState = STATE_CLOSE_CARD;
-           }
+            if (gReceivedRemoteLinkPlayers && sData->isLink && InUnionRoom() == TRUE)
+            {
+                sData->mainState = STATE_WAIT_LINK_PARTNER;
+            }
+            else
+            {
+                FlipTrainerCard();
+                sData->mainState = STATE_WAIT_FLIP_TO_FRONT;
+                PlaySE(SE_RG_CARD_FLIP);
+            }
         }
         break;
     case STATE_WAIT_LINK_PARTNER:
