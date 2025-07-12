@@ -488,9 +488,8 @@ static void Task_TrainerCard(u8 taskId)
             }
             else
             {
-                FlipTrainerCard();
-                sData->mainState = STATE_WAIT_FLIP_TO_FRONT;
-                PlaySE(SE_RG_CARD_FLIP);
+                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, sData->blendColor);
+                sData->mainState = STATE_CLOSE_CARD;
             }
         }
         else if (JOY_NEW(A_BUTTON))
