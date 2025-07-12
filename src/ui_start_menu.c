@@ -93,7 +93,7 @@ static void StartMenu_ShowMapNameWindow(void);
 static void StartMenu_UpdateMenuName(void);
 static u8 RunSaveCallback(void);
 static u8 SaveDoSaveCallback(void);
-static void HideSaveInfoWindow(void);
+//static void HideSaveInfoWindow(void);
 static void HideSaveMessageWindow(void);
 static u8 SaveOverwriteInputCallback(void);
 static u8 SaveConfirmOverwriteDefaultNoCallback(void);
@@ -103,7 +103,7 @@ static u8 SaveFileExistsCallback(void);
 static u8 SaveSavingMessageCallback(void);
 static u8 SaveConfirmInputCallback(void);
 static u8 SaveYesNoCallback(void);
-static void ShowSaveInfoWindow(void);
+//static void ShowSaveInfoWindow(void);
 static u8 SaveConfirmSaveCallback(void);
 static void InitSave(void);
 static u8 GetTotalPageCount(void);
@@ -1497,7 +1497,7 @@ static u8 SaveReturnSuccessCallback(void)
 {
     if (!IsSEPlaying() && SaveSuccesTimer())
     {
-        HideSaveInfoWindow();
+        //HideSaveInfoWindow();
         return SAVE_SUCCESS;
     }
     else
@@ -1525,7 +1525,7 @@ static u8 SaveReturnErrorCallback(void)
     }
     else
     {
-        HideSaveInfoWindow();
+        //HideSaveInfoWindow();
         return SAVE_ERROR;
     }
 }
@@ -1567,10 +1567,12 @@ static u8 SaveDoSaveCallback(void)
     return SAVE_IN_PROGRESS;
 }
 
+/*
 static void HideSaveInfoWindow(void) {
   ClearStdWindowAndFrame(sSaveInfoWindowId, FALSE);
   RemoveWindow(sSaveInfoWindowId);
 }
+*/
 
 static void HideSaveMessageWindow(void) {
   ClearDialogWindowAndFrame(0, TRUE);
@@ -1585,7 +1587,7 @@ static u8 SaveOverwriteInputCallback(void)
         return SAVE_IN_PROGRESS;
     case MENU_B_PRESSED:
     case 1: // No
-        HideSaveInfoWindow();
+        //HideSaveInfoWindow();
         HideSaveMessageWindow();
         return SAVE_CANCELED;
     }
@@ -1656,7 +1658,7 @@ static u8 SaveConfirmInputCallback(void)
         }
     case MENU_B_PRESSED: // No break, thats smart 
     case 1: // No
-        HideSaveInfoWindow();
+        //HideSaveInfoWindow();
         HideSaveMessageWindow();
         return SAVE_CANCELED;
     }
@@ -1670,7 +1672,7 @@ static u8 SaveYesNoCallback(void) {
     return SAVE_IN_PROGRESS;
 }
 
-
+/*
 static void ShowSaveInfoWindow(void) {
     struct WindowTemplate saveInfoWindow = sSaveInfoWindowTemplate;
     u8 gender;
@@ -1734,11 +1736,12 @@ static void ShowSaveInfoWindow(void) {
 
     CopyWindowToVram(sSaveInfoWindowId, COPYWIN_GFX);
 }
+*/
 
 static u8 SaveConfirmSaveCallback(void) {
   ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
   //RemoveStartMenuWindow();
-  ShowSaveInfoWindow();
+  //ShowSaveInfoWindow();
 
   if (InBattlePyramid()) {
     ShowSaveMessage(gText_BattlePyramidConfirmRest, SaveYesNoCallback);
