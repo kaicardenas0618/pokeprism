@@ -207,12 +207,16 @@ struct PartyMenuBox
     u8 statusSpriteId;
 };
 
+static const u32 sPartyMenuScrollingTiles[] = INCBIN_U32("graphics/party_menu/scroll_tiles.4bpp.lz");
+static const u32 sPartyMenuScrollingBgTilemap[] = INCBIN_U32("graphics/party_menu/scroll_bg.bin.lz");
+
 // EWRAM vars
 static EWRAM_DATA struct PartyMenuInternal *sPartyMenuInternal = NULL;
 EWRAM_DATA struct PartyMenu gPartyMenu = {0};
 static EWRAM_DATA struct PartyMenuBox *sPartyMenuBoxes = NULL;
 static EWRAM_DATA u8 *sPartyBgGfxTilemap = NULL;
 static EWRAM_DATA u8 *sPartyBgTilemapBuffer = NULL;
+static EWRAM_DATA u8 *sPartyScrollingBgTilemapBuffer = NULL;
 EWRAM_DATA bool8 gPartyMenuUseExitCallback = 0;
 EWRAM_DATA u8 gSelectedMonPartyId = 0;
 EWRAM_DATA MainCallback gPostMenuFieldCallback = NULL;
@@ -566,6 +570,12 @@ static void VBlankCB_PartyMenu(void)
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
+
+    if (SCROLLING_BGS)
+    {
+        ChangeBgX(3, 64, BG_COORD_ADD);
+        ChangeBgY(3, 64, BG_COORD_ADD);
+    }
 }
 
 static void CB2_InitPartyMenu(void)
@@ -840,17 +850,38 @@ static bool8 AllocPartyMenuBg(void)
     if (sPartyBgTilemapBuffer == NULL)
         return FALSE;
 
+    sPartyScrollingBgTilemapBuffer = Alloc(0x800);
+    if (sPartyScrollingBgTilemapBuffer == NULL)
+    {
+        Free(sPartyBgTilemapBuffer);
+        return FALSE;
+    }
+
     memset(sPartyBgTilemapBuffer, 0, 0x800);
+    memset(sPartyScrollingBgTilemapBuffer, 0, 0x800);
+
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sPartyMenuBgTemplates, ARRAY_COUNT(sPartyMenuBgTemplates));
+
     SetBgTilemapBuffer(1, sPartyBgTilemapBuffer);
+    SetBgTilemapBuffer(3, sPartyScrollingBgTilemapBuffer);
+
     ResetAllBgsCoordinates();
+
     ScheduleBgCopyTilemapToVram(1);
-    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+    ScheduleBgCopyTilemapToVram(3);
+
+    SetGpuReg(REG_OFFSET_DISPCNT,
+        DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP |
+        DISPCNT_BG0_ON | DISPCNT_BG1_ON | DISPCNT_BG2_ON | DISPCNT_BG3_ON);
+
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
+
     ShowBg(0);
     ShowBg(1);
     ShowBg(2);
+    ShowBg(3);
+
     return TRUE;
 }
 
@@ -865,6 +896,7 @@ static bool8 AllocPartyMenuBgGfx(void)
         LoadBgTiles(1, sPartyBgGfxTilemap, sizeout, 0);
         sPartyMenuInternal->data[0]++;
         break;
+
     case 1:
         if (!IsDma3ManagerBusyWithBgCopy())
         {
@@ -872,34 +904,53 @@ static bool8 AllocPartyMenuBgGfx(void)
             sPartyMenuInternal->data[0]++;
         }
         break;
+
     case 2:
         LoadPalette(gPartyMenuBg_Pal, BG_PLTT_ID(0), 11 * PLTT_SIZE_4BPP);
         CpuCopy16(gPlttBufferUnfaded, sPartyMenuInternal->palBuffer, 11 * PLTT_SIZE_4BPP);
         sPartyMenuInternal->data[0]++;
         break;
+
     case 3:
         PartyPaletteBufferCopy(4);
         sPartyMenuInternal->data[0]++;
         break;
+
     case 4:
         PartyPaletteBufferCopy(5);
         sPartyMenuInternal->data[0]++;
         break;
+
     case 5:
         PartyPaletteBufferCopy(6);
         sPartyMenuInternal->data[0]++;
         break;
+
     case 6:
         PartyPaletteBufferCopy(7);
         sPartyMenuInternal->data[0]++;
         break;
+
     case 7:
         PartyPaletteBufferCopy(8);
         sPartyMenuInternal->data[0]++;
         break;
+
+    case 8:
+        LZ77UnCompVram(sPartyMenuScrollingTiles, (void *)BG_CHAR_ADDR(2));
+        sPartyMenuInternal->data[0]++;
+        break;
+
+    case 9:
+        DecompressDataWithHeaderWram(sPartyMenuScrollingBgTilemap, sPartyScrollingBgTilemapBuffer);
+        ScheduleBgCopyTilemapToVram(3);
+        sPartyMenuInternal->data[0]++;
+        break;
+
     default:
         return TRUE;
     }
+
     return FALSE;
 }
 
