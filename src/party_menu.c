@@ -2432,7 +2432,7 @@ static void CreateCancelConfirmWindows(bool8 chooseHalf)
         if (gPartyMenu.menuType != PARTY_MENU_TYPE_SPIN_TRADE)
         {
             mainOffset = GetStringCenterAlignXOffset(FONT_SMALL, gText_Cancel, 48);
-            AddTextPrinterParameterized3(cancelWindowId, FONT_SMALL, mainOffset + offset, 1, sFontColorTable[0], TEXT_SKIP_DRAW, gText_Cancel);
+            AddTextPrinterParameterized3(cancelWindowId, FONT_SMALL, 9, 0, sFontColorTable[0], TEXT_SKIP_DRAW, gText_Cancel);
         }
         else
         {
