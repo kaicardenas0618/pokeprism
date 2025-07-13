@@ -44,7 +44,6 @@
 #include "text.h"
 #include "tv.h"
 #include "window.h"
-#include "config/bw_summary_screen.h"
 #include "constants/battle_move_effects.h"
 #include "constants/hold_effects.h"
 #include "constants/items.h"
@@ -59,7 +58,7 @@ enum BWPSSEffect
 {
     PSS_EFFECT_BATTLE,
     PSS_EFFECT_CONTEST,
-    PSS_EFFECT_COUNT
+    PSS_EFFECT_COUNT 
 };
 
 enum BWSkillsPageState
@@ -187,7 +186,7 @@ static EWRAM_DATA struct PokemonSummaryScreenData
         u8 ppBonuses; // 0x34
         u8 sanity; // 0x35
         u8 OTName[17]; // 0x36
-        u32 OTID; // 0x48
+        u32 OTID; // 0x48  
         u8 teraType;
         u8 mintNature;
         u8 ivHp;
@@ -390,17 +389,16 @@ static const u8 sText_Cancel[]                              = _("Cancel");
 static const u8 sText_Switch[]                              = _("Switch");
 static const u8 sText_PkmnInfo[]                            = _("Pokémon Info");
 static const u8 sText_PkmnSkills[]                          = _("Pokémon Skills");
-static const u8 sText_BattleMoves[]                         = _("Pokémon Moves");
+static const u8 sText_BattleMoves[]                         = _("Battle Moves");
 static const u8 sText_ContestMoves[]                        = _("Contest Moves");
 static const u8 sText_Info[]                                = _("Info");
 static const u8 sText_ViewIVs[]                             = _("View IV");
 static const u8 sText_ViewEVs[]                             = _("View EV");
 static const u8 sText_ViewStats[]                           = _("View Stats");
-static const u8 sText_ViewIVs_Graded[]                      = _("View IVs");
-static const u8 sText_ViewEVs_Graded[]                      = _("View EVs");
+static const u8 sText_ViewIVs_Graded[]                      = _("See Innate");
+static const u8 sText_ViewEVs_Graded[]                      = _("See Effort");
 static const u8 sText_NextLv[]                              = _("Next Lv.");
 static const u8 sText_RentalPkmn[]                          = _("Rental Pokémon");
-static const u8 sText_BWRename  []                          = _("Rename");
 static const u8 sText_None[]                                = _("None");
 #else
 static const u8 sText_Cancel[]                              = _("CANCEL");
@@ -871,7 +869,7 @@ static const struct SpriteTemplate sSpriteTemplate_RelearnPrompt =
     .callback = SpriteCallbackDummy
 };
 
-enum BWStatGrades
+enum BWStatGrades 
 {
     STAT_GRADE_EMINUS,
     STAT_GRADE_E,
@@ -1020,7 +1018,7 @@ enum FriendshipLevels
 };
 
 // edit these to change what friendship value the heart icon changes at
-static const u8 sFriendshipLevelToThreshold[FRIENDSHIP_LEVEL_COUNT] =
+static const u8 sFriendshipLevelToThreshold[FRIENDSHIP_LEVEL_COUNT] = 
 {
     [FRIENDSHIP_LEVEL_0]    = 0,
     [FRIENDSHIP_LEVEL_1]    = 44,
@@ -1808,7 +1806,7 @@ static void RunMonAnimTimer(void)
         sMonSummaryScreen->monAnimTimer++;
     }
 
-    if (sMonSummaryScreen->monAnimTimer > BW_SUMMARY_MON_IDLE_ANIMS_FRAMES
+    if (sMonSummaryScreen->monAnimTimer > BW_SUMMARY_MON_IDLE_ANIMS_FRAMES 
         && sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON] != SPRITE_NONE) // time to re-run the anim
     {
         for (i = 1; i < 8; i++)
@@ -1928,7 +1926,7 @@ static bool8 LoadGraphics(void)
         sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON] = LoadMonGfxAndSprite(&sMonSummaryScreen->currentMon, &sMonSummaryScreen->switchCounter, FALSE);
         if (BW_SUMMARY_MON_SHADOWS)
             sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_SHADOW] = LoadMonGfxAndSprite(&sMonSummaryScreen->currentMon, &sMonSummaryScreen->switchCounter, TRUE);
-
+        
         if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_MON] != SPRITE_NONE)
         {
             sMonSummaryScreen->monAnimTimer = 0;
@@ -2246,7 +2244,7 @@ static bool8 ExtractMonDataToSummaryStruct(struct Pokemon *mon)
         sum->evSpeed = GetMonData(mon, MON_DATA_SPEED_EV);
         break;
     default:
-        sum->ribbonCount = GetMonData(mon, MON_DATA_RIBBON_COUNT);
+        sum->ribbonCount = GetMonData(mon, MON_DATA_RIBBON_COUNT);        
         sum->teraType = GetMonData(mon, MON_DATA_TERA_TYPE);
         sum->isShiny = GetMonData(mon, MON_DATA_IS_SHINY);
         sMonSummaryScreen->relearnableMovesNum = P_SUMMARY_SCREEN_MOVE_RELEARNER ? GetNumberOfRelearnableMoves(mon) : 0;
@@ -2485,7 +2483,7 @@ static void Task_HandleInput(u8 taskId)
             StopPokemonAnimations();
             PlaySE(SE_SELECT);
             BeginCloseSummaryScreen(taskId);
-        }
+        }  
         else if (JOY_NEW(START_BUTTON)
                 && ShouldShowMoveRelearner()
                 && (sMonSummaryScreen->currPageIndex == PSS_PAGE_BATTLE_MOVES || sMonSummaryScreen->currPageIndex == PSS_PAGE_CONTEST_MOVES))
@@ -2496,7 +2494,7 @@ static void Task_HandleInput(u8 taskId)
             StopPokemonAnimations();
             PlaySE(SE_SELECT);
             BeginCloseSummaryScreen(taskId);
-        }
+        }  
         else if (DEBUG_POKEMON_SPRITE_VISUALIZER && JOY_NEW(SELECT_BUTTON) && !gMain.inBattle)
         {
             sMonSummaryScreen->callback = CB2_Pokemon_Sprite_Visualizer;
@@ -2642,7 +2640,7 @@ static void Task_ChangeSummaryMon(u8 taskId)
     case 11:
         PrintPageSpecificText(sMonSummaryScreen->currPageIndex);
         if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO)
-        {
+        { 
             if (sMonSummaryScreen->summary.isEgg)
                 LimitEggSummaryPageDisplay();
             else
@@ -2652,9 +2650,9 @@ static void Task_ChangeSummaryMon(u8 taskId)
             {
                 FillWindowPixelBuffer(PSS_LABEL_WINDOW_PROMPT_CANCEL, PIXEL_FILL(0));
                 ShowCancelOrRenamePrompt();
-                PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);
+                PutWindowTilemap(PSS_LABEL_WINDOW_PROMPT_CANCEL);  
             }
-        }
+        } 
         else if (sMonSummaryScreen->currPageIndex == PSS_PAGE_SKILLS)
         {
             if (BW_SUMMARY_IV_EV_DISPLAY == BW_IV_EV_PRECISE)
@@ -2780,7 +2778,7 @@ static void PssScroll(u8 taskId)
         if (sMonSummaryScreen->mode == SUMMARY_MODE_SELECT_MOVE)
             SetGpuRegBits(REG_OFFSET_BG1CNT, BGCNT_MOSAIC);
     }
-
+    
     // build up mosaic effect
     if (tScrollState <= 3)
     {
@@ -2836,8 +2834,8 @@ static void PssScrollEnd(u8 taskId)
     if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO)
     {
         if (sMonSummaryScreen->markingsSprite != NULL)
-           sMonSummaryScreen->markingsSprite->invisible = FALSE;
-    }
+           sMonSummaryScreen->markingsSprite->invisible = FALSE; 
+    } 
 
     SwitchTaskToFollowupFunc(taskId);
 }
@@ -2974,7 +2972,7 @@ static void CloseMoveSelectMode(u8 taskId)
         ShowMoveRelearner();
 
     sMonSummaryScreen->mode = SUMMARY_MODE_NORMAL;
-
+    
     CreateTask(Task_HideEffectTilemap, 1);
     gTasks[taskId].func = Task_HandleInput;
 }
@@ -4287,8 +4285,8 @@ static void BufferStat(u8 *dst, s8 statIndex, u32 stat, u32 strId, u32 align)
     static const u8 sTextDownArrow[] = _(" {DOWN_ARROW}");
     u8 *txtPtr;
 
-    if (statIndex == 0
-        || !BW_SUMMARY_NATURE_COLORS
+    if (statIndex == 0 
+        || !BW_SUMMARY_NATURE_COLORS 
         || gNaturesInfo[sMonSummaryScreen->summary.mintNature].statUp == gNaturesInfo[sMonSummaryScreen->summary.mintNature].statDown)
         txtPtr = StringCopy(dst, sTextNatureNeutral);
     else if (statIndex == gNaturesInfo[sMonSummaryScreen->summary.mintNature].statUp)
@@ -4300,8 +4298,8 @@ static void BufferStat(u8 *dst, s8 statIndex, u32 stat, u32 strId, u32 align)
 
     ConvertIntToDecimalStringN(txtPtr, stat, STR_CONV_MODE_RIGHT_ALIGN, align);
 
-    if (statIndex != 0
-        && BW_SUMMARY_NATURE_ARROWS
+    if (statIndex != 0 
+        && BW_SUMMARY_NATURE_ARROWS 
         && gNaturesInfo[sMonSummaryScreen->summary.mintNature].statUp != gNaturesInfo[sMonSummaryScreen->summary.mintNature].statDown)
     {
         if (statIndex == gNaturesInfo[sMonSummaryScreen->summary.mintNature].statUp)
@@ -4387,8 +4385,8 @@ static void BufferAndPrintStats_HandleState(u8 mode)
         PrintNonHPStats();
     }
 
-    Free(currentHPString);
-    Free(maxHPString);
+    Free(currentHPString); 
+    Free(maxHPString); 
 }
 
 static void BufferHPStats(void)
@@ -4782,7 +4780,7 @@ static void ShowCategoryIcon(u16 move)
 {
     if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_CATEGORY] == SPRITE_NONE)
         sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_CATEGORY] = CreateSprite(&sSpriteTemplate_CategoryIcons, 223, 96, 0);
-
+    
     gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_CATEGORY]].invisible = FALSE;
 
     StartSpriteAnim(&gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_CATEGORY]], GetBattleMoveCategory(move));
@@ -4835,7 +4833,7 @@ static void ShowGradeIcons(u8 mode)
         spdef = sMonSummaryScreen->summary.evSpdef;
         speed = sMonSummaryScreen->summary.evSpeed;
     }
-
+    
     StartSpriteAnim(&gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_HP_GRADE]], hp / divisor);
     StartSpriteAnim(&gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_ATK_GRADE]], atk / divisor);
     StartSpriteAnim(&gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_DEF_GRADE]], def / divisor);
@@ -4914,7 +4912,7 @@ static void SetTypeIcons(void)
 static void TrySetInfoPageIcons(void)
 {
     if (sMonSummaryScreen->currPageIndex == PSS_PAGE_INFO)
-    {
+    { 
         SetPokerusCuredSprite();
         if (BW_SUMMARY_SHOW_FRIENDSHIP)
             SetFriendshipSprite();
@@ -5006,7 +5004,7 @@ static void SetMoveTypeIcons(void)
         {
             SetSpriteInvisibility(i + SPRITE_ARR_ID_TYPE, TRUE);
         }
-
+            
     }
 }
 
@@ -5026,7 +5024,7 @@ static void SetContestMoveTypeIcons(void)
 static void SetNewMoveTypeIcon(void)
 {
     u32 move = sMonSummaryScreen->newMove;
-
+    
     if (move == MOVE_NONE)
     {
         SetSpriteInvisibility(SPRITE_ARR_ID_TYPE + 4, TRUE);
@@ -5254,12 +5252,12 @@ static void SetPokerusCuredSprite(void)
 static void SetFriendshipSprite(void)
 {
     u8 level = FRIENDSHIP_LEVEL_0;
-
+    
     if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP] == SPRITE_NONE)
         sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP] = CreateSprite(&sSpriteTemplate_FriendshipIcon, 153, 25, 0);
 
     gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_FRIENDSHIP]].invisible = FALSE;
-
+    
     // don't even think about swapping the order of the conditions here or the compiler will smite you for your arrogance
     // I have no idea why it works that way
     while (level < FRIENDSHIP_LEVEL_MAX && sMonSummaryScreen->summary.friendship >= sFriendshipLevelToThreshold[level + 1])
@@ -5466,7 +5464,7 @@ static inline bool32 ShouldShowMoveRelearner(void)
          && sMonSummaryScreen->mode != SUMMARY_MODE_BOX
          && sMonSummaryScreen->mode != SUMMARY_MODE_BOX_CURSOR
          && sMonSummaryScreen->relearnableMovesNum > 0
-         && !InBattleFactory()
+         && !InBattleFactory() 
          && !InSlateportBattleTent());
 }
 
@@ -5474,7 +5472,7 @@ static void ShowMoveRelearner(void)
 {
     if (sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_RELEARN_PROMPT] == SPRITE_NONE)
         sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_RELEARN_PROMPT] = CreateSprite(&sSpriteTemplate_RelearnPrompt, 61, 155, 0);
-
+    
     gSprites[sMonSummaryScreen->spriteIds[SPRITE_ARR_ID_RELEARN_PROMPT]].invisible = FALSE;
 }
 
@@ -5491,14 +5489,14 @@ static inline bool32 ShouldShowRename(void)
          && !sMonSummaryScreen->summary.isEgg
          && sMonSummaryScreen->mode != SUMMARY_MODE_BOX
          && sMonSummaryScreen->mode != SUMMARY_MODE_BOX_CURSOR
-         && !InBattleFactory()
+         && !InBattleFactory() 
          && !InSlateportBattleTent()
          && GetPlayerIDAsU32() == sMonSummaryScreen->summary.OTID);
 }
 
 static void ShowCancelOrRenamePrompt(void)
 {
-    const u8 *promptText = ShouldShowRename() ? sText_BWRename : gText_Cancel2;
+    const u8 *promptText = ShouldShowRename() ? gText_Rename : gText_Cancel2;
 
     int stringXPos = GetStringRightAlignXOffset(FONT_NORMAL, promptText, 62);
     int iconXPos = stringXPos - 16;
@@ -5519,8 +5517,8 @@ static void CB2_PssChangePokemonNickname(void)
 {
     GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_NICKNAME, gStringVar3);
     GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_NICKNAME, gStringVar2);
-    DoNamingScreen(NAMING_SCREEN_NICKNAME, gStringVar2, GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES, NULL),
-                   GetMonGender(&gPlayerParty[gSpecialVar_0x8004]), GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_PERSONALITY, NULL),
+    DoNamingScreen(NAMING_SCREEN_NICKNAME, gStringVar2, GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_SPECIES, NULL), 
+                   GetMonGender(&gPlayerParty[gSpecialVar_0x8004]), GetMonData(&gPlayerParty[gSpecialVar_0x8004], MON_DATA_PERSONALITY, NULL), 
                    CB2_ReturnToSummaryScreenFromNamingScreen);
 }
 

@@ -27,15 +27,6 @@ static const struct BgTemplate sPartyMenuBgTemplates[] =
         .priority = 0,
         .baseTile = 0
     },
-    {
-        .bg = 3,
-        .charBaseIndex = 2,
-        .mapBaseIndex = 26,
-        .screenSize = 0,
-        .paletteMode = 0,
-        .priority = 3,
-        .baseTile = 0
-    },
 };
 
 enum
@@ -75,10 +66,11 @@ static const struct PartyMenuBoxInfoRects sPartyBoxInfoRects[] =
         },
         77, 4, 64, 16        // Description text
     },
-    [PARTY_BOX_EQUAL_COLUMN] = //Custom party menu
+    [PARTY_BOX_EQUAL_COLUMN] =
     {
-        BlitBitmapToPartyWindow_Equal, 
+        BlitBitmapToPartyWindowEqual, 
         {
+            // See above comment
             33,  2, 40, 13, // Nickname
              3, 25, 32,  8, // Level
            100,  1,  8,  8, // Gender
@@ -87,7 +79,7 @@ static const struct PartyMenuBoxInfoRects sPartyBoxInfoRects[] =
             48, 18, 56,  3  // HP bar
         }, 
         33, 13, 64, 16      // Description text
-    },//
+    },
 };
 
 
@@ -217,7 +209,7 @@ static const struct WindowTemplate sSinglePartyMenuWindowTemplate[] =
     DUMMY_WIN_TEMPLATE
 };
 
-static const struct WindowTemplate sSinglePartyMenuWindowTemplate_Equal[] =
+static const struct WindowTemplate sSinglePartyMenuWindowTemplateEqual[] =
 {
     {//Slot 0 left
         .bg = 0,
@@ -491,7 +483,7 @@ static const struct WindowTemplate sCancelButtonWindowTemplate =
     .baseBlock = 0x207,
 };
 
-static const struct WindowTemplate sCancelButtonWindowTemplate_equal =
+static const struct WindowTemplate sCancelButtonWindowTemplateEqual =
 {
     .bg = 0,
     .tilemapLeft = 24,
@@ -513,7 +505,7 @@ static const struct WindowTemplate sMultiCancelButtonWindowTemplate =
     .baseBlock = 0x207,
 };
 
-static const struct WindowTemplate sMultiCancelButtonWindowTemplate_equal =
+static const struct WindowTemplate sMultiCancelButtonWindowTemplateEqual =
 {
     .bg = 0,
     .tilemapLeft = 24,
@@ -535,7 +527,7 @@ static const struct WindowTemplate sConfirmButtonWindowTemplate =
     .baseBlock = 0x1D3,
 };
 
-static const struct WindowTemplate sConfirmButtonWindowTemplate_equal =
+static const struct WindowTemplate sConfirmButtonWindowTemplateEqual =
 {
     .bg = 0,
     .tilemapLeft = 24,
