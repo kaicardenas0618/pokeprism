@@ -457,7 +457,7 @@ static void Task_BattlePyramidChooseMonHeldItems(u8);
 static void ShiftMoveSlot(struct Pokemon*, u8, u8);
 static void BlitBitmapToPartyWindow_LeftColumn(u8, u8, u8, u8, u8, u8);
 static void BlitBitmapToPartyWindow_RightColumn(u8, u8, u8, u8, u8, u8);
-static void BlitBitmapToPartyWindow_Equal(u8, u8, u8, u8, u8, u8);
+static void BlitBitmapToPartyWindowEqual(u8, u8, u8, u8, u8, u8);
 static void CursorCb_Summary(u8);
 static void CursorCb_Switch(u8);
 static void CursorCb_Cancel1(u8);
@@ -860,20 +860,19 @@ static bool8 AllocPartyMenuBg(void)
     memset(sPartyBgTilemapBuffer, 0, 0x800);
     memset(sPartyScrollingBgTilemapBuffer, 0, 0x800);
 
-    ResetVramOamAndBgCntRegs();
-    ResetAllBgsCoordinates();
     ResetBgsAndClearDma3BusyFlags(0);
-
     InitBgsFromTemplates(0, sPartyMenuBgTemplates, ARRAY_COUNT(sPartyMenuBgTemplates));
 
-    SetBgTilemapBuffer(1, sPartyBgTilemapBuffer);             // Party menu BG1
-    SetBgTilemapBuffer(3, sPartyScrollingBgTilemapBuffer);    // Scrolling BG on BG3
+    SetBgTilemapBuffer(1, sPartyBgTilemapBuffer);
+    SetBgTilemapBuffer(3, sPartyScrollingBgTilemapBuffer);
+
+    ResetAllBgsCoordinates();
 
     ScheduleBgCopyTilemapToVram(1);
     ScheduleBgCopyTilemapToVram(3);
 
     SetGpuReg(REG_OFFSET_DISPCNT,
-        DISPCNT_OBJ_1D_MAP | DISPCNT_OBJ_ON |
+        DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP |
         DISPCNT_BG0_ON | DISPCNT_BG1_ON | DISPCNT_BG2_ON | DISPCNT_BG3_ON);
 
     SetGpuReg(REG_OFFSET_BLDCNT, 0);
@@ -893,12 +892,8 @@ static bool8 AllocPartyMenuBgGfx(void)
     switch (sPartyMenuInternal->data[0])
     {
     case 0:
-        ResetTempTileDataBuffers();
-
-        // Decompress & load party menu BG tiles to char base 0 (BG0, BG1, BG2 use charBase 0)
         sPartyBgGfxTilemap = malloc_and_decompress(gPartyMenuBg_Gfx, &sizeout);
         LoadBgTiles(1, sPartyBgGfxTilemap, sizeout, 0);
-        LZ77UnCompVram(gPartyMenuBg_Gfx, (void *)BG_CHAR_ADDR(0));
         sPartyMenuInternal->data[0]++;
         break;
 
@@ -942,13 +937,11 @@ static bool8 AllocPartyMenuBgGfx(void)
         break;
 
     case 8:
-        // Decompress & load scrolling BG tiles to char base 2 (for BG3)
         LZ77UnCompVram(sPartyMenuScrollingTiles, (void *)BG_CHAR_ADDR(2));
         sPartyMenuInternal->data[0]++;
         break;
 
     case 9:
-        // Decompress scrolling BG tilemap to allocated buffer for BG3
         DecompressDataWithHeaderWram(sPartyMenuScrollingBgTilemap, sPartyScrollingBgTilemapBuffer);
         ScheduleBgCopyTilemapToVram(3);
         sPartyMenuInternal->data[0]++;
@@ -1862,7 +1855,7 @@ static void UpdatePartySelectionSingleLayout(s8 *slotPtr, s8 movementDir)
             }
             else if (*slotPtr-2 >= 0)
             {
-                *slotPtr -= 2; //(*slotPtr)--;
+                *slotPtr -= 2;
             }
             break;
         case MENU_DIR_DOWN:
@@ -1881,7 +1874,7 @@ static void UpdatePartySelectionSingleLayout(s8 *slotPtr, s8 movementDir)
                 }
                 else if(*slotPtr+2 < gPlayerPartyCount)
                 {
-                    *slotPtr += 2;//(*slotPtr)++;
+                    *slotPtr += 2;
                 }else
                     (*slotPtr)++;
             }
@@ -1891,8 +1884,6 @@ static void UpdatePartySelectionSingleLayout(s8 *slotPtr, s8 movementDir)
             {
                 if (*slotPtr+1 < gPlayerPartyCount)
                     (*slotPtr)++;
-                // else
-                //     *slotPtr = sPartyMenuInternal->lastSelectedSlot;
             }
             break;
         case MENU_DIR_LEFT:
@@ -1900,8 +1891,6 @@ static void UpdatePartySelectionSingleLayout(s8 *slotPtr, s8 movementDir)
             {
                 if (*slotPtr-1 >= 0 && *slotPtr%2 == 1)
                     (*slotPtr)--;
-                // sPartyMenuInternal->lastSelectedSlot = *slotPtr;
-                // *slotPtr = 0;
             }
             break;
         }
@@ -2378,7 +2367,7 @@ static void InitPartyMenuWindows(u8 layout)
     switch (layout)
     {
     case PARTY_LAYOUT_SINGLE:
-        InitWindows(sSinglePartyMenuWindowTemplate_Equal);
+                InitWindows(sSinglePartyMenuWindowTemplateEqual);
         break;
     case PARTY_LAYOUT_DOUBLE:
         InitWindows(sDoublePartyMenuWindowTemplate);
@@ -2416,7 +2405,7 @@ static void CreateCancelConfirmWindows(bool8 chooseHalf)
         if (chooseHalf == TRUE)
         {
             if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
-                confirmWindowId = AddWindow(&sConfirmButtonWindowTemplate_equal);
+                confirmWindowId = AddWindow(&sConfirmButtonWindowTemplateEqual);
             else
                 confirmWindowId = AddWindow(&sConfirmButtonWindowTemplate);
             FillWindowPixelBuffer(confirmWindowId, PIXEL_FILL(0));
@@ -2429,7 +2418,7 @@ static void CreateCancelConfirmWindows(bool8 chooseHalf)
         }
         else if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE)
         {
-            cancelWindowId = AddWindow(&sCancelButtonWindowTemplate_equal);
+            cancelWindowId = AddWindow(&sCancelButtonWindowTemplateEqual);
             offset = 3;
         }
         else
@@ -2512,7 +2501,7 @@ static void DrawEmptySlot(u8 windowId)
         BlitBitmapToPartyWindow(windowId, sEmptySlotTileNums, 18, 0, 0, 18, 3);
 }
 
-static void BlitBitmapToPartyWindow_Equal(u8 windowId, u8 x, u8 y, u8 width, u8 height, u8 isEgg)
+static void BlitBitmapToPartyWindowEqual(u8 windowId, u8 x, u8 y, u8 width, u8 height, u8 isEgg)
 {
     if (width == 0 && height == 0)
     {
@@ -3199,18 +3188,18 @@ static void CursorCb_Switch(u8 taskId)
     gTasks[taskId].func = Task_HandleChooseMonInput;
 }
 
-#define tSlot1Left      data[0]
-#define tSlot1Top       data[1]
-#define tSlot1Width     data[2]
-#define tSlot1Height    data[3]
-#define tSlot2Left      data[4]
-#define tSlot2Top       data[5]
-#define tSlot2Width     data[6]
-#define tSlot2Height    data[7]
-#define tSlot1Offset    data[8]
-#define tSlot2Offset    data[9]
-#define tSlot1SlideDir  data[10]
-#define tSlot2SlideDir  data[11]
+#define tSlot1Left     data[0]
+#define tSlot1Top      data[1]
+#define tSlot1Width    data[2]
+#define tSlot1Height   data[3]
+#define tSlot2Left     data[4]
+#define tSlot2Top      data[5]
+#define tSlot2Width    data[6]
+#define tSlot2Height   data[7]
+#define tSlot1Offset   data[8]
+#define tSlot2Offset   data[9]
+#define tSlot1SlideDir data[10]
+#define tSlot2SlideDir data[11]
 #define tSlot1BaseBlock data[12]
 #define tSlot2BaseBlock data[13]
 #define count           data[14]
@@ -3249,7 +3238,7 @@ static void SwitchSelectedMons(u8 taskId)
         tSlot2Offset = 0;
         if (gPartyMenu.layout == PARTY_LAYOUT_SINGLE && (tSlot2BaseBlock == 0x63 || tSlot2BaseBlock == 0xEF || tSlot2BaseBlock == 0x17B))
             tSlot2SlideDir = -1;
-        else if (tSlot2Width == 10)//
+        else if (tSlot2Width == 10)
             tSlot2SlideDir = -1;
         else
             tSlot2SlideDir = 1;
@@ -4603,6 +4592,7 @@ static void CreatePartyMonPokeballSpriteParameterized(u16 species, struct PartyM
 static u8 CreatePokeballButtonSprite(u8 x, u8 y)
 {
     u8 spriteId = CreateSprite(&sSpriteTemplate_MenuPokeball, x, y, 8);
+
     gSprites[spriteId].invisible = TRUE;
     gSprites[spriteId].oam.priority = 2;
     return spriteId;
@@ -6995,7 +6985,7 @@ static void TryTutorSelectedMon(u8 taskId)
 
 void CB2_PartyMenuFromStartMenu(void)
 {
-    InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_HandleChooseMonInput, CB2_ReturnToField);
+    InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_HandleChooseMonInput, CB2_ReturnToFieldWithOpenMenu);
 }
 
 // Giving an item by selecting Give from the bag menu
