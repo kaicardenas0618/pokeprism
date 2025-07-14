@@ -148,6 +148,8 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
     }
 };
 
+static const u8 sOptionMenuFontColor[3] = {0, 1, 9};
+
 static void MainCB2(void)
 {
     RunTasks();
@@ -212,9 +214,7 @@ void CB2_InitOptionMenu(void)
         SetGpuReg(REG_OFFSET_WIN0V, 0);
         SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG0);
         SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_CLR);
-        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_DARKEN);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-        SetGpuReg(REG_OFFSET_BLDY, 4);
 
         ShowBg(0);
         ShowBg(1);
@@ -236,9 +236,7 @@ void CB2_InitOptionMenu(void)
         break;
 
     case 4:
-        // Load your custom palette for BG2 (scrolling background)
         LoadPalette(sOptionMenuPalette, BG_PLTT_ID(0), sizeof(sOptionMenuPalette));
-        // Load window frame palette as usual
         LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
         gMain.state++;
         break;
@@ -249,7 +247,6 @@ void CB2_InitOptionMenu(void)
         break;
 
     case 6:
-        // Decompress your custom tiles and tilemap into VRAM / tilemap buffer
         DecompressAndCopyTileDataToVram(2, sOptionMenuTiles, 0, 0, 0);
         DecompressDataWithHeaderWram(sOptionMenuBgTilemap, bg2TilemapBuffer);
         CopyBgTilemapBufferToVram(2);
@@ -443,12 +440,18 @@ static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
 
     if (style != 0)
     {
-        dst[2] = TEXT_COLOR_RED;
-        dst[5] = TEXT_COLOR_LIGHT_RED;
+        dst[2] = 5;
+        dst[5] = 9;
+    }
+    else
+    {
+        dst[2] = 1;
+        dst[5] = 9;
     }
 
     dst[i] = EOS;
-    AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, dst, x, y + 1, TEXT_SKIP_DRAW, NULL);
+
+    AddTextPrinterParameterized3(WIN_OPTIONS, FONT_NORMAL, x, y + 1, sOptionMenuFontColor, TEXT_SKIP_DRAW, dst);
 }
 
 static u8 TextSpeed_ProcessInput(u8 selection)
@@ -673,8 +676,8 @@ static void ButtonMode_DrawChoices(u8 selection)
 
 static void DrawHeaderText(void)
 {
-    FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
-    AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, gText_Option, 8, 1, TEXT_SKIP_DRAW, NULL);
+    FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(8));
+    AddTextPrinterParameterized3(WIN_HEADER, FONT_NORMAL, 8, 1, sOptionMenuFontColor, TEXT_SKIP_DRAW, gText_Option);
     CopyWindowToVram(WIN_HEADER, COPYWIN_FULL);
 }
 
@@ -682,9 +685,9 @@ static void DrawOptionMenuTexts(void)
 {
     u8 i;
 
-    FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
+    FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(8));
     for (i = 0; i < MENUITEM_COUNT; i++)
-        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * 16) + 1, TEXT_SKIP_DRAW, NULL);
+        AddTextPrinterParameterized3(WIN_OPTIONS, FONT_NORMAL, 8, (i * 16) + 1, sOptionMenuFontColor, TEXT_SKIP_DRAW, sOptionMenuItemsNames[i]);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
 }
 
