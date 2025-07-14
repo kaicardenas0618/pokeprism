@@ -1002,6 +1002,8 @@ const u8 gText_FrameTypeYellow[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Yellow");
 const u8 gText_ButtonTypeNormal[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal");
 const u8 gText_ButtonTypeLR[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}L+R");
 const u8 gText_ButtonTypeLEqualsA[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}L=A");
+const u8 gText_ScrollBgsOn[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}On");
+const u8 gText_ScrollBgsOff[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Off");
 
 const u8 gText_NumPlayerLink[] = _("{STR_VAR_1}P LINK");
 const u8 gText_BronzeCard[] = _("BRONZE");
