@@ -48,20 +48,19 @@ static void DrawBgWindowFrames(void);
 
 EWRAM_DATA static bool8 sArrowPressed = FALSE;
 
+// Graphics
 static const u32 sOptionMenuTiles[] = INCBIN_U32("graphics/option_menu/scroll_tiles.4bpp.lz");
 static const u16 sOptionMenuPalette[] = INCBIN_U16("graphics/option_menu/scroll_pal.gbapal");
 static const u32 sOptionMenuBgTilemap[] = INCBIN_U32("graphics/option_menu/scroll_bg.bin.lz");
 static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.gbapal");
-// note: this is only used in the Japanese release
-static const u8 sEqualSignGfx[] = INCBIN_U8("graphics/option_menu/equals_sign.4bpp");
 
+// Option Strings
 static const u8 sText_TextSpeed[] = _("Text Speed  {A_BUTTON}");
 static const u8 sText_BattleScene[] = _("Battle Anims  {A_BUTTON}");
 static const u8 sText_BattleStyle[] = _("Battle Style  {A_BUTTON}");
 static const u8 sText_Sound[] = _("Sound Mode  {A_BUTTON}");
 static const u8 sText_ButtonMode[] = _("Button Mode  {A_BUTTON}");
 static const u8 sText_Frame[] = _("Frame Type  {A_BUTTON}");
-static const u8 sText_OptionMenuCancel[] = _("Cancel  {A_BUTTON}");
 
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
