@@ -55,15 +55,23 @@ static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.g
 // note: this is only used in the Japanese release
 static const u8 sEqualSignGfx[] = INCBIN_U8("graphics/option_menu/equals_sign.4bpp");
 
+static const u8 sText_TextSpeed[] = _("TEXT SPEED");
+static const u8 sText_BattleScene[] = _("BATTLE SCENE");
+static const u8 sText_BattleStyle[] = _("BATTLE STYLE");
+static const u8 sText_Sound[] = _("SOUND");
+static const u8 sText_ButtonMode[] = _("BUTTON MODE");
+static const u8 sText_Frame[] = _("FRAME");
+static const u8 sText_OptionMenuCancel[] = _("CANCEL");
+
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
-    [MENUITEM_TEXTSPEED]   = gText_TextSpeed,
-    [MENUITEM_BATTLESCENE] = gText_BattleScene,
-    [MENUITEM_BATTLESTYLE] = gText_BattleStyle,
-    [MENUITEM_SOUND]       = gText_Sound,
-    [MENUITEM_BUTTONMODE]  = gText_ButtonMode,
-    [MENUITEM_FRAMETYPE]   = gText_Frame,
-    [MENUITEM_CANCEL]      = gText_OptionMenuCancel,
+    [MENUITEM_TEXTSPEED]   = sText_TextSpeed,
+    [MENUITEM_BATTLESCENE] = sText_BattleScene,
+    [MENUITEM_BATTLESTYLE] = sText_BattleStyle,
+    [MENUITEM_SOUND]       = sText_Sound,
+    [MENUITEM_BUTTONMODE]  = sText_ButtonMode,
+    [MENUITEM_FRAMETYPE]   = sText_Frame,
+    [MENUITEM_CANCEL]      = sText_OptionMenuCancel,
 };
 
 static const u8 sGeneralOptions[] = { MENUITEM_SOUND, MENUITEM_BUTTONMODE };
