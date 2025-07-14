@@ -42,7 +42,7 @@ static void Sound_DrawChoices(u8 selection, u8 y);
 static void FrameType_DrawChoices(u8 selection, u8 y);
 static void ButtonMode_DrawChoices(u8 selection, u8 y);
 
-static void DrawHeaderText(void);
+static void DrawHeaderText(u8 page);
 static void DrawOptionMenuTexts(u8 page);
 static void DrawBgWindowFrames(void);
 
@@ -55,13 +55,13 @@ static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.g
 // note: this is only used in the Japanese release
 static const u8 sEqualSignGfx[] = INCBIN_U8("graphics/option_menu/equals_sign.4bpp");
 
-static const u8 sText_TextSpeed[] = _("TEXT SPEED");
-static const u8 sText_BattleScene[] = _("BATTLE SCENE");
-static const u8 sText_BattleStyle[] = _("BATTLE STYLE");
-static const u8 sText_Sound[] = _("SOUND");
-static const u8 sText_ButtonMode[] = _("BUTTON MODE");
-static const u8 sText_Frame[] = _("FRAME");
-static const u8 sText_OptionMenuCancel[] = _("CANCEL");
+static const u8 sText_TextSpeed[] = _("Text Speed  {A_BUTTON}");
+static const u8 sText_BattleScene[] = _("Battle Anims  {A_BUTTON}");
+static const u8 sText_BattleStyle[] = _("Battle Style  {A_BUTTON}");
+static const u8 sText_Sound[] = _("Sound Mode  {A_BUTTON}");
+static const u8 sText_ButtonMode[] = _("Button Mode  {A_BUTTON}");
+static const u8 sText_Frame[] = _("Frame Type  {A_BUTTON}");
+static const u8 sText_OptionMenuCancel[] = _("Cancel  {A_BUTTON}");
 
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
@@ -71,7 +71,12 @@ static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
     [MENUITEM_SOUND]       = sText_Sound,
     [MENUITEM_BUTTONMODE]  = sText_ButtonMode,
     [MENUITEM_FRAMETYPE]   = sText_Frame,
-    [MENUITEM_CANCEL]      = sText_OptionMenuCancel,
+};
+
+static const u8 sPageTitles[PAGE_COUNT][32] = {
+    [PAGE_GENERAL] = _("General Options"),
+    [PAGE_BATTLE]  = _("Battle Options"),
+    [PAGE_UI]      = _("UI Options"),
 };
 
 static const u8 sGeneralOptions[] = { MENUITEM_SOUND, MENUITEM_BUTTONMODE };
@@ -234,7 +239,7 @@ void CB2_InitOptionMenu(void)
         CopyBgTilemapBufferToVram(2);
 
         PutWindowTilemap(WIN_HEADER);
-        DrawHeaderText();
+        DrawHeaderText(PAGE_GENERAL);
         gMain.state++;
         break;
     case 7:
@@ -445,9 +450,6 @@ static void Task_OptionMenuProcessInput(u8 taskId)
                     PlaySE(SE_SELECT);
                 }
                 break;
-            case MENUITEM_CANCEL:
-                gTasks[taskId].func = Task_OptionMenuSave;
-                break;
             default:
                 return;
         }
@@ -462,6 +464,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
 
 static void Task_OptionMenuDrawValuesAndHighlight(u8 taskId)
 {
+    DrawHeaderText(gTasks[taskId].tCurrentPage);
     DrawOptionMenuValues(gTasks[taskId].tCurrentPage, taskId);
     HighlightOptionMenuItem(gTasks[taskId].tPageSelection);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_GFX);
@@ -782,10 +785,26 @@ static void ButtonMode_DrawChoices(u8 selection, u8 y)
     DrawOptionMenuChoice(gText_ButtonTypeLEqualsA, GetStringRightAlignXOffset(FONT_NORMAL, gText_ButtonTypeLEqualsA, 198), y, styles[2]);
 }
 
-static void DrawHeaderText(void)
+static void DrawHeaderText(u8 page)
 {
+    const u8 *pageTitle = sPageTitles[page];
+    const u8 *lButton = gText_LButton;
+    const u8 *rButton = gText_RButton;
+
+    s32 widthTitle = GetStringWidth(FONT_NORMAL, pageTitle, 0);
+    s32 centerX = (26 * 8) / 2;
+    s32 titleX = centerX - (widthTitle / 2);
+
     FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
-    AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, gText_Option, 8, 1, TEXT_SKIP_DRAW, NULL);
+
+    AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, lButton, 1, 1, TEXT_SKIP_DRAW, NULL);
+
+    s32 widthR = GetStringWidth(FONT_NORMAL, rButton, 0);
+    s32 rX = 208 - widthR - 1;
+    AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, rButton, rX, 1, TEXT_SKIP_DRAW, NULL);
+
+    AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, pageTitle, titleX, 1, TEXT_SKIP_DRAW, NULL);
+
     CopyWindowToVram(WIN_HEADER, COPYWIN_FULL);
 }
 
