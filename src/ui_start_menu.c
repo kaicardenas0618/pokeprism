@@ -1830,7 +1830,7 @@ static void StartMenu_OpenMenu(void) {
             break;
         case MENU_OPTIONS:
             FlagSet(FLAG_OPTIONS_FROM_START_MENU);
-            DoCleanUpAndChangeCallback(CB2_InitUIOptionMenu);
+            DoCleanUpAndChangeCallback(CB2_InitOptionMenu);
             break;
     }
 }

@@ -1,10 +1,12 @@
 #include "global.h"
 #include "option_menu.h"
 #include "bg.h"
+#include "decompress.h"
 #include "event_data.h"
 #include "gpu_regs.h"
 #include "international_string_util.h"
 #include "main.h"
+#include "malloc.h"
 #include "menu.h"
 #include "overworld.h"
 #include "palette.h"
@@ -74,6 +76,9 @@ static void DrawBgWindowFrames(void);
 
 EWRAM_DATA static bool8 sArrowPressed = FALSE;
 
+static const u32 sOptionMenuTiles[] = INCBIN_U32("graphics/option_menu/tiles.4bpp.lz");
+static const u16 sOptionMenuPalette[] = INCBIN_U16("graphics/option_menu/palette.gbapal");
+static const u32 sOptionMenuBgTilemap[] = INCBIN_U32("graphics/option_menu/scroll_bg.bin.lz");
 static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.gbapal");
 // note: this is only used in the Japanese release
 static const u8 sEqualSignGfx[] = INCBIN_U8("graphics/option_menu/equals_sign.4bpp");
@@ -115,6 +120,15 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
 static const struct BgTemplate sOptionMenuBgTemplates[] =
 {
     {
+        .bg = 0,
+        .charBaseIndex = 1,
+        .mapBaseIndex = 31,
+        .screenSize = 0,
+        .paletteMode = 0,
+        .priority = 1,
+        .baseTile = 0
+    },
+    {
         .bg = 1,
         .charBaseIndex = 1,
         .mapBaseIndex = 30,
@@ -124,12 +138,12 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
         .baseTile = 0
     },
     {
-        .bg = 0,
-        .charBaseIndex = 1,
-        .mapBaseIndex = 31,
+        .bg = 2,
+        .charBaseIndex = 2,
+        .mapBaseIndex = 28,
         .screenSize = 0,
         .paletteMode = 0,
-        .priority = 1,
+        .priority = 2,
         .baseTile = 0
     }
 };
@@ -149,10 +163,18 @@ static void VBlankCB(void)
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
+
+    if (SCROLLING_BGS)
+    {
+        ChangeBgX(2, 64, BG_COORD_ADD);
+        ChangeBgY(2, 64, BG_COORD_ADD);
+    }
 }
 
 void CB2_InitOptionMenu(void)
 {
+    static u16 *bg2TilemapBuffer;
+
     switch (gMain.state)
     {
     default:
@@ -160,12 +182,14 @@ void CB2_InitOptionMenu(void)
         SetVBlankCallback(NULL);
         gMain.state++;
         break;
+
     case 1:
         DmaClearLarge16(3, (void *)(VRAM), VRAM_SIZE, 0x1000);
         DmaClear32(3, OAM, OAM_SIZE);
         DmaClear16(3, PLTT, PLTT_SIZE);
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         ResetBgsAndClearDma3BusyFlags(0);
+
         InitBgsFromTemplates(0, sOptionMenuBgTemplates, ARRAY_COUNT(sOptionMenuBgTemplates));
         ChangeBgX(0, 0, BG_COORD_SET);
         ChangeBgY(0, 0, BG_COORD_SET);
@@ -173,10 +197,19 @@ void CB2_InitOptionMenu(void)
         ChangeBgY(1, 0, BG_COORD_SET);
         ChangeBgX(2, 0, BG_COORD_SET);
         ChangeBgY(2, 0, BG_COORD_SET);
-        ChangeBgX(3, 0, BG_COORD_SET);
-        ChangeBgY(3, 0, BG_COORD_SET);
+
+        bg2TilemapBuffer = Alloc(0x800);
+        if (!bg2TilemapBuffer)
+        {
+            SetMainCallback2(gMain.savedCallback);
+            return;
+        }
+        memset(bg2TilemapBuffer, 0, 0x800);
+        SetBgTilemapBuffer(2, bg2TilemapBuffer);
+
         InitWindows(sOptionMenuWinTemplates);
         DeactivateAllTextPrinters();
+
         SetGpuReg(REG_OFFSET_WIN0H, 0);
         SetGpuReg(REG_OFFSET_WIN0V, 0);
         SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG0);
@@ -184,11 +217,13 @@ void CB2_InitOptionMenu(void)
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_DARKEN);
         SetGpuReg(REG_OFFSET_BLDALPHA, 0);
         SetGpuReg(REG_OFFSET_BLDY, 4);
-        SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+
         ShowBg(0);
         ShowBg(1);
+        ShowBg(2);
         gMain.state++;
         break;
+
     case 2:
         ResetPaletteFade();
         ScanlineEffect_Stop();
@@ -196,36 +231,48 @@ void CB2_InitOptionMenu(void)
         ResetSpriteData();
         gMain.state++;
         break;
+
     case 3:
         LoadBgTiles(1, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, 0x1A2);
         gMain.state++;
         break;
+
     case 4:
-        LoadPalette(sOptionMenuBg_Pal, BG_PLTT_ID(0), sizeof(sOptionMenuBg_Pal));
+        // Load your custom palette for BG2 (scrolling background)
+        LoadPalette(sOptionMenuPalette, BG_PLTT_ID(0), sizeof(sOptionMenuPalette));
+        // Load window frame palette as usual
         LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
         gMain.state++;
         break;
+
     case 5:
         LoadPalette(sOptionMenuText_Pal, BG_PLTT_ID(1), sizeof(sOptionMenuText_Pal));
         gMain.state++;
         break;
+
     case 6:
+        // Decompress your custom tiles and tilemap into VRAM / tilemap buffer
+        DecompressAndCopyTileDataToVram(2, sOptionMenuTiles, 0, 0, 0);
+        DecompressDataWithHeaderWram(sOptionMenuBgTilemap, bg2TilemapBuffer);
+        CopyBgTilemapBufferToVram(2);
+
         PutWindowTilemap(WIN_HEADER);
         DrawHeaderText();
         gMain.state++;
         break;
+
     case 7:
-        gMain.state++;
-        break;
-    case 8:
         PutWindowTilemap(WIN_OPTIONS);
         DrawOptionMenuTexts();
         gMain.state++;
-    case 9:
+        break;
+
+    case 8:
         DrawBgWindowFrames();
         gMain.state++;
         break;
-    case 10:
+
+    case 9:
     {
         u8 taskId = CreateTask(Task_OptionMenuFadeIn, 0);
 
@@ -249,11 +296,11 @@ void CB2_InitOptionMenu(void)
         gMain.state++;
         break;
     }
-    case 11:
+    case 10:
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
         SetVBlankCallback(VBlankCB);
         SetMainCallback2(MainCB2);
-        return;
+        break;
     }
 }
 
