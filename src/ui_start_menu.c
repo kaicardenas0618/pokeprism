@@ -1433,13 +1433,13 @@ static void DoCleanUpAndOpenTrainerCard(void) {
     StartMenu_ExitAndClearTilemap();
     CleanupOverworldWindowsAndTilemaps();
     if (IsOverworldLinkActive() || InUnionRoom()) {
-      ShowPlayerTrainerCard(CB2_ReturnToField); // Display trainer card
+      ShowPlayerTrainerCard(CB2_ReturnToFieldWithOpenMenu); // Display trainer card
       DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
     } else if (FlagGet(FLAG_SYS_FRONTIER_PASS)) {
-      ShowFrontierPass(CB2_ReturnToField); // Display frontier pass
+      ShowFrontierPass(CB2_ReturnToFieldWithOpenMenu); // Display frontier pass
       DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
     } else {
-      ShowPlayerTrainerCard(CB2_ReturnToField); // Display trainer card
+      ShowPlayerTrainerCard(CB2_ReturnToFieldWithOpenMenu); // Display trainer card
       DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
     }
   }
@@ -2160,5 +2160,5 @@ static u8 GetTotalPageCount(void)
 
 static void CB2_OpenQuestMenuFromStartMenu(void)
 {
-    QuestMenu_Init(0, CB2_ReturnToField);
+    QuestMenu_Init(0, CB2_ReturnToFieldWithOpenMenu);
 }
