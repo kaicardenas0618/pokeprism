@@ -1,20 +1,35 @@
 #include "global.h"
+#include "option_menu.h"
 #include "bg.h"
 #include "decompress.h"
-#include "dma3.h"
+#include "event_data.h"
 #include "gpu_regs.h"
+#include "international_string_util.h"
 #include "main.h"
 #include "malloc.h"
 #include "menu.h"
+#include "overworld.h"
 #include "palette.h"
+#include "scanline_effect.h"
+#include "sprite.h"
+#include "strings.h"
 #include "task.h"
+#include "text.h"
+#include "text_window.h"
 #include "ui_option_menu.h"
+#include "window.h"
+#include "gba/m4a_internal.h"
 #include "constants/rgb.h"
+
+EWRAM_DATA static bool8 sArrowPressed = FALSE;
+static u16 *sOptionMenuBgTilemapBuffer;
+static u16 *sOptionMenuScrollBgTilemapBuffer;
 
 static const u32 sOptionMenuTiles[] = INCBIN_U32("graphics/option_menu/tiles.4bpp.lz");
 static const u32 sOptionMenuTilemap[] = INCBIN_U32("graphics/option_menu/tilemap.bin.lz");
-static const u32 sOptionMenuPalette[] = INCBIN_U32("graphics/option_menu/palette.gbapal");
+static const u16 sOptionMenuPalette[] = INCBIN_U16("graphics/option_menu/palette.gbapal");
 static const u32 sOptionMenuBgTilemap[] = INCBIN_U32("graphics/option_menu/scroll_bg.bin.lz");
+static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.gbapal");
 
 static void VBlankCB(void);
 static void MainCB(void);
@@ -22,8 +37,16 @@ static void Task_OptionMenuHandleMainInput(u8 taskId);
 static void Task_OptionMenuExitFade(u8 taskId);
 static void ExitMenu(u8 taskId);
 
-static u16 *sOptionMenuBgTilemapBuffer;
-static u16 *sOptionMenuScrollBgTilemapBuffer;
+static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
+{
+    [MENUITEM_TEXTSPEED]   = gText_TextSpeed,
+    [MENUITEM_BATTLESCENE] = gText_BattleScene,
+    [MENUITEM_BATTLESTYLE] = gText_BattleStyle,
+    [MENUITEM_SOUND]       = gText_Sound,
+    [MENUITEM_BUTTONMODE]  = gText_ButtonMode,
+    [MENUITEM_FRAMETYPE]   = gText_Frame,
+    [MENUITEM_CANCEL]      = gText_OptionMenuCancel,
+};
 
 static const struct BgTemplate sBgTemplates[] =
 {
@@ -45,6 +68,29 @@ static const struct BgTemplate sBgTemplates[] =
         .priority = 3,
         .baseTile = 0,
     },
+    {
+        .bg = 2,
+        .charBaseIndex = 2,
+        .mapBaseIndex = 28,
+        .screenSize = 0,
+        .paletteMode = 0,
+        .priority = 0,
+        .baseTile = 0
+    },
+};
+
+static const struct WindowTemplate sOptionMenuWinTemplates[] =
+{
+    [WIN_HEADER] = {
+        .bg = 2,
+        .tilemapLeft = 2,
+        .tilemapTop = 1,
+        .width = 26,
+        .height = 2,
+        .paletteNum = 1,
+        .baseBlock = 2
+    },
+    DUMMY_WIN_TEMPLATE
 };
 
 void CB2_InitUIOptionMenu(void)
