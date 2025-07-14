@@ -55,12 +55,16 @@ static const u32 sOptionMenuBgTilemap[] = INCBIN_U32("graphics/option_menu/scrol
 static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.gbapal");
 
 // Option Strings
-static const u8 sText_TextSpeed[] = _("Text Speed  {A_BUTTON}");
-static const u8 sText_BattleScene[] = _("Battle Anims  {A_BUTTON}");
-static const u8 sText_BattleStyle[] = _("Battle Style  {A_BUTTON}");
-static const u8 sText_Sound[] = _("Sound Mode  {A_BUTTON}");
-static const u8 sText_ButtonMode[] = _("Button Mode  {A_BUTTON}");
-static const u8 sText_Frame[] = _("Frame Type  {A_BUTTON}");
+static const u8 sText_TextSpeed[] = _("Text Speed");
+static const u8 sText_BattleScene[] = _("Battle Anims");
+static const u8 sText_BattleStyle[] = _("Battle Style");
+static const u8 sText_Sound[] = _("Sound Mode");
+static const u8 sText_ButtonMode[] = _("Button Mode");
+static const u8 sText_Frame[] = _("Frame Type");
+
+// D-Pad Strings
+const u8 sText_DPadLeft[] = _("{DPAD_LEFT} ");
+const u8 sText_DPadRight[] = _(" {DPAD_RIGHT}");
 
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
@@ -77,6 +81,15 @@ static const u8 sPageTitles[PAGE_COUNT][32] = {
     [PAGE_BATTLE]  = _("Battle Options"),
     [PAGE_UI]      = _("UI Options"),
 };
+
+// Option Texts
+const u8 *const gTextSpeedOptions[] = {
+    gText_TextSpeedSlow,
+    gText_TextSpeedMid,
+    gText_TextSpeedFast,
+};
+
+#define TEXT_SPEED_OPTIONS_COUNT       (ARRAY_COUNT(gTextSpeedOptions))
 
 static const u8 sGeneralOptions[] = { MENUITEM_SOUND, MENUITEM_BUTTONMODE };
 static const u8 sBattleOptions[] = { MENUITEM_BATTLESCENE, MENUITEM_BATTLESTYLE };
@@ -564,50 +577,64 @@ static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
     AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, dst, x, y, TEXT_SKIP_DRAW, NULL);
 }
 
+
+////////////////////////////////////
+/// Option Menu Choice Functions ///
+////////////////////////////////////
+
+
+// Text Speed //
+
 static u8 TextSpeed_ProcessInput(u8 selection)
 {
     if (JOY_NEW(DPAD_RIGHT))
     {
-        if (selection <= 1)
+        if (selection < TEXT_SPEED_OPTIONS_COUNT - 1)
+        {
             selection++;
-        else
-            selection = 0;
-
-        sArrowPressed = TRUE;
+            sArrowPressed = TRUE;
+        }
     }
     if (JOY_NEW(DPAD_LEFT))
     {
-        if (selection != 0)
+        if (selection > 0)
+        {
             selection--;
-        else
-            selection = 2;
-
-        sArrowPressed = TRUE;
+            sArrowPressed = TRUE;
+        }
     }
     return selection;
 }
 
 static void TextSpeed_DrawChoices(u8 selection, u8 y)
 {
-    u8 styles[3];
-    s32 widthSlow, widthMid, widthFast, xMid;
+    const u8 *leftArrow = sText_DPadLeft;
+    const u8 *rightArrow = sText_DPadRight;
+    const u8 *choiceText;
+    s32 xLeft, xChoice, xRight;
+    s32 leftWidth, choiceWidth;
 
-    styles[0] = 0;
-    styles[1] = 0;
-    styles[2] = 0;
-    styles[selection] = 1;
+    if (selection >= TEXT_SPEED_OPTIONS_COUNT)
+        selection = 0;
 
-    DrawOptionMenuChoice(gText_TextSpeedSlow, 104, y, styles[0]);
+    choiceText = gTextSpeedOptions[selection % TEXT_SPEED_OPTIONS_COUNT];
 
-    widthSlow = GetStringWidth(FONT_NORMAL, gText_TextSpeedSlow, 0);
-    widthMid = GetStringWidth(FONT_NORMAL, gText_TextSpeedMid, 0);
-    widthFast = GetStringWidth(FONT_NORMAL, gText_TextSpeedFast, 0);
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
 
-    widthMid -= 94;
-    xMid = (widthSlow - widthMid - widthFast) / 2 + 104;
-    DrawOptionMenuChoice(gText_TextSpeedMid, xMid, y, styles[1]);
+    leftWidth = GetStringWidth(FONT_NORMAL, leftArrow, 0);
+    choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
 
-    DrawOptionMenuChoice(gText_TextSpeedFast, GetStringRightAlignXOffset(FONT_NORMAL, gText_TextSpeedFast, 198), y, styles[2]);
+    xChoice = 152 - (choiceWidth / 2);
+    xLeft = xChoice - leftWidth - 4;
+    xRight = xChoice + choiceWidth + 4;
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, leftArrow, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
+
+    if (selection < TEXT_SPEED_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, rightArrow, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
 static u8 BattleScene_ProcessInput(u8 selection)
