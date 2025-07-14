@@ -76,8 +76,8 @@ static void DrawBgWindowFrames(void);
 
 EWRAM_DATA static bool8 sArrowPressed = FALSE;
 
-static const u32 sOptionMenuTiles[] = INCBIN_U32("graphics/option_menu/tiles.4bpp.lz");
-static const u16 sOptionMenuPalette[] = INCBIN_U16("graphics/option_menu/palette.gbapal");
+static const u32 sOptionMenuTiles[] = INCBIN_U32("graphics/option_menu/scroll_tiles.4bpp.lz");
+static const u16 sOptionMenuPalette[] = INCBIN_U16("graphics/option_menu/scroll_pal.gbapal");
 static const u32 sOptionMenuBgTilemap[] = INCBIN_U32("graphics/option_menu/scroll_bg.bin.lz");
 static const u16 sOptionMenuText_Pal[] = INCBIN_U16("graphics/option_menu/text.gbapal");
 // note: this is only used in the Japanese release
@@ -147,8 +147,6 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
         .baseTile = 0
     }
 };
-
-static const u16 sOptionMenuBg_Pal[] = {RGB(17, 18, 31)};
 
 static void MainCB2(void)
 {
