@@ -256,12 +256,13 @@ extern const u8 gText_BattleStyleShift[];
 extern const u8 gText_BattleStyleSet[];
 extern const u8 gText_SoundMono[];
 extern const u8 gText_SoundStereo[];
-extern const u8 gText_FrameTypeNumber[];
-extern const u8 gText_FrameType[];
+extern const u8 gText_FrameTypeRed[];
+extern const u8 gText_FrameTypeAqua[];
+extern const u8 gText_FrameTypeWhite[];
+extern const u8 gText_FrameTypeYellow[];
 extern const u8 gText_ButtonTypeNormal[];
 extern const u8 gText_ButtonTypeLR[];
 extern const u8 gText_ButtonTypeLEqualsA[];
-extern const u8 gText_Option[];
 extern const u8 gText_OptionMenu[];
 
 extern const u8 gText_MaleSymbol[];

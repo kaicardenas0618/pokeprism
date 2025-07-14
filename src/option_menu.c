@@ -82,6 +82,7 @@ static const u8 sPageTitles[PAGE_COUNT][32] = {
     [PAGE_UI]      = _("UI Options"),
 };
 
+
 // Option Texts
 const u8 *const gTextSpeedOptions[] = {
     gText_TextSpeedSlow,
@@ -89,7 +90,41 @@ const u8 *const gTextSpeedOptions[] = {
     gText_TextSpeedFast,
 };
 
-#define TEXT_SPEED_OPTIONS_COUNT       (ARRAY_COUNT(gTextSpeedOptions))
+static const u8 *const sBattleSceneOptions[] = {
+    gText_BattleSceneOn,
+    gText_BattleSceneOff,
+};
+
+static const u8 *const sBattleStyleOptions[] = {
+    gText_BattleStyleShift,
+    gText_BattleStyleSet,
+};
+
+static const u8 *const sSoundOptions[] = {
+    gText_SoundMono,
+    gText_SoundStereo,
+};
+
+static const u8 *const sButtonModeOptions[] = {
+    gText_ButtonTypeNormal,
+    gText_ButtonTypeLR,
+    gText_ButtonTypeLEqualsA,
+};
+
+static const u8 *const sFrameTypeOptions[] = {
+    gText_FrameTypeRed,     // Previously Type 1
+    gText_FrameTypeAqua,    // Previously Type 2
+    gText_FrameTypeWhite,   // Previously Type 3
+    gText_FrameTypeYellow,  // Previously Type 4
+};
+
+#define TEXT_SPEED_OPTIONS_COUNT       ARRAY_COUNT(gTextSpeedOptions)
+#define BATTLE_SCENE_OPTIONS_COUNT     ARRAY_COUNT(sBattleSceneOptions)
+#define BATTLE_STYLE_OPTIONS_COUNT     ARRAY_COUNT(sBattleStyleOptions)
+#define SOUND_OPTIONS_COUNT            ARRAY_COUNT(sSoundOptions)
+#define BUTTON_MODE_OPTIONS_COUNT      ARRAY_COUNT(sButtonModeOptions)
+#define FRAME_TYPE_OPTIONS_COUNT       ARRAY_COUNT(sFrameTypeOptions)
+
 
 static const u8 sGeneralOptions[] = { MENUITEM_SOUND, MENUITEM_BUTTONMODE };
 static const u8 sBattleOptions[] = { MENUITEM_BATTLESCENE, MENUITEM_BATTLESTYLE };
@@ -578,10 +613,10 @@ static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
 }
 
 
+
 ////////////////////////////////////
 /// Option Menu Choice Functions ///
 ////////////////////////////////////
-
 
 // Text Speed //
 
@@ -637,152 +672,128 @@ static void TextSpeed_DrawChoices(u8 selection, u8 y)
         AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, rightArrow, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
+// Battle Scene //
+
 static u8 BattleScene_ProcessInput(u8 selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    if (JOY_NEW(DPAD_RIGHT) && selection < BATTLE_SCENE_OPTIONS_COUNT - 1)
     {
-        selection ^= 1;
+        selection++;
         sArrowPressed = TRUE;
     }
-
+    else if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+        sArrowPressed = TRUE;
+    }
     return selection;
 }
 
 static void BattleScene_DrawChoices(u8 selection, u8 y)
 {
-    u8 styles[2];
+    const u8 *choiceText = sBattleSceneOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, sText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    styles[0] = 0;
-    styles[1] = 0;
-    styles[selection] = 1;
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
 
-    DrawOptionMenuChoice(gText_BattleSceneOn, 104, y, styles[0]);
-    DrawOptionMenuChoice(gText_BattleSceneOff, GetStringRightAlignXOffset(FONT_NORMAL, gText_BattleSceneOff, 198), y, styles[1]);
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
+
+    if (selection < BATTLE_SCENE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
+
+// Battle Style //
 
 static u8 BattleStyle_ProcessInput(u8 selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    if (JOY_NEW(DPAD_RIGHT) && selection < BATTLE_STYLE_OPTIONS_COUNT - 1)
     {
-        selection ^= 1;
+        selection++;
         sArrowPressed = TRUE;
     }
-
+    else if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+        sArrowPressed = TRUE;
+    }
     return selection;
 }
 
 static void BattleStyle_DrawChoices(u8 selection, u8 y)
 {
-    u8 styles[2];
+    const u8 *choiceText = sBattleStyleOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, sText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    styles[0] = 0;
-    styles[1] = 0;
-    styles[selection] = 1;
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
 
-    DrawOptionMenuChoice(gText_BattleStyleShift, 104, y, styles[0]);
-    DrawOptionMenuChoice(gText_BattleStyleSet, GetStringRightAlignXOffset(FONT_NORMAL, gText_BattleStyleSet, 198), y, styles[1]);
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
+
+    if (selection < BATTLE_STYLE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
+
+// Sound Mode //
 
 static u8 Sound_ProcessInput(u8 selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    if (JOY_NEW(DPAD_RIGHT) && selection < SOUND_OPTIONS_COUNT - 1)
     {
-        selection ^= 1;
-        SetPokemonCryStereo(selection);
+        selection++;
+        sArrowPressed = TRUE;
+    }
+    else if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
         sArrowPressed = TRUE;
     }
 
+    SetPokemonCryStereo(selection);
     return selection;
 }
 
 static void Sound_DrawChoices(u8 selection, u8 y)
 {
-    u8 styles[2];
+    const u8 *choiceText = sSoundOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, sText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    styles[0] = 0;
-    styles[1] = 0;
-    styles[selection] = 1;
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
 
-    DrawOptionMenuChoice(gText_SoundMono, 104, y, styles[0]);
-    DrawOptionMenuChoice(gText_SoundStereo, GetStringRightAlignXOffset(FONT_NORMAL, gText_SoundStereo, 198), y, styles[1]);
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
+
+    if (selection < SOUND_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
-static u8 FrameType_ProcessInput(u8 selection)
-{
-    if (JOY_NEW(DPAD_RIGHT))
-    {
-        if (selection < WINDOW_FRAMES_COUNT - 1)
-            selection++;
-        else
-            selection = 0;
-
-        LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
-        LoadPalette(GetWindowFrameTilesPal(selection)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
-        sArrowPressed = TRUE;
-    }
-    if (JOY_NEW(DPAD_LEFT))
-    {
-        if (selection != 0)
-            selection--;
-        else
-            selection = WINDOW_FRAMES_COUNT - 1;
-
-        LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
-        LoadPalette(GetWindowFrameTilesPal(selection)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
-        sArrowPressed = TRUE;
-    }
-    return selection;
-}
-
-static void FrameType_DrawChoices(u8 selection, u8 y)
-{
-    u8 text[16] = {EOS};
-    u8 n = selection + 1;
-    u16 i;
-
-    for (i = 0; gText_FrameTypeNumber[i] != EOS && i <= 5; i++)
-        text[i] = gText_FrameTypeNumber[i];
-
-    // Convert a number to decimal string
-    if (n / 10 != 0)
-    {
-        text[i] = n / 10 + CHAR_0;
-        i++;
-        text[i] = n % 10 + CHAR_0;
-        i++;
-    }
-    else
-    {
-        text[i] = n % 10 + CHAR_0;
-        i++;
-        text[i] = CHAR_SPACER;
-        i++;
-    }
-
-    text[i] = EOS;
-
-    DrawOptionMenuChoice(gText_FrameType, 104, y, 0);
-    DrawOptionMenuChoice(text, 128, y, 1);
-}
+// Button Mode //
 
 static u8 ButtonMode_ProcessInput(u8 selection)
 {
-    if (JOY_NEW(DPAD_RIGHT))
+    if (JOY_NEW(DPAD_RIGHT) && selection < BUTTON_MODE_OPTIONS_COUNT - 1)
     {
-        if (selection <= 1)
-            selection++;
-        else
-            selection = 0;
-
+        selection++;
         sArrowPressed = TRUE;
     }
-    if (JOY_NEW(DPAD_LEFT))
+    else if (JOY_NEW(DPAD_LEFT) && selection > 0)
     {
-        if (selection != 0)
-            selection--;
-        else
-            selection = 2;
-
+        selection--;
         sArrowPressed = TRUE;
     }
     return selection;
@@ -790,25 +801,68 @@ static u8 ButtonMode_ProcessInput(u8 selection)
 
 static void ButtonMode_DrawChoices(u8 selection, u8 y)
 {
-    s32 widthNormal, widthLR, widthLA, xLR;
-    u8 styles[3];
+    const u8 *choiceText = sButtonModeOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, sText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    styles[0] = 0;
-    styles[1] = 0;
-    styles[2] = 0;
-    styles[selection] = 1;
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
 
-    DrawOptionMenuChoice(gText_ButtonTypeNormal, 104, y, styles[0]);
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
 
-    widthNormal = GetStringWidth(FONT_NORMAL, gText_ButtonTypeNormal, 0);
-    widthLR = GetStringWidth(FONT_NORMAL, gText_ButtonTypeLR, 0);
-    widthLA = GetStringWidth(FONT_NORMAL, gText_ButtonTypeLEqualsA, 0);
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
 
-    widthLR -= 94;
-    xLR = (widthNormal - widthLR - widthLA) / 2 + 104;
-    DrawOptionMenuChoice(gText_ButtonTypeLR, xLR, y, styles[1]);
+    if (selection < BUTTON_MODE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
+}
 
-    DrawOptionMenuChoice(gText_ButtonTypeLEqualsA, GetStringRightAlignXOffset(FONT_NORMAL, gText_ButtonTypeLEqualsA, 198), y, styles[2]);
+// Frame Type //
+
+static u8 FrameType_ProcessInput(u8 selection)
+{
+    if (JOY_NEW(DPAD_RIGHT))
+    {
+        if (selection < FRAME_TYPE_OPTIONS_COUNT - 1)
+        {
+            selection++;
+            LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
+            LoadPalette(GetWindowFrameTilesPal(selection)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
+            sArrowPressed = TRUE;
+        }
+    }
+    else if (JOY_NEW(DPAD_LEFT))
+    {
+        if (selection > 0)
+        {
+            selection--;
+            LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
+            LoadPalette(GetWindowFrameTilesPal(selection)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
+            sArrowPressed = TRUE;
+        }
+    }
+
+    return selection;
+}
+
+static void FrameType_DrawChoices(u8 selection, u8 y)
+{
+    const u8 *choiceText = sFrameTypeOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, sText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
+
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
+
+    if (selection < FRAME_TYPE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
 static void DrawHeaderText(u8 page)
