@@ -2,13 +2,11 @@
 #include "option_menu.h"
 #include "bg.h"
 #include "decompress.h"
-#include "event_data.h"
 #include "gpu_regs.h"
 #include "international_string_util.h"
 #include "main.h"
 #include "malloc.h"
 #include "menu.h"
-#include "overworld.h"
 #include "palette.h"
 #include "scanline_effect.h"
 #include "sprite.h"
@@ -148,8 +146,6 @@ static const struct BgTemplate sOptionMenuBgTemplates[] =
     }
 };
 
-static const u8 sOptionMenuFontColor[3] = {0, 1, 9};
-
 static void MainCB2(void)
 {
     RunTasks();
@@ -182,14 +178,12 @@ void CB2_InitOptionMenu(void)
         SetVBlankCallback(NULL);
         gMain.state++;
         break;
-
     case 1:
         DmaClearLarge16(3, (void *)(VRAM), VRAM_SIZE, 0x1000);
         DmaClear32(3, OAM, OAM_SIZE);
         DmaClear16(3, PLTT, PLTT_SIZE);
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         ResetBgsAndClearDma3BusyFlags(0);
-
         InitBgsFromTemplates(0, sOptionMenuBgTemplates, ARRAY_COUNT(sOptionMenuBgTemplates));
         ChangeBgX(0, 0, BG_COORD_SET);
         ChangeBgY(0, 0, BG_COORD_SET);
@@ -197,7 +191,9 @@ void CB2_InitOptionMenu(void)
         ChangeBgY(1, 0, BG_COORD_SET);
         ChangeBgX(2, 0, BG_COORD_SET);
         ChangeBgY(2, 0, BG_COORD_SET);
-
+        ChangeBgX(3, 0, BG_COORD_SET);
+        ChangeBgY(3, 0, BG_COORD_SET);
+        
         bg2TilemapBuffer = Alloc(0x800);
         if (!bg2TilemapBuffer)
         {
@@ -209,19 +205,18 @@ void CB2_InitOptionMenu(void)
 
         InitWindows(sOptionMenuWinTemplates);
         DeactivateAllTextPrinters();
-
         SetGpuReg(REG_OFFSET_WIN0H, 0);
         SetGpuReg(REG_OFFSET_WIN0V, 0);
-        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG0);
-        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_CLR);
-        SetGpuReg(REG_OFFSET_BLDALPHA, 0);
-
+        SetGpuReg(REG_OFFSET_WININ, WININ_WIN0_BG0 | WININ_WIN0_CLR);
+        SetGpuReg(REG_OFFSET_WINOUT, WINOUT_WIN01_BG0 | WINOUT_WIN01_BG1 | WINOUT_WIN01_BG2);
+        SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_LIGHTEN);
+        SetGpuReg(REG_OFFSET_BLDY, 3);
+        SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
         ShowBg(0);
         ShowBg(1);
         ShowBg(2);
         gMain.state++;
         break;
-
     case 2:
         ResetPaletteFade();
         ScanlineEffect_Stop();
@@ -229,23 +224,19 @@ void CB2_InitOptionMenu(void)
         ResetSpriteData();
         gMain.state++;
         break;
-
     case 3:
         LoadBgTiles(1, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, 0x1A2);
         gMain.state++;
         break;
-
     case 4:
         LoadPalette(sOptionMenuPalette, BG_PLTT_ID(0), sizeof(sOptionMenuPalette));
         LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
         gMain.state++;
         break;
-
     case 5:
         LoadPalette(sOptionMenuText_Pal, BG_PLTT_ID(1), sizeof(sOptionMenuText_Pal));
         gMain.state++;
         break;
-
     case 6:
         DecompressAndCopyTileDataToVram(2, sOptionMenuTiles, 0, 0, 0);
         DecompressDataWithHeaderWram(sOptionMenuBgTilemap, bg2TilemapBuffer);
@@ -255,19 +246,18 @@ void CB2_InitOptionMenu(void)
         DrawHeaderText();
         gMain.state++;
         break;
-
     case 7:
+        gMain.state++;
+        break;
+    case 8:
         PutWindowTilemap(WIN_OPTIONS);
         DrawOptionMenuTexts();
         gMain.state++;
-        break;
-
-    case 8:
+    case 9:
         DrawBgWindowFrames();
         gMain.state++;
         break;
-
-    case 9:
+    case 10:
     {
         u8 taskId = CreateTask(Task_OptionMenuFadeIn, 0);
 
@@ -291,11 +281,11 @@ void CB2_InitOptionMenu(void)
         gMain.state++;
         break;
     }
-    case 10:
+    case 11:
         BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
         SetVBlankCallback(VBlankCB);
         SetMainCallback2(MainCB2);
-        break;
+        return;
     }
 }
 
@@ -411,16 +401,7 @@ static void Task_OptionMenuFadeOut(u8 taskId)
     {
         DestroyTask(taskId);
         FreeAllWindowBuffers();
-
-        if (FlagGet(FLAG_OPTIONS_FROM_START_MENU))
-        {
-            FlagClear(FLAG_OPTIONS_FROM_START_MENU);
-            SetMainCallback2(CB2_ReturnToField);
-        }
-        else
-        {
-            SetMainCallback2(gMain.savedCallback);
-        }
+        SetMainCallback2(gMain.savedCallback);
     }
 }
 
@@ -441,17 +422,16 @@ static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style)
     if (style != 0)
     {
         dst[2] = 5;
-        dst[5] = 9;
+        dst[5] = 3;
     }
     else
     {
-        dst[2] = 1;
-        dst[5] = 9;
+        dst[2] = 2;
+        dst[5] = 3;
     }
 
     dst[i] = EOS;
-
-    AddTextPrinterParameterized3(WIN_OPTIONS, FONT_NORMAL, x, y + 1, sOptionMenuFontColor, TEXT_SKIP_DRAW, dst);
+    AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, dst, x, y + 1, TEXT_SKIP_DRAW, NULL);
 }
 
 static u8 TextSpeed_ProcessInput(u8 selection)
@@ -676,8 +656,8 @@ static void ButtonMode_DrawChoices(u8 selection)
 
 static void DrawHeaderText(void)
 {
-    FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(8));
-    AddTextPrinterParameterized3(WIN_HEADER, FONT_NORMAL, 8, 1, sOptionMenuFontColor, TEXT_SKIP_DRAW, gText_Option);
+    FillWindowPixelBuffer(WIN_HEADER, PIXEL_FILL(1));
+    AddTextPrinterParameterized(WIN_HEADER, FONT_NORMAL, gText_Option, 8, 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(WIN_HEADER, COPYWIN_FULL);
 }
 
@@ -685,9 +665,9 @@ static void DrawOptionMenuTexts(void)
 {
     u8 i;
 
-    FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(8));
+    FillWindowPixelBuffer(WIN_OPTIONS, PIXEL_FILL(1));
     for (i = 0; i < MENUITEM_COUNT; i++)
-        AddTextPrinterParameterized3(WIN_OPTIONS, FONT_NORMAL, 8, (i * 16) + 1, sOptionMenuFontColor, TEXT_SKIP_DRAW, sOptionMenuItemsNames[i]);
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sOptionMenuItemsNames[i], 8, (i * 16) + 1, TEXT_SKIP_DRAW, NULL);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_FULL);
 }
 
