@@ -50,7 +50,6 @@
 #include "text.h"
 #include "text_window.h"
 #include "trainer_card.h"
-#include "ui_option_menu.h"
 #include "window.h"
 #include "union_room.h"
 #include "constants/battle_frontier.h"
