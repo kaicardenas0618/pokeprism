@@ -256,20 +256,16 @@ extern const u8 gText_BattleStyleShift[];
 extern const u8 gText_BattleStyleSet[];
 extern const u8 gText_SoundMono[];
 extern const u8 gText_SoundStereo[];
-extern const u8 gText_FrameTypeNumber[];
-extern const u8 gText_FrameType[];
+extern const u8 gText_FrameTypeRed[];
+extern const u8 gText_FrameTypeAqua[];
+extern const u8 gText_FrameTypeWhite[];
+extern const u8 gText_FrameTypeYellow[];
 extern const u8 gText_ButtonTypeNormal[];
 extern const u8 gText_ButtonTypeLR[];
 extern const u8 gText_ButtonTypeLEqualsA[];
-extern const u8 gText_Option[];
+extern const u8 gText_ScrollBgsOn[];
+extern const u8 gText_ScrollBgsOff[];
 extern const u8 gText_OptionMenu[];
-extern const u8 gText_TextSpeed[];
-extern const u8 gText_BattleScene[];
-extern const u8 gText_BattleStyle[];
-extern const u8 gText_Sound[];
-extern const u8 gText_Frame[];
-extern const u8 gText_OptionMenuCancel[];
-extern const u8 gText_ButtonMode[];
 
 extern const u8 gText_MaleSymbol[];
 extern const u8 gText_FemaleSymbol[];
@@ -2626,5 +2622,9 @@ extern const u8 gText_Rename[]; // change nickname from summary screen
 
 // Switch Caught Mon into Party
 extern const u8 gText_CannotSendMonToBoxHM[];
+
+// Buttons
+extern const u8 gText_RButton[];
+extern const u8 gText_LButton[];
 
 #endif // GUARD_STRINGS_H

@@ -1018,7 +1018,7 @@ static void VBlankCB(void)
     TransferPlttBuffer();
 
     // Scroll the background on BG2 (diagonally)
-    if (SCROLLING_BGS)
+    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(2, 64, BG_COORD_ADD);
         ChangeBgY(2, 64, BG_COORD_ADD);

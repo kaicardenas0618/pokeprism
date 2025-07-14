@@ -1780,7 +1780,7 @@ static void VBlank(void)
     LoadOam();
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
-    if (BW_SUMMARY_SCROLLING_BG)
+    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(3, 64, BG_COORD_ADD);
         ChangeBgY(3, 64, BG_COORD_ADD);

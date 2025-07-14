@@ -227,7 +227,7 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
 };
 
 //gui font
-static const u8 sDexNavFontColor[3] = {TEXT_COLOR_TRANSPARENT, 10, 11};
+static const u8 sDexNavFontColor[3] = {0, 10, 11};
 static const u8 sDexNavFontColorNoShadow[3] = {0, 10, 0};
 
 //search window font
@@ -1622,7 +1622,7 @@ static void DexNav_VBlankCB(void)
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
 
-    if (DEXNAV_SCROLLING_BG)
+    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(2, 64, BG_COORD_ADD);
         ChangeBgY(2, 64, BG_COORD_ADD);

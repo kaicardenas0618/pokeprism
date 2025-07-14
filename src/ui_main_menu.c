@@ -34,7 +34,6 @@
 #include "constants/field_weather.h"
 #include "constants/songs.h"
 #include "constants/rgb.h"
-#include "config/options.h"
 #include "pokemon_icon.h"
 #include "region_map.h"
 #include "pokedex.h"
@@ -412,7 +411,7 @@ static void MainMenu_VBlankCB(void)
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
 
-    if (SCROLLING_BGS)
+    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(2, 64, BG_COORD_ADD);
         ChangeBgY(2, 64, BG_COORD_ADD);
