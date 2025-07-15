@@ -936,32 +936,32 @@ static const u8 sQuestMenuWindowFontColors[][4] =
 	{
 		//Header of Quest Menu
 		TEXT_COLOR_TRANSPARENT,
-		10,
-		TEXT_COLOR_TRANSPARENT
+		2,
+		3
 	},
 	{
 		//Reward state progress indicator
 		TEXT_COLOR_TRANSPARENT,
 		TEXT_COLOR_RED,
-		TEXT_COLOR_TRANSPARENT
+		3
 	},
 	{
 		//Done state progress indicator
 		TEXT_COLOR_TRANSPARENT,
 		TEXT_COLOR_GREEN,
-		TEXT_COLOR_TRANSPARENT
+		3
 	},
 	{
 		//Active state progress indicator
 		TEXT_COLOR_TRANSPARENT,
 		TEXT_COLOR_BLUE,
-		TEXT_COLOR_TRANSPARENT
+		3
 	},
 	{
 		//Footer flavor text
 		TEXT_COLOR_TRANSPARENT,
-		10,
-		TEXT_COLOR_TRANSPARENT
+		2,
+		3
 	},
 };
 
@@ -1534,12 +1534,12 @@ static void BuildMenuTemplate(void)
 	gMultiuseListMenuTemplate.item_X = 23;
 	gMultiuseListMenuTemplate.lettersSpacing = 1;
 	gMultiuseListMenuTemplate.itemVerticalPadding = 2;
-	gMultiuseListMenuTemplate.upText_Y = 2;
+	gMultiuseListMenuTemplate.upText_Y = 3;
 	gMultiuseListMenuTemplate.maxShowed = sStateDataPtr->maxShowed;
 	gMultiuseListMenuTemplate.fontId = 2;
 	gMultiuseListMenuTemplate.cursorPal = 2;
 	gMultiuseListMenuTemplate.fillValue = 0;
-	gMultiuseListMenuTemplate.cursorShadowPal = 0;
+	gMultiuseListMenuTemplate.cursorShadowPal = 3;
 	gMultiuseListMenuTemplate.moveCursorFunc = MoveCursorFunc;
 	gMultiuseListMenuTemplate.itemPrintFunc = GenerateStateAndPrint;
 	gMultiuseListMenuTemplate.scrollMultiple = LIST_MULTIPLE_SCROLL_DPAD;
