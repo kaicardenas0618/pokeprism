@@ -2488,7 +2488,7 @@ static void PrintMenuContext(void)
 }
 static void PrintTypeFilterButton(void)
 {
-	QuestMenu_AddTextPrinterParameterized(2, 0, sText_Type, 198, 1,
+	QuestMenu_AddTextPrinterParameterized(2, 0, sText_Type, 196, 1,
 	                                      0, 1, 0, 4);
 
 }
