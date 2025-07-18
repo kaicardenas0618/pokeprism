@@ -1018,7 +1018,7 @@ static void VBlankCB(void)
     TransferPlttBuffer();
 
     // Scroll the background on BG2 (diagonally)
-    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
+    if (gSaveBlock4Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(2, 64, BG_COORD_ADD);
         ChangeBgY(2, 64, BG_COORD_ADD);
@@ -1695,9 +1695,9 @@ u8 QuestMenu_GetSetSubquestState(u8 quest, u8 caseId, u8 childQuest)
 	switch (caseId)
 	{
 		case FLAG_GET_COMPLETED:
-			return gSaveBlock2Ptr->subQuests[index] & mask;
+			return gSaveBlock4Ptr->subQuests[index] & mask;
 		case FLAG_SET_COMPLETED:
-			gSaveBlock2Ptr->subQuests[index] |= mask;
+			gSaveBlock4Ptr->subQuests[index] |= mask;
 			return 1;
 	}
 
@@ -1753,9 +1753,9 @@ u8 QuestMenu_GetSetQuestState(u8 quest, u8 caseId)
 	switch (caseId)
 	{
 		case FLAG_GET_UNLOCKED:
-			return gSaveBlock2Ptr->questData[index] & mask;
+			return gSaveBlock4Ptr->questData[index] & mask;
 		case FLAG_SET_UNLOCKED:
-			gSaveBlock2Ptr->questData[index] |= mask;
+			gSaveBlock4Ptr->questData[index] |= mask;
 			return 1;
 		case FLAG_GET_INACTIVE:
 			bit2 = bit + 1;
@@ -1776,37 +1776,37 @@ u8 QuestMenu_GetSetQuestState(u8 quest, u8 caseId)
 
 			mask2 = 1 << bit2;
 			mask3 = 1 << bit3;
-			return !(gSaveBlock2Ptr->questData[index] & mask) && \
-			       !(gSaveBlock2Ptr->questData[index2] & mask2) && \
-			       !(gSaveBlock2Ptr->questData[index3] & mask3);
+			return !(gSaveBlock4Ptr->questData[index] & mask) && \
+			       !(gSaveBlock4Ptr->questData[index2] & mask2) && \
+			       !(gSaveBlock4Ptr->questData[index3] & mask3);
 		case FLAG_GET_ACTIVE:
-			return gSaveBlock2Ptr->questData[index] & mask;
+			return gSaveBlock4Ptr->questData[index] & mask;
 		case FLAG_SET_ACTIVE:
-			gSaveBlock2Ptr->questData[index] |= mask;
+			gSaveBlock4Ptr->questData[index] |= mask;
 			return 1;
 		case FLAG_REMOVE_ACTIVE:
-			gSaveBlock2Ptr->questData[index] &= ~mask;
+			gSaveBlock4Ptr->questData[index] &= ~mask;
 			return 1;
 		case FLAG_GET_REWARD:
-			return gSaveBlock2Ptr->questData[index] & mask;
+			return gSaveBlock4Ptr->questData[index] & mask;
 		case FLAG_SET_REWARD:
-			gSaveBlock2Ptr->questData[index] |= mask;
+			gSaveBlock4Ptr->questData[index] |= mask;
 			return 1;
 		case FLAG_REMOVE_REWARD:
-			gSaveBlock2Ptr->questData[index] &= ~mask;
+			gSaveBlock4Ptr->questData[index] &= ~mask;
 			return 1;
 		case FLAG_GET_COMPLETED:
-			return gSaveBlock2Ptr->questData[index] & mask;
+			return gSaveBlock4Ptr->questData[index] & mask;
 		case FLAG_SET_COMPLETED:
-			gSaveBlock2Ptr->questData[index] |= mask;
+			gSaveBlock4Ptr->questData[index] |= mask;
 			return 1;
 		case FLAG_GET_FAVORITE:
-			return gSaveBlock2Ptr->questData[index] & mask;
+			return gSaveBlock4Ptr->questData[index] & mask;
 		case FLAG_SET_FAVORITE:
-			gSaveBlock2Ptr->questData[index] |= mask;
+			gSaveBlock4Ptr->questData[index] |= mask;
 			return 1;
 		case FLAG_REMOVE_FAVORITE:
-			gSaveBlock2Ptr->questData[index] &= ~mask;
+			gSaveBlock4Ptr->questData[index] &= ~mask;
 			return 1;
 	}
 	return -1;  //failure
@@ -2863,8 +2863,8 @@ void QuestMenu_CopySubquestName(u8 *dst, u8 parentId, u8 childId)
 
 void QuestMenu_ResetMenuSaveData(void)
 {
-	memset(&gSaveBlock2Ptr->questData, 0,
-	       sizeof(gSaveBlock2Ptr->questData));
-	memset(&gSaveBlock2Ptr->subQuests, 0,
-	       sizeof(gSaveBlock2Ptr->subQuests));
+	memset(&gSaveBlock4Ptr->questData, 0,
+	       sizeof(gSaveBlock4Ptr->questData));
+	memset(&gSaveBlock4Ptr->subQuests, 0,
+	       sizeof(gSaveBlock4Ptr->subQuests));
 }

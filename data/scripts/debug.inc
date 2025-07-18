@@ -175,6 +175,8 @@ Debug_CheckSaveBlock::
 	msgbox Debug_SaveBlock2Size, MSGBOX_DEFAULT
 	callnative CheckSaveBlock3Size
 	msgbox Debug_SaveBlock3Size, MSGBOX_DEFAULT
+	callnative CheckSaveBlock4Size
+	msgbox Debug_SaveBlock4Size, MSGBOX_DEFAULT
 	callnative CheckPokemonStorageSize
 	msgbox Debug_PokemonStorageSize, MSGBOX_DEFAULT
 	release
@@ -190,6 +192,10 @@ Debug_SaveBlock2Size::
 
 Debug_SaveBlock3Size::
 	.string "SaveBlock3 size: {STR_VAR_1}b/{STR_VAR_2}b.\n"
+	.string "Free space: {STR_VAR_3}b.$"
+	
+Debug_SaveBlock4Size::
+	.string "SaveBlock4 size: {STR_VAR_1}b/{STR_VAR_2}b.\n"
 	.string "Free space: {STR_VAR_3}b.$"
 
 Debug_PokemonStorageSize::

@@ -15,6 +15,7 @@
 // Exists unused in RS as well
 static const u32 sUnusedStructSizes[] =
 {
+    sizeof(struct SaveBlock4),
     sizeof(struct SaveBlock2),
     sizeof(struct SaveBlock1),
     sizeof(struct MapHeader),

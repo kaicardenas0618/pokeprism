@@ -1393,6 +1393,16 @@ void CheckSaveBlock3Size(struct ScriptContext *ctx)
     ConvertIntToDecimalStringN(gStringVar3, maxSb3Size - currSb3Size, STR_CONV_MODE_LEFT_ALIGN, 6);
 }
 
+void CheckSaveBlock4Size(struct ScriptContext *ctx)
+{
+    u32 currSb4Size = sizeof(struct SaveBlock4);
+    u32 maxSb4Size = SECTOR_DATA_SIZE * (SECTOR_ID_SAVEBLOCK4_END - SECTOR_ID_SAVEBLOCK4_START + 1);
+    ConvertIntToDecimalStringN(gStringVar1, currSb4Size, STR_CONV_MODE_LEFT_ALIGN, 6);
+    ConvertIntToDecimalStringN(gStringVar2, maxSb4Size, STR_CONV_MODE_LEFT_ALIGN, 6);
+    ConvertIntToDecimalStringN(gStringVar3, maxSb4Size - currSb4Size, STR_CONV_MODE_LEFT_ALIGN, 6);
+    ConvertIntToDecimalStringN(gStringVar4, 1, STR_CONV_MODE_LEFT_ALIGN, 6);
+}
+
 void CheckPokemonStorageSize(struct ScriptContext *ctx)
 {
     u32 currPkmnStorageSize = sizeof(struct PokemonStorage);

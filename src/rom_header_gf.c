@@ -57,6 +57,7 @@ struct GFRomHeader
     u8 unk15;
     u8 unk16;
     u8 unk17;
+    u32 saveBlock4Size;
     u32 saveBlock2Size;
     u32 saveBlock1Size;
     u32 partyCountOffset;
@@ -139,6 +140,7 @@ __attribute__((section(".text.header_gf"))) USED static const struct GFRomHeader
     .unk15 = 1,
     .unk16 = 8,
     .unk17 = 12,
+    .saveBlock4Size = sizeof(struct SaveBlock2),
     .saveBlock2Size = sizeof(struct SaveBlock2),
     .saveBlock1Size = sizeof(struct SaveBlock1),
     .partyCountOffset = offsetof(struct SaveBlock1, playerPartyCount),

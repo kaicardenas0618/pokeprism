@@ -17,9 +17,11 @@
 #define SECTOR_ID_SAVEBLOCK2          0
 #define SECTOR_ID_SAVEBLOCK1_START    1
 #define SECTOR_ID_SAVEBLOCK1_END      4
-#define SECTOR_ID_PKMN_STORAGE_START  5
-#define SECTOR_ID_PKMN_STORAGE_END   13
-#define NUM_SECTORS_PER_SLOT         14
+#define SECTOR_ID_SAVEBLOCK4_START    5
+#define SECTOR_ID_SAVEBLOCK4_END     18
+#define SECTOR_ID_PKMN_STORAGE_START 19
+#define SECTOR_ID_PKMN_STORAGE_END   27
+#define NUM_SECTORS_PER_SLOT         28
 // Save Slot 1: 0-13;  Save Slot 2: 14-27
 #define SECTOR_ID_HOF_1              28
 #define SECTOR_ID_HOF_2              29
@@ -100,6 +102,7 @@ bool8 LinkFullSave_Init(void);
 bool8 LinkFullSave_WriteSector(void);
 bool8 LinkFullSave_ReplaceLastSector(void);
 bool8 LinkFullSave_SetLastSectorSignature(void);
+bool8 WriteSaveBlock4Sector(void);
 bool8 WriteSaveBlock2(void);
 bool8 WriteSaveBlock1Sector(void);
 u8 LoadGameSave(u8 saveType);

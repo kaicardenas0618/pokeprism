@@ -999,7 +999,7 @@ static void Task_DoRecordMixing(u8 taskId)
         task->tState++;
         break;
     case 3:
-        if (WriteSaveBlock1Sector())
+        if (WriteSaveBlock1Sector() || WriteSaveBlock4Sector())
         {
             ClearContinueGameWarpStatus2();
             task->tState = 4;

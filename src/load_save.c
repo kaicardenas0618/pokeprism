@@ -30,6 +30,7 @@ struct LoadedSaveData
 };
 
 // EWRAM DATA
+EWRAM_DATA struct SaveBlock4ASLR gSaveblock4 = {0};
 EWRAM_DATA struct SaveBlock3 gSaveblock3 = {};
 EWRAM_DATA struct SaveBlock2ASLR gSaveblock2 = {0};
 EWRAM_DATA struct SaveBlock1ASLR gSaveblock1 = {0};
@@ -43,6 +44,7 @@ COMMON_DATA bool32 gFlashMemoryPresent = 0;
 COMMON_DATA struct SaveBlock1 *gSaveBlock1Ptr = NULL;
 COMMON_DATA struct SaveBlock2 *gSaveBlock2Ptr = NULL;
 IWRAM_INIT struct SaveBlock3 *gSaveBlock3Ptr = &gSaveblock3;
+COMMON_DATA struct SaveBlock4 *gSaveBlock4Ptr = NULL;
 COMMON_DATA struct PokemonStorage *gPokemonStoragePtr = NULL;
 
 // code
@@ -57,6 +59,11 @@ void CheckForFlashMemory(void)
     {
         gFlashMemoryPresent = FALSE;
     }
+}
+
+void ClearSav4(void)
+{
+    CpuFill16(0, &gSaveblock4, sizeof(struct SaveBlock4ASLR));
 }
 
 void ClearSav3(void)
@@ -79,11 +86,13 @@ void ClearSav1(void)
 void SetSaveBlocksPointers(u16 offset)
 {
     struct SaveBlock1 **sav1_LocalVar = &gSaveBlock1Ptr;
+    struct SaveBlock4 **sav4_LocalVar = &gSaveBlock4Ptr;
 
     offset = (offset + Random()) & (SAVEBLOCK_MOVE_RANGE - 4);
 
     gSaveBlock2Ptr = (void *)(&gSaveblock2) + offset;
     *sav1_LocalVar = (void *)(&gSaveblock1) + offset;
+    *sav4_LocalVar = (void *)(&gSaveblock4) + offset;
     gPokemonStoragePtr = (void *)(&gPokemonStorage) + offset;
 
     SetBagItemsPointers();
@@ -94,6 +103,7 @@ void MoveSaveBlocks_ResetHeap(void)
 {
     void *vblankCB, *hblankCB;
     u32 encryptionKey;
+    struct SaveBlock4 *saveBlock4Copy;
     struct SaveBlock2 *saveBlock2Copy;
     struct SaveBlock1 *saveBlock1Copy;
     struct PokemonStorage *pokemonStorageCopy;
@@ -107,9 +117,11 @@ void MoveSaveBlocks_ResetHeap(void)
 
     saveBlock2Copy = (struct SaveBlock2 *)(gHeap);
     saveBlock1Copy = (struct SaveBlock1 *)(gHeap + sizeof(struct SaveBlock2));
-    pokemonStorageCopy = (struct PokemonStorage *)(gHeap + sizeof(struct SaveBlock2) + sizeof(struct SaveBlock1));
+    saveBlock4Copy = (struct SaveBlock4 *)(gHeap + sizeof(struct SaveBlock2) + sizeof(struct SaveBlock1));
+    pokemonStorageCopy = (struct PokemonStorage *)(gHeap + sizeof(struct SaveBlock2) + sizeof(struct SaveBlock1) + sizeof(struct SaveBlock4));
 
     // backup the saves.
+    *saveBlock4Copy = *gSaveBlock4Ptr;
     *saveBlock2Copy = *gSaveBlock2Ptr;
     *saveBlock1Copy = *gSaveBlock1Ptr;
     *pokemonStorageCopy = *gPokemonStoragePtr;
@@ -123,6 +135,7 @@ void MoveSaveBlocks_ResetHeap(void)
       saveBlock2Copy->playerTrainerId[3]);
 
     // restore saveblock data since the pointers changed
+    *gSaveBlock4Ptr = *saveBlock4Copy;
     *gSaveBlock2Ptr = *saveBlock2Copy;
     *gSaveBlock1Ptr = *saveBlock1Copy;
     *gPokemonStoragePtr = *pokemonStorageCopy;
