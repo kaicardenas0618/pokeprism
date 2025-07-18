@@ -571,7 +571,7 @@ static void VBlankCB_PartyMenu(void)
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
 
-    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
+    if (gSaveBlock4Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(3, 64, BG_COORD_ADD);
         ChangeBgY(3, 64, BG_COORD_ADD);

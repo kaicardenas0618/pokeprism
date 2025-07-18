@@ -2171,7 +2171,7 @@ static void HandlePlayerInput(void)
 
     if (sBerryBlender->gameEndState == 0)
     {
-        if (gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A && JOY_NEW(A_BUTTON))
+        if (gSaveBlock4Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_L_EQUALS_A && JOY_NEW(A_BUTTON))
         {
             if (JOY_HELD_RAW(A_BUTTON | L_BUTTON) != (A_BUTTON | L_BUTTON))
                 pressedA = TRUE;
@@ -2786,7 +2786,7 @@ static bool8 LinkPlayAgainHandleSaving(void)
     case 4:
         if (IsLinkTaskFinished())
         {
-            if (WriteSaveBlock1Sector())
+            if (WriteSaveBlock1Sector() || WriteSaveBlock4Sector())
             {
                 sBerryBlender->linkPlayAgainState = 5;
             }

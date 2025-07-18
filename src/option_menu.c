@@ -210,7 +210,7 @@ static void VBlankCB(void)
     ProcessSpriteCopyRequests();
     TransferPlttBuffer();
 
-    if (gSaveBlock2Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
+    if (gSaveBlock4Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
     {
         ChangeBgX(2, 64, BG_COORD_ADD);
         ChangeBgY(2, 64, BG_COORD_ADD);
@@ -278,12 +278,12 @@ void CB2_InitOptionMenu(void)
         gMain.state++;
         break;
     case 3:
-        LoadBgTiles(1, GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->tiles, 0x120, 0x1A2);
+        LoadBgTiles(1, GetWindowFrameTilesPal(gSaveBlock4Ptr->optionsWindowFrameType)->tiles, 0x120, 0x1A2);
         gMain.state++;
         break;
     case 4:
         LoadPalette(sOptionMenuPalette, BG_PLTT_ID(0), sizeof(sOptionMenuPalette));
-        LoadPalette(GetWindowFrameTilesPal(gSaveBlock2Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
+        LoadPalette(GetWindowFrameTilesPal(gSaveBlock4Ptr->optionsWindowFrameType)->pal, BG_PLTT_ID(7), PLTT_SIZE_4BPP);
         gMain.state++;
         break;
     case 5:
@@ -317,13 +317,13 @@ void CB2_InitOptionMenu(void)
         gTasks[taskId].tMenuSelection = 0;
         gTasks[taskId].tCurrentPage = PAGE_GENERAL;
         gTasks[taskId].tPageSelection = 0;
-        gTasks[taskId].tTextSpeed = gSaveBlock2Ptr->optionsTextSpeed;
-        gTasks[taskId].tBattleSceneOff = gSaveBlock2Ptr->optionsBattleSceneOff;
-        gTasks[taskId].tBattleStyle = gSaveBlock2Ptr->optionsBattleStyle;
-        gTasks[taskId].tSound = gSaveBlock2Ptr->optionsSound;
-        gTasks[taskId].tButtonMode = gSaveBlock2Ptr->optionsButtonMode;
-        gTasks[taskId].tWindowFrameType = gSaveBlock2Ptr->optionsWindowFrameType;
-        gTasks[taskId].tScrollBgs = gSaveBlock2Ptr->optionsScrollBgs;
+        gTasks[taskId].tTextSpeed = gSaveBlock4Ptr->optionsTextSpeed;
+        gTasks[taskId].tBattleSceneOff = gSaveBlock4Ptr->optionsBattleSceneOff;
+        gTasks[taskId].tBattleStyle = gSaveBlock4Ptr->optionsBattleStyle;
+        gTasks[taskId].tSound = gSaveBlock4Ptr->optionsSound;
+        gTasks[taskId].tButtonMode = gSaveBlock4Ptr->optionsButtonMode;
+        gTasks[taskId].tWindowFrameType = gSaveBlock4Ptr->optionsWindowFrameType;
+        gTasks[taskId].tScrollBgs = gSaveBlock4Ptr->optionsScrollBgs;
 
         DrawOptionMenuTexts(gTasks[taskId].tCurrentPage);
         DrawOptionMenuValues(gTasks[taskId].tCurrentPage, taskId);
@@ -588,13 +588,13 @@ static void DrawOptionMenuValues(u8 page, u8 taskId)
 
 static void Task_OptionMenuSave(u8 taskId)
 {
-    gSaveBlock2Ptr->optionsTextSpeed = gTasks[taskId].tTextSpeed;
-    gSaveBlock2Ptr->optionsBattleSceneOff = gTasks[taskId].tBattleSceneOff;
-    gSaveBlock2Ptr->optionsBattleStyle = gTasks[taskId].tBattleStyle;
-    gSaveBlock2Ptr->optionsSound = gTasks[taskId].tSound;
-    gSaveBlock2Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
-    gSaveBlock2Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;
-    gSaveBlock2Ptr->optionsScrollBgs = gTasks[taskId].tScrollBgs;
+    gSaveBlock4Ptr->optionsTextSpeed = gTasks[taskId].tTextSpeed;
+    gSaveBlock4Ptr->optionsBattleSceneOff = gTasks[taskId].tBattleSceneOff;
+    gSaveBlock4Ptr->optionsBattleStyle = gTasks[taskId].tBattleStyle;
+    gSaveBlock4Ptr->optionsSound = gTasks[taskId].tSound;
+    gSaveBlock4Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
+    gSaveBlock4Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;
+    gSaveBlock4Ptr->optionsScrollBgs = gTasks[taskId].tScrollBgs;
 
     SetGpuReg(REG_OFFSET_WIN0H, 0);
     SetGpuReg(REG_OFFSET_WIN0V, 0);
@@ -905,13 +905,13 @@ static u8 ScrollBgs_ProcessInput(u8 selection)
     {
         selection++;
         sArrowPressed = TRUE;
-        gSaveBlock2Ptr->optionsScrollBgs = selection;
+        gSaveBlock4Ptr->optionsScrollBgs = selection;
     }
     else if (JOY_NEW(DPAD_LEFT) && selection > 0)
     {
         selection--;
         sArrowPressed = TRUE;
-        gSaveBlock2Ptr->optionsScrollBgs = selection;
+        gSaveBlock4Ptr->optionsScrollBgs = selection;
     }
     return selection;
 }

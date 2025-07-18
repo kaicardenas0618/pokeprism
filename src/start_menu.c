@@ -1356,7 +1356,7 @@ static void Task_SaveAfterLinkBattle(u8 taskId)
             *state = 2;
             break;
         case 2:
-            if (WriteSaveBlock1Sector())
+            if (WriteSaveBlock1Sector() || WriteSaveBlock4Sector())
             {
                 ClearContinueGameWarpStatus2();
                 *state = 3;
