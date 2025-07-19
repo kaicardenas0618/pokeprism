@@ -2507,7 +2507,7 @@ static void SafariTextIntoHealthboxObject(void *dest, u8 *windowTileData, u32 wi
 /*
  * BG = BackGround
  * FG = ForeGround
- * SH = SHadow
+ * SH = Shadow
  */
 #define ABILITY_POP_UP_BATTLER_BG_TXTCLR 8
 #define ABILITY_POP_UP_BATTLER_FG_TXTCLR 7
