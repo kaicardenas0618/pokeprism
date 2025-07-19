@@ -621,7 +621,7 @@ static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
         if (mapBattleScene == sMapBattleSceneMapping[i].mapScene)
             return sMapBattleSceneMapping[i].battleEnvironment;
     }
-    return BATTLE_ENVIRONMENT_PLAIN;
+    return BATTLE_ENVIRONMENT_GRASS2;
 }
 
 // Loads the initial battle terrain.
