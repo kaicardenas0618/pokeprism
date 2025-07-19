@@ -173,6 +173,7 @@ enum
 static const u8 *GetHealthboxElementGfxPtr(u8);
 static u8 *AddTextPrinterAndCreateWindowOnHealthbox(const u8 *, u32, u32, u32, u32 *);
 static u8 *AddTextPrinterAndCreateWindowOnHealthboxToFit(const u8 *, u32, u32, u32, u32 *, u32);
+static u8 *AddHPTextPrinterAndCreateWindowOnHealthbox(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId);
 
 static void RemoveWindowOnHealthbox(u32 windowId);
 static void UpdateHpTextInHealthboxInDoubles(u32 healthboxSpriteId, u32 maxOrCurrent, s16 currHp, s16 maxHp);
@@ -969,7 +970,7 @@ static void PrintHpOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor,
     *txtPtr++ = CHAR_SLASH;
     txtPtr = ConvertIntToDecimalStringN(txtPtr, maxHp, STR_CONV_MODE_LEFT_ALIGN, 4);
     // Print last 6 chars on the right window
-    windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(txtPtr - 6, 0, 5, 3, &windowId);
+    windowTileData = AddHPTextPrinterAndCreateWindowOnHealthbox(txtPtr - 6, 0, 5, 3, &windowId);
     HpTextIntoHealthboxObject(objVram + rightTile, windowTileData, 4);
     RemoveWindowOnHealthbox(windowId);
     // Print the rest of the chars on the left window
@@ -979,7 +980,7 @@ static void PrintHpOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor,
         x = 9, tilesCount = 3;
     else
         x = 6, tilesCount = 2, leftTile += 0x20;
-    windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(text, x, 5, 3, &windowId);
+    windowTileData = AddHPTextPrinterAndCreateWindowOnHealthbox(text, x, 5, 3, &windowId);
     HpTextIntoHealthboxObject(objVram + leftTile, windowTileData, tilesCount);
     RemoveWindowOnHealthbox(windowId);
 }
@@ -2409,8 +2410,27 @@ static u8 *AddTextPrinterAndCreateWindowOnHealthboxWithFont(const u8 *str, u32 x
     FillWindowPixelBuffer(winId, PIXEL_FILL(bgColor));
 
     color[0] = bgColor;
+    color[1] = 3;
+    color[2] = 0;
+
+    AddTextPrinterParameterized4(winId, fontId, x, y, 0, 0, color, TEXT_SKIP_DRAW, str);
+
+    *windowId = winId;
+    return (u8 *)(GetWindowAttribute(winId, WINDOW_TILE_DATA));
+}
+
+static u8 *AddHPTextPrinterAndCreateWindowOnHealthboxWithFont(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId, u32 fontId)
+{
+    u16 winId;
+    u8 color[3];
+    struct WindowTemplate winTemplate = sHealthboxWindowTemplate;
+
+    winId = AddWindow(&winTemplate);
+    FillWindowPixelBuffer(winId, PIXEL_FILL(bgColor));
+
+    color[0] = bgColor;
     color[1] = 2;
-    color[2] = 3;
+    color[2] = bgColor;
 
     AddTextPrinterParameterized4(winId, fontId, x, y, 0, 0, color, TEXT_SKIP_DRAW, str);
 
@@ -2427,6 +2447,11 @@ static u8 *AddTextPrinterAndCreateWindowOnHealthboxToFit(const u8 *str, u32 x, u
 {
     u32 fontId = GetFontIdToFit(str, FONT_SMALL, 0, width);
     return AddTextPrinterAndCreateWindowOnHealthboxWithFont(str, x, y, bgColor, windowId, fontId);
+}
+
+static u8 *AddHPTextPrinterAndCreateWindowOnHealthbox(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId)
+{
+    return AddHPTextPrinterAndCreateWindowOnHealthboxWithFont(str, x, y, bgColor, windowId, FONT_SMALL);
 }
 
 static void RemoveWindowOnHealthbox(u32 windowId)
@@ -2486,11 +2511,11 @@ static void SafariTextIntoHealthboxObject(void *dest, u8 *windowTileData, u32 wi
  */
 #define ABILITY_POP_UP_BATTLER_BG_TXTCLR 8
 #define ABILITY_POP_UP_BATTLER_FG_TXTCLR 7
-#define ABILITY_POP_UP_BATTLER_SH_TXTCLR 5
+#define ABILITY_POP_UP_BATTLER_SH_TXTCLR 4
 
-#define ABILITY_POP_UP_ABILITY_BG_TXTCLR 6
+#define ABILITY_POP_UP_ABILITY_BG_TXTCLR 8
 #define ABILITY_POP_UP_ABILITY_FG_TXTCLR 7
-#define ABILITY_POP_UP_ABILITY_SH_TXTCLR 5
+#define ABILITY_POP_UP_ABILITY_SH_TXTCLR 4
 
 #define sState          data[0]
 #define sAutoDestroy    data[1]
@@ -2941,8 +2966,8 @@ static const struct SpriteSheet sSpriteSheet_MoveInfoWindow =
     sMoveInfoWindowGfx, sizeof(sMoveInfoWindowGfx), MOVE_INFO_WINDOW_TAG
 };
 
-#define LAST_USED_BALL_X_F    14
-#define LAST_USED_BALL_X_0    -14
+#define LAST_USED_BALL_X_F    13
+#define LAST_USED_BALL_X_0    -13
 #define LAST_USED_BALL_Y      ((IsDoubleBattle()) ? 78 : 68)
 #define LAST_USED_BALL_Y_BNC  ((IsDoubleBattle()) ? 76 : 66)
 
@@ -3049,7 +3074,7 @@ void TryToAddMoveInfoWindow(void)
 
     if (gBattleStruct->moveInfoSpriteId == MAX_SPRITES)
     {
-        gBattleStruct->moveInfoSpriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow, LAST_BALL_WIN_X_0, LAST_USED_WIN_Y + 32, 6);
+        gBattleStruct->moveInfoSpriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow, LAST_BALL_WIN_X_0 + 1, LAST_USED_WIN_Y + 32, 6);
         gSprites[gBattleStruct->moveInfoSpriteId].sHide = FALSE;
     }
 }
