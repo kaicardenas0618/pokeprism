@@ -2411,10 +2411,10 @@ static u8 *AddTextPrinterAndCreateWindowOnHealthboxWithFont(const u8 *str, u32 x
     FillWindowPixelBuffer(winId, PIXEL_FILL(bgColor));
 
     color[0] = bgColor;
-    if (IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, MORNING_HOUR_END))
-        color[1] = 2;
-    else
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
         color[1] = 3;
+    else
+        color[1] = 2;
     color[2] = 4;
 
     AddTextPrinterParameterized4(winId, fontId, x, y, 0, 0, color, TEXT_SKIP_DRAW, str);

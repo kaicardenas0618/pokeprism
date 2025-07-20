@@ -557,6 +557,7 @@ enum BattleEnvironments
     BATTLE_ENVIRONMENT_CITY,
     // Night Battle Environments
     BATTLE_ENVIRONMENT_NIGHT_GRASS,
+    BATTLE_ENVIRONMENT_NIGHT_GRASS2,
     // Total
     BATTLE_ENVIRONMENT_COUNT,
 };

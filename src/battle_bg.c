@@ -16,6 +16,7 @@
 #include "menu.h"
 #include "overworld.h"
 #include "palette.h"
+#include "rtc.h"
 #include "sound.h"
 #include "sprite.h"
 #include "task.h"
@@ -621,14 +622,23 @@ static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
         if (mapBattleScene == sMapBattleSceneMapping[i].mapScene)
             return sMapBattleSceneMapping[i].battleEnvironment;
     }
-    return BATTLE_ENVIRONMENT_GRASS2;
+
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+        return BATTLE_ENVIRONMENT_GRASS2;
+    else
+        return BATTLE_ENVIRONMENT_NIGHT_GRASS2;
 }
 
 // Loads the initial battle terrain.
 static void LoadBattleEnvironmentGfx(u16 terrain)
 {
-    if (terrain >= NELEMS(gBattleEnvironmentInfo))
-        terrain = BATTLE_ENVIRONMENT_GRASS2;  // If higher than the number of entries in gBattleEnvironmentInfo, use the default.
+    if (terrain >= NELEMS(gBattleEnvironmentInfo)) // If higher than the number of entries in gBattleEnvironmentInfo, use the default.
+    {
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            terrain = BATTLE_ENVIRONMENT_GRASS2;
+        else
+            terrain = BATTLE_ENVIRONMENT_NIGHT_GRASS2;
+    }
     // Copy to bg3
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.tileset, (void *)(BG_CHAR_ADDR(2)));
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.tilemap, (void *)(BG_SCREEN_ADDR(26)));
@@ -640,7 +650,12 @@ static void LoadBattleEnvironmentGfx(u16 terrain)
 static void LoadBattleEnvironmentEntryGfx(u16 terrain)
 {
     if (terrain >= NELEMS(gBattleEnvironmentInfo))
-        terrain = BATTLE_ENVIRONMENT_GRASS2;
+    {
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            terrain = BATTLE_ENVIRONMENT_GRASS2;
+        else
+            terrain = BATTLE_ENVIRONMENT_NIGHT_GRASS2;
+    }
     // Copy to bg1
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.entryTileset, (void *)BG_CHAR_ADDR(1));
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.entryTilemap, (void *)BG_SCREEN_ADDR(28));

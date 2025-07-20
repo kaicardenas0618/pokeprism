@@ -405,6 +405,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - GRASS            "),
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = _("NIGHT - GRASS2           "),
 };
 
 const u8 sShadowSizeLabels[][4] =

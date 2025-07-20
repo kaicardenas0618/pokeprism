@@ -633,7 +633,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
 
     tileBehavior = MapGridGetMetatileBehaviorAt(x, y);
 
-    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, MORNING_HOUR_END)) // Day Battle Environments
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END)) // Day Battle Environments
     {
         switch (gMapHeader.mapType)
         {
@@ -783,7 +783,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
                 return BATTLE_ENVIRONMENT_WATER;
         }
 
-        return BATTLE_ENVIRONMENT_GRASS2;
+        return BATTLE_ENVIRONMENT_NIGHT_GRASS2;
     }
 }
 

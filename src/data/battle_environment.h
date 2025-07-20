@@ -1,12 +1,13 @@
 const u32 gBattleEnvironmentTiles_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_TallGrass[] = INCBIN_U16("graphics/battle_environment/tall_grass/palette.gbapal");
-const u32 gBattleEnvironmentTilemap_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/map.bin.smolTM");
 const u16 gBattleEnvironmentPaletteNight_TallGrass[] = INCBIN_U16("graphics/battle_environment/tall_grass/palette_night.gbapal");
+const u32 gBattleEnvironmentTilemap_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/anim_map.bin.smolTM");
 
 const u32 gBattleEnvironmentTiles_TrainerGrass[] = INCBIN_U32("graphics/battle_environment/trainer_grass/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_TrainerGrass[] = INCBIN_U16("graphics/battle_environment/trainer_grass/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_TrainerGrass[] = INCBIN_U16("graphics/battle_environment/trainer_grass/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_TrainerGrass[] = INCBIN_U32("graphics/battle_environment/trainer_grass/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_TrainerGrass[] = INCBIN_U32("graphics/battle_environment/trainer_grass/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_TrainerGrass[] = INCBIN_U32("graphics/battle_environment/trainer_grass/anim_map.bin.smolTM");
@@ -263,6 +264,20 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
         .camouflageType = TYPE_GRASS,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(TallGrass),
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS2] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_ENERGY_BALL,
+    #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_SEED_BOMB,
+    #else
+        .naturePower = MOVE_STUN_SPORE,
+    #endif
+        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
+        .camouflageType = TYPE_GRASS,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(TrainerGrass),
     },
 };
 

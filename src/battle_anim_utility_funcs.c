@@ -151,6 +151,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_NIGHT_GRASS:
         gBattleAnimArgs[4] = RGB(12, 24, 2);
         break;
+    case BATTLE_ENVIRONMENT_NIGHT_GRASS2:
+        gBattleAnimArgs[4] = RGB(12, 24, 2);
+        break;
     
     default:
         gBattleAnimArgs[4] = RGB_WHITE;

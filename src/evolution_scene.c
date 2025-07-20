@@ -20,6 +20,7 @@
 #include "pokedex.h"
 #include "pokemon.h"
 #include "pokemon_summary_screen.h"
+#include "rtc.h"
 #include "scanline_effect.h"
 #include "sound.h"
 #include "sprite.h"
@@ -237,7 +238,10 @@ void EvolutionScene(struct Pokemon *mon, u16 postEvoSpecies, bool8 canStopEvo, u
     gBattle_BG3_X = 256;
     gBattle_BG3_Y = 0;
 
-    gBattleEnvironment = BATTLE_ENVIRONMENT_GRASS2;
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+        gBattleEnvironment = BATTLE_ENVIRONMENT_GRASS2;
+    else
+        gBattleEnvironment = BATTLE_ENVIRONMENT_NIGHT_GRASS2;
 
     InitBattleBgsVideo();
     LoadBattleTextboxAndBackground();
@@ -343,7 +347,10 @@ static void CB2_EvolutionSceneLoadGraphics(void)
     gBattle_BG3_X = 256;
     gBattle_BG3_Y = 0;
 
-    gBattleEnvironment = BATTLE_ENVIRONMENT_GRASS2;
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+        gBattleEnvironment = BATTLE_ENVIRONMENT_GRASS2;
+    else
+        gBattleEnvironment = BATTLE_ENVIRONMENT_NIGHT_GRASS2;
 
     InitBattleBgsVideo();
     LoadBattleTextboxAndBackground();
