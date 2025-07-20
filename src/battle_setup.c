@@ -650,16 +650,29 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
             return BATTLE_ENVIRONMENT_POND;
         return BATTLE_ENVIRONMENT_CAVE;
+        break;
     case MAP_TYPE_INDOOR:
+        return BATTLE_ENVIRONMENT_BUILDING;
+        break;
     case MAP_TYPE_SECRET_BASE:
         return BATTLE_ENVIRONMENT_BUILDING;
+        break;
     case MAP_TYPE_UNDERWATER:
         return BATTLE_ENVIRONMENT_UNDERWATER;
+        break;
     case MAP_TYPE_OCEAN_ROUTE:
         return BATTLE_ENVIRONMENT_WATER;
+        break;
     case MAP_TYPE_MOUNTAIN:
         return BATTLE_ENVIRONMENT_MOUNTAIN;
+        break;
+    case MAP_TYPE_SAND:
+        return BATTLE_ENVIRONMENT_SAND;
+        break;
     }
+
+    if (GetSavedWeather() == WEATHER_SANDSTORM)
+        return BATTLE_ENVIRONMENT_SAND;
     
     if (MetatileBehavior_IsTallGrass(tileBehavior))
         return BATTLE_ENVIRONMENT_GRASS;
@@ -682,10 +695,6 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsBridgeOverWater(tileBehavior) == TRUE)
             return BATTLE_ENVIRONMENT_WATER;
     }
-    if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_ROUTE113) && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_ROUTE113))
-        return BATTLE_ENVIRONMENT_SAND;
-    if (GetSavedWeather() == WEATHER_SANDSTORM)
-        return BATTLE_ENVIRONMENT_SAND;
 
     return BATTLE_ENVIRONMENT_GRASS2;
 }
