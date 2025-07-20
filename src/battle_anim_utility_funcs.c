@@ -142,6 +142,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_BUILDING:
         gBattleAnimArgs[4] = RGB_WHITE;
         break;
+    case BATTLE_ENVIRONMENT_CITY:
+        gBattleAnimArgs[4] = RGB_WHITE;
+        break;
     case BATTLE_ENVIRONMENT_PLAIN:
     default:
         gBattleAnimArgs[4] = RGB_WHITE;

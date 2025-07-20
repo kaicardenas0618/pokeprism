@@ -35,3 +35,6 @@ const u32 gBattleEnvironmentAnimTilemap_WaterCave[] = INCBIN_U32("graphics/battl
 
 const u32 gBattleEnvironmentAnimTiles_Building[] = INCBIN_U32("graphics/battle_environment/building/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Building[] = INCBIN_U32("graphics/battle_environment/building/anim_map.bin.smolTM");
+
+const u32 gBattleEnvironmentAnimTiles_City[] = INCBIN_U32("graphics/battle_environment/city/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_City[] = INCBIN_U32("graphics/battle_environment/city/anim_map.bin.smolTM");

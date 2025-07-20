@@ -636,7 +636,11 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
     switch (gMapHeader.mapType)
     {
     case MAP_TYPE_TOWN:
+        return BATTLE_ENVIRONMENT_CITY;
+        break;
     case MAP_TYPE_CITY:
+        return BATTLE_ENVIRONMENT_CITY;
+        break;
     case MAP_TYPE_ROUTE:
         break;
     case MAP_TYPE_FOREST:
