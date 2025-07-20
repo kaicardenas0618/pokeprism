@@ -30376,7 +30376,6 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, STATUS_FIELD_PSYCHIC_TERRAIN,  gBattleAnimMove_Confusion
 	createvisualtask AnimTask_GetBattleEnvironment, 5
 	jumpargeq 0, BATTLE_ENVIRONMENT_GRASS,          gBattleAnimMove_NeedleArm
-	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS,    gBattleAnimMove_NeedleArm
 	jumpargeq 0, BATTLE_ENVIRONMENT_LONG_GRASS,     gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_FOREST,         gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_SAND,           gBattleAnimMove_MudShot
@@ -30388,19 +30387,8 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, BATTLE_ENVIRONMENT_WATER_CAVE,     gBattleAnimMove_Surf
 	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_Strength
 	jumpargeq 0, BATTLE_ENVIRONMENT_CITY,           gBattleAnimMove_NeedleArm
-.if B_SECRET_POWER_ANIMATION >= GEN_7
-	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_SpitUp
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS,    gBattleAnimMove_NeedleArm
 	goto gBattleAnimMove_SpitUp
-.elseif B_SECRET_POWER_ANIMATION >= GEN_6
-	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_BodySlam
-	goto gBattleAnimMove_BodySlam
-.elseif B_SECRET_POWER_ANIMATION >= GEN_4
-	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_BodySlam
-	goto gBattleAnimMove_MudSlap
-.else
-	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_Strength
-	goto gBattleAnimMove_Slam
-.endif
 
 gBattleAnimMove_Twister::
 	loadspritegfx ANIM_TAG_LEAF
