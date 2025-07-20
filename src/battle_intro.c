@@ -6,6 +6,7 @@
 #include "bg.h"
 #include "gpu_regs.h"
 #include "main.h"
+#include "rtc.h"
 #include "scanline_effect.h"
 #include "task.h"
 #include "test_runner.h"
@@ -50,6 +51,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_BEACH]      = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_WATER]      = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_NIGHT_UNDERWATER] = BattleIntroSlide2,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
@@ -136,7 +138,10 @@ void HandleIntroSlide(u8 environment)
     }
     else if (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL) == SPECIES_KYOGRE)
     {
-        environment = BATTLE_ENVIRONMENT_UNDERWATER;
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            environment = BATTLE_ENVIRONMENT_UNDERWATER;
+        else
+            environment = BATTLE_ENVIRONMENT_NIGHT_UNDERWATER;
         taskId = CreateTask(BattleIntroSlide2, 0);
     }
     else
@@ -313,12 +318,11 @@ static void BattleIntroSlide2(u8 taskId)
     case BATTLE_ENVIRONMENT_SAND:
     case BATTLE_ENVIRONMENT_NIGHT_SAND:
     case BATTLE_ENVIRONMENT_WATER:
-        gBattle_BG1_X += 8;
-        break;
     case BATTLE_ENVIRONMENT_NIGHT_WATER:
         gBattle_BG1_X += 8;
         break;
     case BATTLE_ENVIRONMENT_UNDERWATER:
+    case BATTLE_ENVIRONMENT_NIGHT_UNDERWATER:
         gBattle_BG1_X += 6;
         break;
     }

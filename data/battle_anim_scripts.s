@@ -30399,6 +30399,7 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE,     gBattleAnimMove_MuddyWater
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_BEACH,          gBattleAnimMove_BubbleBeam
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_WATER,          gBattleAnimMove_Surf
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_UNDERWATER,     gBattleAnimMove_Waterfall
 	goto gBattleAnimMove_SpitUp
 
 gBattleAnimMove_Twister::

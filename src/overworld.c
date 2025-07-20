@@ -1636,7 +1636,8 @@ bool32 MapHasNaturalLight(u8 mapType)
           || mapType == MAP_TYPE_FOREST
           || mapType == MAP_TYPE_MOUNTAIN
           || mapType == MAP_TYPE_SAND
-          || mapType == MAP_TYPE_OCEAN_ROUTE));
+          || mapType == MAP_TYPE_OCEAN_ROUTE
+          || mapType == MAP_TYPE_UNDERWATER));
 }
 
 bool32 CurrentMapHasShadows(void)

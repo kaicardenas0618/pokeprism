@@ -753,7 +753,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_BUILDING;
             break;
         case MAP_TYPE_UNDERWATER:
-            return BATTLE_ENVIRONMENT_UNDERWATER;
+            return BATTLE_ENVIRONMENT_NIGHT_UNDERWATER;
             break;
         case MAP_TYPE_OCEAN_ROUTE:
             if (MetatileBehavior_IsTallGrass(tileBehavior) || MetatileBehavior_IsLongGrass(tileBehavior))

@@ -181,6 +181,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_NIGHT_WATER:
         gBattleAnimArgs[4] = RGB(11, 22, 31);
         break;
+    case BATTLE_ENVIRONMENT_NIGHT_UNDERWATER:
+        gBattleAnimArgs[4] = RGB(0, 0, 18);
+        break;
 
     default:
         gBattleAnimArgs[4] = RGB_WHITE;

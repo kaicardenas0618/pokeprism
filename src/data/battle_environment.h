@@ -77,6 +77,7 @@ const u32 gBattleEnvironmentAnimTilemap_Water[] = INCBIN_U32("graphics/battle_en
 
 const u32 gBattleEnvironmentTiles_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Underwater[] = INCBIN_U16("graphics/battle_environment/underwater/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_Underwater[] = INCBIN_U16("graphics/battle_environment/underwater/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/anim_map.bin.smolTM");
@@ -418,6 +419,14 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_ATK_MINUS_1,
         .camouflageType = TYPE_WATER,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(Water),
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_UNDERWATER] =
+    {
+        .naturePower = MOVE_HYDRO_PUMP,
+        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_6 ? MOVE_EFFECT_ATK_MINUS_1 : MOVE_EFFECT_DEF_MINUS_1,
+        .camouflageType = TYPE_WATER,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(Underwater),
     },
 };
 

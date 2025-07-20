@@ -415,6 +415,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] = _("NIGHT - WATER CAVE       "),
     [BATTLE_ENVIRONMENT_NIGHT_BEACH]      = _("NIGHT - BEACH            "),
     [BATTLE_ENVIRONMENT_NIGHT_WATER]      = _("NIGHT - WATER            "),
+    [BATTLE_ENVIRONMENT_NIGHT_UNDERWATER] = _("NIGHT - UNDERWATER       "),
 };
 
 const u8 sShadowSizeLabels[][4] =
