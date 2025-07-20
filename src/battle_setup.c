@@ -705,7 +705,6 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_MOUNTAIN;
         if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
         {
-            // Is BRIDGE_TYPE_POND_*?
             if (MetatileBehavior_GetBridgeType(tileBehavior) != BRIDGE_TYPE_OCEAN)
                 return BATTLE_ENVIRONMENT_BEACH;
 
@@ -759,7 +758,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         case MAP_TYPE_OCEAN_ROUTE:
             if (MetatileBehavior_IsTallGrass(tileBehavior) || MetatileBehavior_IsLongGrass(tileBehavior))
                 return BATTLE_ENVIRONMENT_NIGHT_BEACH;
-            return BATTLE_ENVIRONMENT_WATER;
+            return BATTLE_ENVIRONMENT_NIGHT_WATER;
             break;
         case MAP_TYPE_MOUNTAIN:
             if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
@@ -780,19 +779,18 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsSandOrDeepSand(tileBehavior) || GetSavedWeather() == WEATHER_SANDSTORM)
             return BATTLE_ENVIRONMENT_NIGHT_SAND;
         if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))
-            return BATTLE_ENVIRONMENT_WATER;
+            return BATTLE_ENVIRONMENT_NIGHT_WATER;
         if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_BEACH;
         if (MetatileBehavior_IsMountain(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN;
         if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
         {
-            // Is BRIDGE_TYPE_POND_*?
             if (MetatileBehavior_GetBridgeType(tileBehavior) != BRIDGE_TYPE_OCEAN)
                 return BATTLE_ENVIRONMENT_NIGHT_BEACH;
 
             if (MetatileBehavior_IsBridgeOverWater(tileBehavior) == TRUE)
-                return BATTLE_ENVIRONMENT_WATER;
+                return BATTLE_ENVIRONMENT_NIGHT_WATER;
         }
 
         return BATTLE_ENVIRONMENT_NIGHT_GRASS2;

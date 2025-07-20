@@ -35,8 +35,8 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_CAVE]       = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_WATER_CAVE] = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_BEACH]      = BattleIntroSlide1,
-    [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_WATER]      = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_BUILDING]   = BattleIntroSlide3,
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = BattleIntroSlide1,
@@ -49,6 +49,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_NIGHT_CAVE]       = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_BEACH]      = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_WATER]      = BattleIntroSlide2,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
@@ -314,12 +315,15 @@ static void BattleIntroSlide2(u8 taskId)
     case BATTLE_ENVIRONMENT_WATER:
         gBattle_BG1_X += 8;
         break;
+    case BATTLE_ENVIRONMENT_NIGHT_WATER:
+        gBattle_BG1_X += 8;
+        break;
     case BATTLE_ENVIRONMENT_UNDERWATER:
         gBattle_BG1_X += 6;
         break;
     }
 
-    if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_WATER)
+    if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_WATER || gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_NIGHT_WATER)
     {
         gBattle_BG1_Y = Cos2(gTasks[taskId].data[6]) / 512 - 8;
         if (gTasks[taskId].data[6] < 180)

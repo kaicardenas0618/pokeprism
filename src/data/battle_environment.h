@@ -70,6 +70,7 @@ const u32 gBattleEnvironmentAnimTilemap_Beach[] = INCBIN_U32("graphics/battle_en
 
 const u32 gBattleEnvironmentTiles_Water[] = INCBIN_U32("graphics/battle_environment/water/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Water[] = INCBIN_U16("graphics/battle_environment/water/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_Water[] = INCBIN_U16("graphics/battle_environment/water/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_Water[] = INCBIN_U32("graphics/battle_environment/water/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_Water[] = INCBIN_U32("graphics/battle_environment/water/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Water[] = INCBIN_U32("graphics/battle_environment/water/anim_map.bin.smolTM");
@@ -246,20 +247,20 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .background = ENVIRONMENT_BACKGROUND(Beach),
     },
 
-    [BATTLE_ENVIRONMENT_UNDERWATER] =
-    {
-        .naturePower = MOVE_HYDRO_PUMP,
-        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_6 ? MOVE_EFFECT_ATK_MINUS_1 : MOVE_EFFECT_DEF_MINUS_1,
-        .camouflageType = TYPE_WATER,
-        .background = ENVIRONMENT_BACKGROUND(Underwater),
-    },
-
     [BATTLE_ENVIRONMENT_WATER] =
     {
         .naturePower = B_NATURE_POWER_MOVES >= GEN_4 ? MOVE_HYDRO_PUMP : MOVE_SURF,
         .secretPowerEffect = MOVE_EFFECT_ATK_MINUS_1,
         .camouflageType = TYPE_WATER,
         .background = ENVIRONMENT_BACKGROUND(Water),
+    },
+
+    [BATTLE_ENVIRONMENT_UNDERWATER] =
+    {
+        .naturePower = MOVE_HYDRO_PUMP,
+        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_6 ? MOVE_EFFECT_ATK_MINUS_1 : MOVE_EFFECT_DEF_MINUS_1,
+        .camouflageType = TYPE_WATER,
+        .background = ENVIRONMENT_BACKGROUND(Underwater),
     },
 
     [BATTLE_ENVIRONMENT_BUILDING] =
@@ -270,7 +271,7 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .background = ENVIRONMENT_BACKGROUND(Building),
     },
 
-    
+
     // Night Battle Environments
 
     [BATTLE_ENVIRONMENT_NIGHT_GRASS] =
@@ -410,6 +411,14 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .camouflageType = TYPE_WATER,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(Beach),
     },
+
+    [BATTLE_ENVIRONMENT_NIGHT_WATER] =
+    {
+        .naturePower = B_NATURE_POWER_MOVES >= GEN_4 ? MOVE_HYDRO_PUMP : MOVE_SURF,
+        .secretPowerEffect = MOVE_EFFECT_ATK_MINUS_1,
+        .camouflageType = TYPE_WATER,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(Water),
+    },
 };
 
 static const struct {
@@ -417,7 +426,7 @@ static const struct {
     u8 battleEnvironment;
 } sMapBattleSceneMapping[] = {
     {MAP_BATTLE_SCENE_GYM,      BATTLE_ENVIRONMENT_BUILDING},
-    {MAP_BATTLE_SCENE_MAGMA,    BATTLE_ENVIRONMENT_CAVE},
+    {MAP_BATTLE_SCENE_MAGMA,    BATTLE_ENVIRONMENT_MOUNTAIN},
     {MAP_BATTLE_SCENE_AQUA,     BATTLE_ENVIRONMENT_WATER},
     {MAP_BATTLE_SCENE_SIDNEY,   BATTLE_ENVIRONMENT_BUILDING},
     {MAP_BATTLE_SCENE_PHOEBE,   BATTLE_ENVIRONMENT_BUILDING},
