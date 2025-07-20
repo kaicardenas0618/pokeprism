@@ -21,6 +21,7 @@ const u32 gBattleEnvironmentAnimTilemap_LongGrass[] = INCBIN_U32("graphics/battl
 
 const u32 gBattleEnvironmentTiles_Forest[] = INCBIN_U32("graphics/battle_environment/forest/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Forest[] = INCBIN_U16("graphics/battle_environment/forest/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_Forest[] = INCBIN_U16("graphics/battle_environment/forest/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_Forest[] = INCBIN_U32("graphics/battle_environment/forest/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_Forest[] = INCBIN_U32("graphics/battle_environment/forest/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Forest[] = INCBIN_U32("graphics/battle_environment/forest/anim_map.bin.smolTM");
@@ -293,6 +294,20 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_SLEEP,
         .camouflageType = TYPE_GRASS,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(LongGrass),
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_FOREST] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_ENERGY_BALL,
+    #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_SEED_BOMB,
+    #else
+        .naturePower = MOVE_RAZOR_LEAF,
+    #endif
+        .secretPowerEffect = MOVE_EFFECT_SLEEP,
+        .camouflageType = TYPE_GRASS,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(Forest),
     },
 };
 
