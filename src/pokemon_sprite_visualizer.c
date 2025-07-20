@@ -390,9 +390,9 @@ const u8 gBattleBackgroundNames[][30] =
 const u8 gBattleBackgroundTerrainNames[][26] =
 {
     // Day Battle Environments
-    [BATTLE_ENVIRONMENT_GRASS]      = _("NORMAL - GRASS           "),
-    [BATTLE_ENVIRONMENT_GRASS2]     = _("NORMAL - GRASS2          "),
-    [BATTLE_ENVIRONMENT_LONG_GRASS] = _("NORMAL - LONG GRASS      "),
+    [BATTLE_ENVIRONMENT_GRASS]      = _("NORMAL - TALL GRASS      "),
+    [BATTLE_ENVIRONMENT_GRASS2]     = _("NORMAL - TRAINER GRASS   "),
+    [BATTLE_ENVIRONMENT_GRASS3]     = _("NORMAL - LONG GRASS      "),
     [BATTLE_ENVIRONMENT_FOREST]     = _("NORMAL - FOREST          "),
     [BATTLE_ENVIRONMENT_SAND]       = _("NORMAL - SAND            "),
     [BATTLE_ENVIRONMENT_UNDERWATER] = _("NORMAL - UNDERWATER      "),
@@ -404,8 +404,9 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
     [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
     // Night Battle Environments
-    [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - GRASS            "),
-    [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = _("NIGHT - GRASS2           "),
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - TALL GRASS       "),
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = _("NIGHT - TRAINER GRASS    "),
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = _("NIGHT - LONG GRASS       "),
 };
 
 const u8 sShadowSizeLabels[][4] =

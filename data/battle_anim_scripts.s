@@ -30377,7 +30377,7 @@ gBattleAnimMove_SecretPower::
 	createvisualtask AnimTask_GetBattleEnvironment, 5
 	jumpargeq 0, BATTLE_ENVIRONMENT_GRASS,          gBattleAnimMove_NeedleArm
 	jumpargeq 0, BATTLE_ENVIRONMENT_GRASS2,         gBattleAnimMove_NeedleArm
-	jumpargeq 0, BATTLE_ENVIRONMENT_LONG_GRASS,     gBattleAnimMove_MagicalLeaf
+	jumpargeq 0, BATTLE_ENVIRONMENT_GRASS3,         gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_FOREST,         gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_SAND,           gBattleAnimMove_MudShot
 	jumpargeq 0, BATTLE_ENVIRONMENT_UNDERWATER,     gBattleAnimMove_Waterfall
@@ -30388,8 +30388,9 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, BATTLE_ENVIRONMENT_WATER_CAVE,     gBattleAnimMove_Surf
 	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_Strength
 	jumpargeq 0, BATTLE_ENVIRONMENT_CITY,           gBattleAnimMove_NeedleArm
-	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS,    gBattleAnimMove_NeedleArm
-	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS2,   gBattleAnimMove_NeedleArm
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS,        gBattleAnimMove_NeedleArm
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS2,       gBattleAnimMove_NeedleArm
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS3,       gBattleAnimMove_MagicalLeaf
 	goto gBattleAnimMove_SpitUp
 
 gBattleAnimMove_Twister::

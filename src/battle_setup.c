@@ -688,7 +688,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsTallGrass(tileBehavior))
             return BATTLE_ENVIRONMENT_GRASS;
         if (MetatileBehavior_IsLongGrass(tileBehavior))
-            return BATTLE_ENVIRONMENT_LONG_GRASS;
+            return BATTLE_ENVIRONMENT_GRASS3;
         if (MetatileBehavior_IsSandOrDeepSand(tileBehavior) || GetSavedWeather() == WEATHER_SANDSTORM)
             return BATTLE_ENVIRONMENT_SAND;
         if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))
@@ -764,7 +764,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsTallGrass(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_GRASS;
         if (MetatileBehavior_IsLongGrass(tileBehavior))
-            return BATTLE_ENVIRONMENT_LONG_GRASS;
+            return BATTLE_ENVIRONMENT_NIGHT_GRASS3;
         if (MetatileBehavior_IsSandOrDeepSand(tileBehavior) || GetSavedWeather() == WEATHER_SANDSTORM)
             return BATTLE_ENVIRONMENT_SAND;
         if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))

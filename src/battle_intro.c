@@ -27,7 +27,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     // Day Battle Environments
     [BATTLE_ENVIRONMENT_GRASS]      = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_GRASS2]     = BattleIntroSlide1,
-    [BATTLE_ENVIRONMENT_LONG_GRASS] = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_GRASS3]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_FOREST]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_SAND]       = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
@@ -41,6 +41,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = BattleIntroSlide1,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
@@ -251,7 +252,7 @@ static void BattleIntroSlide1(u8 taskId)
         }
         else
         {
-            if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_LONG_GRASS)
+            if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_GRASS3 || gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_NIGHT_GRASS3)
             {
                 if (gBattle_BG1_Y != (u16)(-80))
                     gBattle_BG1_Y -= 2;
