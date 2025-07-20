@@ -251,7 +251,7 @@ void BattleAI_SetupFlags(void)
     else
     {
         gAiThinkingStruct->aiFlags[B_POSITION_OPPONENT_LEFT] = GetAiFlags(TRAINER_BATTLE_PARAM.opponentA);
-        if (TRAINER_BATTLE_PARAM.opponentB != 0)
+        if (TRAINER_BATTLE_PARAM.opponentB != 0 && TRAINER_BATTLE_PARAM.opponentB != 0xFFFF)
             gAiThinkingStruct->aiFlags[B_POSITION_OPPONENT_RIGHT] = GetAiFlags(TRAINER_BATTLE_PARAM.opponentB);
         else
             gAiThinkingStruct->aiFlags[B_POSITION_OPPONENT_RIGHT] = gAiThinkingStruct->aiFlags[B_POSITION_OPPONENT_LEFT];
@@ -259,7 +259,7 @@ void BattleAI_SetupFlags(void)
 
     if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
     {
-        gAiThinkingStruct->aiFlags[B_POSITION_PLAYER_RIGHT] = GetAiFlags(gPartnerTrainerId - TRAINER_PARTNER(PARTNER_NONE));
+        gAiThinkingStruct->aiFlags[B_POSITION_PLAYER_RIGHT] = GetAiFlags(gPartnerTrainerId);
     }
     else if (IsDoubleBattle() && IsAiVsAiBattle())
     {
@@ -3890,6 +3890,7 @@ static u32 AI_CalcMoveEffectScore(u32 battlerAtk, u32 battlerDef, u32 move)
             if (aiData->holdEffects[battlerAtk] == HOLD_EFFECT_BIG_ROOT)
                 ADJUST_SCORE(WEAK_EFFECT);
         }
+        break;
     case EFFECT_EXPLOSION:
     case EFFECT_MISTY_EXPLOSION:
     case EFFECT_MEMENTO:
