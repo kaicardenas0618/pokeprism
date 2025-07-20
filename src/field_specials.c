@@ -455,6 +455,7 @@ bool32 ShouldDoRoxanneCall(void)
         case MAP_TYPE_TOWN:
         case MAP_TYPE_CITY:
         case MAP_TYPE_ROUTE:
+        case MAP_TYPE_FOREST:
         case MAP_TYPE_OCEAN_ROUTE:
             if (++(*GetVarPointer(VAR_ROXANNE_CALL_STEP_COUNTER)) < 250)
                 return FALSE;

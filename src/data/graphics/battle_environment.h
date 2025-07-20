@@ -28,6 +28,9 @@ const u32 gBattleEnvironmentAnimTilemap_TrainerGrass[] = INCBIN_U32("graphics/ba
 const u32 gBattleEnvironmentAnimTiles_LongGrass[] = INCBIN_U32("graphics/battle_environment/long_grass/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_LongGrass[] = INCBIN_U32("graphics/battle_environment/long_grass/anim_map.bin.smolTM");
 
+const u32 gBattleEnvironmentAnimTiles_Forest[] = INCBIN_U32("graphics/battle_environment/forest/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_Forest[] = INCBIN_U32("graphics/battle_environment/forest/anim_map.bin.smolTM");
+
 const u32 gBattleEnvironmentAnimTiles_Sand[] = INCBIN_U32("graphics/battle_environment/sand/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Sand[] = INCBIN_U32("graphics/battle_environment/sand/anim_map.bin.smolTM");
 

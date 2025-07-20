@@ -633,18 +633,16 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
 
     tileBehavior = MapGridGetMetatileBehaviorAt(x, y);
 
-    if (MetatileBehavior_IsTallGrass(tileBehavior))
-        return BATTLE_ENVIRONMENT_GRASS;
-    if (MetatileBehavior_IsLongGrass(tileBehavior))
-        return BATTLE_ENVIRONMENT_LONG_GRASS;
-    if (MetatileBehavior_IsSandOrDeepSand(tileBehavior))
-        return BATTLE_ENVIRONMENT_SAND;
-
     switch (gMapHeader.mapType)
     {
     case MAP_TYPE_TOWN:
     case MAP_TYPE_CITY:
     case MAP_TYPE_ROUTE:
+        break;
+    case MAP_TYPE_FOREST:
+        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
+            return BATTLE_ENVIRONMENT_POND;
+        return BATTLE_ENVIRONMENT_FOREST;
         break;
     case MAP_TYPE_UNDERGROUND:
         if (MetatileBehavior_IsIndoorEncounter(tileBehavior))
@@ -662,6 +660,13 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_WATER;
         return BATTLE_ENVIRONMENT_PLAIN;
     }
+    
+    if (MetatileBehavior_IsTallGrass(tileBehavior))
+        return BATTLE_ENVIRONMENT_GRASS;
+    if (MetatileBehavior_IsLongGrass(tileBehavior))
+        return BATTLE_ENVIRONMENT_LONG_GRASS;
+    if (MetatileBehavior_IsSandOrDeepSand(tileBehavior))
+        return BATTLE_ENVIRONMENT_SAND;
     if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))
         return BATTLE_ENVIRONMENT_WATER;
     if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))

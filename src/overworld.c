@@ -1438,6 +1438,7 @@ bool8 IsMapTypeOutdoors(enum MapType mapType)
      || mapType == MAP_TYPE_TOWN
      || mapType == MAP_TYPE_UNDERWATER
      || mapType == MAP_TYPE_CITY
+     || mapType == MAP_TYPE_FOREST
      || mapType == MAP_TYPE_OCEAN_ROUTE)
         return TRUE;
     else
@@ -1449,7 +1450,8 @@ bool8 Overworld_MapTypeAllowsTeleportAndFly(enum MapType mapType)
     if (mapType == MAP_TYPE_ROUTE
      || mapType == MAP_TYPE_TOWN
      || mapType == MAP_TYPE_OCEAN_ROUTE
-     || mapType == MAP_TYPE_CITY)
+     || mapType == MAP_TYPE_CITY
+     || mapType == MAP_TYPE_FOREST)
         return TRUE;
     else
         return FALSE;
@@ -1627,6 +1629,7 @@ bool32 MapHasNaturalLight(u8 mapType)
          && (mapType == MAP_TYPE_TOWN
           || mapType == MAP_TYPE_CITY
           || mapType == MAP_TYPE_ROUTE
+          || mapType == MAP_TYPE_FOREST
           || mapType == MAP_TYPE_OCEAN_ROUTE));
 }
 
