@@ -399,6 +399,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_POND]       = _("NORMAL - POND            "),
     [BATTLE_ENVIRONMENT_MOUNTAIN]   = _("NORMAL - MOUNTAIN        "),
     [BATTLE_ENVIRONMENT_CAVE]       = _("NORMAL - CAVE            "),
+    [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
     [BATTLE_ENVIRONMENT_PLAIN]      = _("NORMAL - PLAIN           "),
 };

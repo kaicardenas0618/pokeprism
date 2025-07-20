@@ -38,6 +38,10 @@ const u32 gBattleEnvironmentTiles_Cave[] = INCBIN_U32("graphics/battle_environme
 const u16 gBattleEnvironmentPalette_Cave[] = INCBIN_U16("graphics/battle_environment/cave/palette.gbapal");
 const u32 gBattleEnvironmentTilemap_Cave[] = INCBIN_U32("graphics/battle_environment/cave/map.bin.smolTM");
 
+const u32 gBattleEnvironmentTiles_WaterCave[] = INCBIN_U32("graphics/battle_environment/water_cave/tiles.4bpp.smol");
+const u16 gBattleEnvironmentPalette_WaterCave[] = INCBIN_U16("graphics/battle_environment/water_cave/palette.gbapal");
+const u32 gBattleEnvironmentTilemap_WaterCave[] = INCBIN_U32("graphics/battle_environment/water_cave/map.bin.smolTM");
+
 const u16 gBattleEnvironmentPalette_Plain[] = INCBIN_U16("graphics/battle_environment/plain/palette.gbapal");
 
 const u32 gBattleEnvironmentTiles_Building[] = INCBIN_U32("graphics/battle_environment/building/tiles.4bpp.smol");
@@ -176,6 +180,14 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_FLINCH,
         .camouflageType = TYPE_ROCK,
         .background = ENVIRONMENT_BACKGROUND(Cave),
+    },
+
+    [BATTLE_ENVIRONMENT_WATER_CAVE] =
+    {
+        .naturePower = B_NATURE_POWER_MOVES >= GEN_4 ? MOVE_HYDRO_PUMP : MOVE_SURF,
+        .secretPowerEffect = MOVE_EFFECT_ATK_MINUS_1,
+        .camouflageType = TYPE_WATER,
+        .background = ENVIRONMENT_BACKGROUND(WaterCave),
     },
 
     [BATTLE_ENVIRONMENT_BUILDING] =

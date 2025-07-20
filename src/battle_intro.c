@@ -34,6 +34,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_POND]       = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_MOUNTAIN]   = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_CAVE]       = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_WATER_CAVE] = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_BUILDING]   = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_PLAIN]      = BattleIntroSlide3,
 };

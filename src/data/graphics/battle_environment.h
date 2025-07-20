@@ -30,5 +30,8 @@ const u32 gBattleEnvironmentAnimTilemap_Rock[] = INCBIN_U32("graphics/battle_env
 const u32 gBattleEnvironmentAnimTiles_Cave[] = INCBIN_U32("graphics/battle_environment/cave/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Cave[] = INCBIN_U32("graphics/battle_environment/cave/anim_map.bin.smolTM");
 
+const u32 gBattleEnvironmentAnimTiles_WaterCave[] = INCBIN_U32("graphics/battle_environment/cave/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_WaterCave[] = INCBIN_U32("graphics/battle_environment/cave/anim_map.bin.smolTM");
+
 const u32 gBattleEnvironmentAnimTiles_Building[] = INCBIN_U32("graphics/battle_environment/building/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Building[] = INCBIN_U32("graphics/battle_environment/building/anim_map.bin.smolTM");
