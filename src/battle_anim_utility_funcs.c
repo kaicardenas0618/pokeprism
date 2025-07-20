@@ -119,6 +119,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_FOREST:
         gBattleAnimArgs[4] = RGB(0, 15, 2);
         break;
+    case BATTLE_ENVIRONMENT_CITY:
+        gBattleAnimArgs[4] = RGB_WHITE;
+        break;
     case BATTLE_ENVIRONMENT_SAND:
         gBattleAnimArgs[4] = RGB(30, 24, 11);
         break;
@@ -143,9 +146,6 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_BUILDING:
         gBattleAnimArgs[4] = RGB_WHITE;
         break;
-    case BATTLE_ENVIRONMENT_CITY:
-        gBattleAnimArgs[4] = RGB_WHITE;
-        break;
 
     // Night Battle Environments
     case BATTLE_ENVIRONMENT_NIGHT_GRASS:
@@ -159,6 +159,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
         break;
     case BATTLE_ENVIRONMENT_NIGHT_FOREST:
         gBattleAnimArgs[4] = RGB(0, 15, 2);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_CITY:
+        gBattleAnimArgs[4] = RGB_WHITE;
         break;
     case BATTLE_ENVIRONMENT_NIGHT_SAND:
         gBattleAnimArgs[4] = RGB(30, 24, 11);

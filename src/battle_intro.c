@@ -29,6 +29,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_GRASS2]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_GRASS3]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_FOREST]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_CITY]       = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_SAND]       = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_WATER]      = BattleIntroSlide2,
@@ -37,12 +38,12 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_CAVE]       = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_WATER_CAVE] = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_BUILDING]   = BattleIntroSlide3,
-    [BATTLE_ENVIRONMENT_CITY]       = BattleIntroSlide3,
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_CITY]       = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_NIGHT_SAND]       = BattleIntroSlide2,
 };
 

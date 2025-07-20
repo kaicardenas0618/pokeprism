@@ -394,6 +394,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_GRASS2]     = _("NORMAL - TRAINER GRASS   "),
     [BATTLE_ENVIRONMENT_GRASS3]     = _("NORMAL - LONG GRASS      "),
     [BATTLE_ENVIRONMENT_FOREST]     = _("NORMAL - FOREST          "),
+    [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
     [BATTLE_ENVIRONMENT_SAND]       = _("NORMAL - SAND            "),
     [BATTLE_ENVIRONMENT_UNDERWATER] = _("NORMAL - UNDERWATER      "),
     [BATTLE_ENVIRONMENT_WATER]      = _("NORMAL - WATER           "),
@@ -402,12 +403,12 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_CAVE]       = _("NORMAL - CAVE            "),
     [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
-    [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - TALL GRASS       "),
     [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = _("NIGHT - TRAINER GRASS    "),
     [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = _("NIGHT - LONG GRASS       "),
     [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = _("NIGHT - FOREST           "),
+    [BATTLE_ENVIRONMENT_NIGHT_CITY]       = _("NIGHT - CITY             "),
     [BATTLE_ENVIRONMENT_NIGHT_SAND]       = _("NIGHT - SAND             "),
 };
 

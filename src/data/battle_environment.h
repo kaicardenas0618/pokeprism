@@ -26,30 +26,19 @@ const u32 gBattleEnvironmentTilemap_Forest[] = INCBIN_U32("graphics/battle_envir
 const u32 gBattleEnvironmentAnimTiles_Forest[] = INCBIN_U32("graphics/battle_environment/forest/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Forest[] = INCBIN_U32("graphics/battle_environment/forest/anim_map.bin.smolTM");
 
+const u32 gBattleEnvironmentTiles_City[] = INCBIN_U32("graphics/battle_environment/city/tiles.4bpp.smol");
+const u16 gBattleEnvironmentPalette_City[] = INCBIN_U16("graphics/battle_environment/city/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_City[] = INCBIN_U16("graphics/battle_environment/city/palette_night.gbapal");
+const u32 gBattleEnvironmentTilemap_City[] = INCBIN_U32("graphics/battle_environment/city/map.bin.smolTM");
+const u32 gBattleEnvironmentAnimTiles_City[] = INCBIN_U32("graphics/battle_environment/city/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_City[] = INCBIN_U32("graphics/battle_environment/city/anim_map.bin.smolTM");
+
 const u32 gBattleEnvironmentTiles_Sand[] = INCBIN_U32("graphics/battle_environment/sand/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Sand[] = INCBIN_U16("graphics/battle_environment/sand/palette.gbapal");
 const u16 gBattleEnvironmentPaletteNight_Sand[] = INCBIN_U16("graphics/battle_environment/sand/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_Sand[] = INCBIN_U32("graphics/battle_environment/sand/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_Sand[] = INCBIN_U32("graphics/battle_environment/sand/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Sand[] = INCBIN_U32("graphics/battle_environment/sand/anim_map.bin.smolTM");
-
-const u32 gBattleEnvironmentTiles_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/tiles.4bpp.smol");
-const u16 gBattleEnvironmentPalette_Underwater[] = INCBIN_U16("graphics/battle_environment/underwater/palette.gbapal");
-const u32 gBattleEnvironmentTilemap_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/map.bin.smolTM");
-const u32 gBattleEnvironmentAnimTiles_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/anim_tiles.4bpp.smol");
-const u32 gBattleEnvironmentAnimTilemap_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/anim_map.bin.smolTM");
-
-const u32 gBattleEnvironmentTiles_Water[] = INCBIN_U32("graphics/battle_environment/water/tiles.4bpp.smol");
-const u16 gBattleEnvironmentPalette_Water[] = INCBIN_U16("graphics/battle_environment/water/palette.gbapal");
-const u32 gBattleEnvironmentTilemap_Water[] = INCBIN_U32("graphics/battle_environment/water/map.bin.smolTM");
-const u32 gBattleEnvironmentAnimTiles_Water[] = INCBIN_U32("graphics/battle_environment/water/anim_tiles.4bpp.smol");
-const u32 gBattleEnvironmentAnimTilemap_Water[] = INCBIN_U32("graphics/battle_environment/water/anim_map.bin.smolTM");
-
-const u32 gBattleEnvironmentTiles_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/tiles.4bpp.smol");
-const u16 gBattleEnvironmentPalette_PondWater[] = INCBIN_U16("graphics/battle_environment/pond_water/palette.gbapal");
-const u32 gBattleEnvironmentTilemap_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/map.bin.smolTM");
-const u32 gBattleEnvironmentAnimTiles_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/anim_tiles.4bpp.smol");
-const u32 gBattleEnvironmentAnimTilemap_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/anim_map.bin.smolTM");
 
 const u32 gBattleEnvironmentTiles_Rock[] = INCBIN_U32("graphics/battle_environment/rock/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Rock[] = INCBIN_U16("graphics/battle_environment/rock/palette.gbapal");
@@ -69,11 +58,23 @@ const u32 gBattleEnvironmentTilemap_WaterCave[] = INCBIN_U32("graphics/battle_en
 const u32 gBattleEnvironmentAnimTiles_WaterCave[] = INCBIN_U32("graphics/battle_environment/cave/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_WaterCave[] = INCBIN_U32("graphics/battle_environment/cave/anim_map.bin.smolTM");
 
-const u32 gBattleEnvironmentTiles_City[] = INCBIN_U32("graphics/battle_environment/city/tiles.4bpp.smol");
-const u16 gBattleEnvironmentPalette_City[] = INCBIN_U16("graphics/battle_environment/city/palette.gbapal");
-const u32 gBattleEnvironmentTilemap_City[] = INCBIN_U32("graphics/battle_environment/city/map.bin.smolTM");
-const u32 gBattleEnvironmentAnimTiles_City[] = INCBIN_U32("graphics/battle_environment/city/anim_tiles.4bpp.smol");
-const u32 gBattleEnvironmentAnimTilemap_City[] = INCBIN_U32("graphics/battle_environment/city/anim_map.bin.smolTM");
+const u32 gBattleEnvironmentTiles_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/tiles.4bpp.smol");
+const u16 gBattleEnvironmentPalette_PondWater[] = INCBIN_U16("graphics/battle_environment/pond_water/palette.gbapal");
+const u32 gBattleEnvironmentTilemap_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/map.bin.smolTM");
+const u32 gBattleEnvironmentAnimTiles_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_PondWater[] = INCBIN_U32("graphics/battle_environment/pond_water/anim_map.bin.smolTM");
+
+const u32 gBattleEnvironmentTiles_Water[] = INCBIN_U32("graphics/battle_environment/water/tiles.4bpp.smol");
+const u16 gBattleEnvironmentPalette_Water[] = INCBIN_U16("graphics/battle_environment/water/palette.gbapal");
+const u32 gBattleEnvironmentTilemap_Water[] = INCBIN_U32("graphics/battle_environment/water/map.bin.smolTM");
+const u32 gBattleEnvironmentAnimTiles_Water[] = INCBIN_U32("graphics/battle_environment/water/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_Water[] = INCBIN_U32("graphics/battle_environment/water/anim_map.bin.smolTM");
+
+const u32 gBattleEnvironmentTiles_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/tiles.4bpp.smol");
+const u16 gBattleEnvironmentPalette_Underwater[] = INCBIN_U16("graphics/battle_environment/underwater/palette.gbapal");
+const u32 gBattleEnvironmentTilemap_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/map.bin.smolTM");
+const u32 gBattleEnvironmentAnimTiles_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_Underwater[] = INCBIN_U32("graphics/battle_environment/underwater/anim_map.bin.smolTM");
 
 const u32 gBattleEnvironmentTiles_Building[] = INCBIN_U32("graphics/battle_environment/building/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Building[] = INCBIN_U16("graphics/battle_environment/building/palette.gbapal");
@@ -155,6 +156,20 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_SLEEP,
         .camouflageType = TYPE_GRASS,
         .background = ENVIRONMENT_BACKGROUND(Forest),
+    },
+
+    [BATTLE_ENVIRONMENT_CITY] =
+    {
+        #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_ENERGY_BALL,
+        #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_SEED_BOMB,
+        #else
+        .naturePower = MOVE_STUN_SPORE,
+        #endif
+        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
+        .camouflageType = TYPE_GRASS,
+        .background = ENVIRONMENT_BACKGROUND(City),
     },
 
     [BATTLE_ENVIRONMENT_SAND] =
@@ -241,20 +256,6 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .background = ENVIRONMENT_BACKGROUND(Building),
     },
 
-    [BATTLE_ENVIRONMENT_CITY] =
-    {
-        #if B_NATURE_POWER_MOVES >= GEN_6
-        .naturePower = MOVE_ENERGY_BALL,
-        #elif B_NATURE_POWER_MOVES >= GEN_4
-        .naturePower = MOVE_SEED_BOMB,
-        #else
-        .naturePower = MOVE_STUN_SPORE,
-        #endif
-        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
-        .camouflageType = TYPE_GRASS,
-        .background = ENVIRONMENT_BACKGROUND(City),
-    },
-
     [BATTLE_ENVIRONMENT_NIGHT_GRASS] =
     {
     #if B_NATURE_POWER_MOVES >= GEN_6
@@ -309,6 +310,20 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_SLEEP,
         .camouflageType = TYPE_GRASS,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(Forest),
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_CITY] =
+    {
+        #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_ENERGY_BALL,
+        #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_SEED_BOMB,
+        #else
+        .naturePower = MOVE_STUN_SPORE,
+        #endif
+        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
+        .camouflageType = TYPE_GRASS,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(City),
     },
 
     [BATTLE_ENVIRONMENT_NIGHT_SAND] =
