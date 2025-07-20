@@ -1316,8 +1316,6 @@ const u16 gBattleVSFrame_Pal[] = INCBIN_U16("graphics/battle_transitions/vs_fram
 
 const u32 gVsLettersGfx[] = INCBIN_U32("graphics/battle_transitions/vs.4bpp.smol");
 
-#include "data/graphics/battle_environment.h"
-
 // Battle Dome
 const u32 gDomeTourneyTree_Gfx[] = INCBIN_U32("graphics/battle_frontier/tourney_tree.4bpp.smol");
 const u32 gDomeTourneyLine_Gfx[] = INCBIN_U32("graphics/battle_frontier/tourney_line.4bpp.smol"); // the red glow mask for the tourney advancement lines
