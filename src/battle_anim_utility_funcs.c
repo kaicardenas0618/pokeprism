@@ -106,6 +106,7 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     u32 selectedPalettes = UnpackSelectedBattlePalettes(gBattleAnimArgs[0]);
     switch (gBattleEnvironment)
     {
+    // Day Battle Environments
     case BATTLE_ENVIRONMENT_GRASS:
         gBattleAnimArgs[4] = RGB(12, 24, 2);
         break;
@@ -145,7 +146,12 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_CITY:
         gBattleAnimArgs[4] = RGB_WHITE;
         break;
-    case BATTLE_ENVIRONMENT_PLAIN:
+
+    // Night Battle Environments
+    case BATTLE_ENVIRONMENT_NIGHT_GRASS:
+        gBattleAnimArgs[4] = RGB(12, 24, 2);
+        break;
+    
     default:
         gBattleAnimArgs[4] = RGB_WHITE;
         break;

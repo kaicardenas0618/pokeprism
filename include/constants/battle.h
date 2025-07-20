@@ -541,6 +541,7 @@ enum __attribute__((packed)) MoveEffects
 // Battle environment defines for gBattleEnvironment.
 enum BattleEnvironments
 {
+    // Day Battle Environments
     BATTLE_ENVIRONMENT_GRASS,
     BATTLE_ENVIRONMENT_GRASS2,
     BATTLE_ENVIRONMENT_LONG_GRASS,
@@ -568,6 +569,8 @@ enum BattleEnvironments
     BATTLE_ENVIRONMENT_GROUDON,
     BATTLE_ENVIRONMENT_KYOGRE,
     BATTLE_ENVIRONMENT_RAYQUAZA,
+    // Night Battle Environments
+    BATTLE_ENVIRONMENT_NIGHT_GRASS,
     // New battle environments are used for Secret Power but not fully implemented.
     BATTLE_ENVIRONMENT_SOARING,
     BATTLE_ENVIRONMENT_SKY_PILLAR,

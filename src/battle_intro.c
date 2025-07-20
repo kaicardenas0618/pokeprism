@@ -24,6 +24,7 @@ static const u8 sBattleAnimBgCnts[] = {REG_OFFSET_BG0CNT, REG_OFFSET_BG1CNT, REG
 
 static const TaskFunc sBattleIntroSlideFuncs[] =
 {
+    // Day Battle Environments
     [BATTLE_ENVIRONMENT_GRASS]      = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_GRASS2]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_LONG_GRASS] = BattleIntroSlide1,
@@ -38,6 +39,8 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_BUILDING]   = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_CITY]       = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_PLAIN]      = BattleIntroSlide3,
+    // Night Battle Environments
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = BattleIntroSlide1,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)

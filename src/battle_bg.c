@@ -628,7 +628,7 @@ static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
 static void LoadBattleEnvironmentGfx(u16 terrain)
 {
     if (terrain >= NELEMS(gBattleEnvironmentInfo))
-        terrain = BATTLE_ENVIRONMENT_PLAIN;  // If higher than the number of entries in gBattleEnvironmentInfo, use the default.
+        terrain = BATTLE_ENVIRONMENT_GRASS2;  // If higher than the number of entries in gBattleEnvironmentInfo, use the default.
     // Copy to bg3
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.tileset, (void *)(BG_CHAR_ADDR(2)));
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.tilemap, (void *)(BG_SCREEN_ADDR(26)));
@@ -640,7 +640,7 @@ static void LoadBattleEnvironmentGfx(u16 terrain)
 static void LoadBattleEnvironmentEntryGfx(u16 terrain)
 {
     if (terrain >= NELEMS(gBattleEnvironmentInfo))
-        terrain = BATTLE_ENVIRONMENT_PLAIN;
+        terrain = BATTLE_ENVIRONMENT_GRASS2;
     // Copy to bg1
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.entryTileset, (void *)BG_CHAR_ADDR(1));
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.entryTilemap, (void *)BG_SCREEN_ADDR(28));

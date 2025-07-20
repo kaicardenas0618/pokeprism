@@ -1,6 +1,7 @@
 const u32 gBattleEnvironmentTiles_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_TallGrass[] = INCBIN_U16("graphics/battle_environment/tall_grass/palette.gbapal");
 const u32 gBattleEnvironmentTilemap_TallGrass[] = INCBIN_U32("graphics/battle_environment/tall_grass/map.bin.smolTM");
+const u16 gBattleEnvironmentPaletteNight_TallGrass[] = INCBIN_U16("graphics/battle_environment/tall_grass/palette_night.gbapal");
 
 const u32 gBattleEnvironmentTiles_TrainerGrass[] = INCBIN_U32("graphics/battle_environment/trainer_grass/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_TrainerGrass[] = INCBIN_U16("graphics/battle_environment/trainer_grass/palette.gbapal");
@@ -73,7 +74,35 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
     #endif
         .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
         .camouflageType = TYPE_GRASS,
-        .background = ENVIRONMENT_BACKGROUND(TallGrass),
+        .background =
+        {
+            .tileset = gBattleEnvironmentTiles_TallGrass,
+            .tilemap = gBattleEnvironmentTilemap_TallGrass,
+            .entryTileset = gBattleEnvironmentAnimTiles_TallGrass,
+            .entryTilemap = gBattleEnvironmentAnimTilemap_TallGrass,
+            .palette = gBattleEnvironmentPalette_TallGrass,
+        },
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_ENERGY_BALL,
+    #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_SEED_BOMB,
+    #else
+        .naturePower = MOVE_STUN_SPORE,
+    #endif
+        .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_SLEEP : MOVE_EFFECT_POISON,
+        .camouflageType = TYPE_GRASS,
+        .background =
+        {
+            .tileset = gBattleEnvironmentTiles_TallGrass,
+            .tilemap = gBattleEnvironmentTilemap_TallGrass,
+            .entryTileset = gBattleEnvironmentAnimTiles_TallGrass,
+            .entryTilemap = gBattleEnvironmentAnimTilemap_TallGrass,
+            .palette = gBattleEnvironmentPaletteNight_TallGrass,
+        },
     },
 
     [BATTLE_ENVIRONMENT_GRASS2] =
