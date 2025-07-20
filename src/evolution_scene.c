@@ -343,7 +343,7 @@ static void CB2_EvolutionSceneLoadGraphics(void)
     gBattle_BG3_X = 256;
     gBattle_BG3_Y = 0;
 
-    gBattleEnvironment = BATTLE_ENVIRONMENT_PLAIN;
+    gBattleEnvironment = BATTLE_ENVIRONMENT_GRASS2;
 
     InitBattleBgsVideo();
     LoadBattleTextboxAndBackground();

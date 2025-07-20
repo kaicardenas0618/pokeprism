@@ -403,7 +403,6 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
     [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
-    [BATTLE_ENVIRONMENT_PLAIN]      = _("NORMAL - PLAIN           "),
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - GRASS            "),
 };
@@ -1031,7 +1030,7 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
     {
         if (increment)
         {
-            if (data->battleEnvironment == BATTLE_ENVIRONMENT_PLAIN)
+            if (data->battleEnvironment == BATTLE_ENVIRONMENT_GRASS2)
                 data->battleBgType += 1;
             else
                 data->battleEnvironment += 1;
@@ -1051,7 +1050,7 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
         else
         {
             data->battleBgType = MAP_BATTLE_SCENE_NORMAL;
-            data->battleEnvironment = BATTLE_ENVIRONMENT_PLAIN;
+            data->battleEnvironment = BATTLE_ENVIRONMENT_GRASS2;
         }
     }
     else if (data->battleBgType == MAP_BATTLE_SCENE_RAYQUAZA)

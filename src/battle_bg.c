@@ -651,28 +651,30 @@ static u8 GetBattleEnvironmentOverride(void)
     u8 battleScene = GetCurrentMapBattleScene();
 
     if (gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
-        return BATTLE_ENVIRONMENT_FRONTIER;
+        return BATTLE_ENVIRONMENT_BUILDING;
+    /*
     else if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY)
     {
         switch (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL))
         {
         case SPECIES_GROUDON:
-            return BATTLE_ENVIRONMENT_GROUDON;
+            return BATTLE_ENVIRONMENT_CAVE;
         case SPECIES_KYOGRE:
-            return BATTLE_ENVIRONMENT_KYOGRE;
+            return BATTLE_ENVIRONMENT_UNDERWATER;
         case SPECIES_RAYQUAZA:
-            return BATTLE_ENVIRONMENT_RAYQUAZA;
+            return BATTLE_ENVIRONMENT_MOUNTAIN;
         default:
             return gBattleEnvironment;
         }
     }
+    */
     else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
     {
         u32 trainerClass = GetTrainerClassFromId(TRAINER_BATTLE_PARAM.opponentA);
         if (trainerClass == TRAINER_CLASS_LEADER)
-            return BATTLE_ENVIRONMENT_LEADER;
+            return BATTLE_ENVIRONMENT_BUILDING;
         else if (trainerClass == TRAINER_CLASS_CHAMPION)
-            return BATTLE_ENVIRONMENT_CHAMPION;
+            return BATTLE_ENVIRONMENT_BUILDING;
     }
 
     if (battleScene == MAP_BATTLE_SCENE_NORMAL)
@@ -1038,6 +1040,7 @@ void DrawBattleEntryBackground(void)
             CopyBgTilemapBufferToVram(2);
         }
     }
+    /*
     else if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY)
     {
         switch (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL))
@@ -1049,7 +1052,7 @@ void DrawBattleEntryBackground(void)
             LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_UNDERWATER);
             break;
         case SPECIES_RAYQUAZA:
-            LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_RAYQUAZA);
+            LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_MOUNTAIN);
             break;
         default:
             DecompressDataWithHeaderVram(gBattleEnvironmentInfo[gBattleEnvironment].background.entryTileset, (void *)(BG_CHAR_ADDR(1)));
@@ -1057,6 +1060,7 @@ void DrawBattleEntryBackground(void)
             break;
         }
     }
+    */
     else
     {
         if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
