@@ -612,6 +612,7 @@ const struct WindowTemplate *const gBattleWindowTemplates[] =
     [B_WIN_TYPE_ARENA]  = sBattleArenaWindowTemplates,
 };
 
+/*
 // If current map scene equals any of the values in sMapBattleSceneMapping,
 // use its battle terrain value. Otherwise, use the default.
 static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
@@ -628,6 +629,7 @@ static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
     else
         return BATTLE_ENVIRONMENT_NIGHT_GRASS2;
 }
+*/
 
 // Loads the initial battle terrain.
 static void LoadBattleEnvironmentGfx(u16 terrain)
@@ -663,10 +665,15 @@ static void LoadBattleEnvironmentEntryGfx(u16 terrain)
 
 static u8 GetBattleEnvironmentOverride(void)
 {
-    u8 battleScene = GetCurrentMapBattleScene();
+    //u8 battleScene = GetCurrentMapBattleScene();
 
     if (gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
-        return BATTLE_ENVIRONMENT_BUILDING;
+    {
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            return BATTLE_ENVIRONMENT_BUILDING;
+        else
+            return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
+    }
     /*
     else if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY)
     {
@@ -683,19 +690,8 @@ static u8 GetBattleEnvironmentOverride(void)
         }
     }
     */
-    else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
-    {
-        u32 trainerClass = GetTrainerClassFromId(TRAINER_BATTLE_PARAM.opponentA);
-        if (trainerClass == TRAINER_CLASS_LEADER)
-            return BATTLE_ENVIRONMENT_BUILDING;
-        else if (trainerClass == TRAINER_CLASS_CHAMPION)
-            return BATTLE_ENVIRONMENT_BUILDING;
-    }
 
-    if (battleScene == MAP_BATTLE_SCENE_NORMAL)
-        return gBattleEnvironment;
-
-    return GetBattleEnvironmentByMapScene(battleScene);
+    return gBattleEnvironment;
 }
 
 void BattleInitBgsAndWindows(void)
@@ -1041,7 +1037,10 @@ void DrawBattleEntryBackground(void)
     {
         if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) || gPartnerTrainerId > TRAINER_PARTNER(PARTNER_NONE))
         {
-            LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
+            if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
+            else
+                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_NIGHT_BUILDING);
         }
         else
         {
@@ -1078,29 +1077,7 @@ void DrawBattleEntryBackground(void)
     */
     else
     {
-        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
-        {
-            enum TrainerClassID trainerClass = GetTrainerClassFromId(TRAINER_BATTLE_PARAM.opponentA);
-            if (trainerClass == TRAINER_CLASS_LEADER)
-            {
-                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
-                return;
-            }
-            else if (trainerClass == TRAINER_CLASS_CHAMPION)
-            {
-                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
-                return;
-            }
-        }
-
-        if (GetCurrentMapBattleScene() == MAP_BATTLE_SCENE_NORMAL)
-        {
-            LoadBattleEnvironmentEntryGfx(gBattleEnvironment);
-        }
-        else
-        {
-            LoadBattleEnvironmentEntryGfx(gBattleEnvironment);
-        }
+        LoadBattleEnvironmentEntryGfx(gBattleEnvironment);
     }
 }
 

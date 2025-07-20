@@ -722,14 +722,14 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
                 return BATTLE_ENVIRONMENT_NIGHT_BEACH;
             if (MetatileBehavior_IsIndoorEncounter(tileBehavior))
-                return BATTLE_ENVIRONMENT_BUILDING;
+                return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
             return BATTLE_ENVIRONMENT_NIGHT_CITY;
             break;
         case MAP_TYPE_CITY:
             if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
                 return BATTLE_ENVIRONMENT_NIGHT_BEACH;
             if (MetatileBehavior_IsIndoorEncounter(tileBehavior))
-                return BATTLE_ENVIRONMENT_BUILDING;
+                return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
             return BATTLE_ENVIRONMENT_NIGHT_CITY;
             break;
         case MAP_TYPE_ROUTE:
@@ -741,16 +741,16 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             break;
         case MAP_TYPE_UNDERGROUND:
             if (MetatileBehavior_IsIndoorEncounter(tileBehavior))
-                return BATTLE_ENVIRONMENT_BUILDING;
+                return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
             if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
                 return BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE;
             return BATTLE_ENVIRONMENT_NIGHT_CAVE;
             break;
         case MAP_TYPE_INDOOR:
-            return BATTLE_ENVIRONMENT_BUILDING;
+            return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
             break;
         case MAP_TYPE_SECRET_BASE:
-            return BATTLE_ENVIRONMENT_BUILDING;
+            return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
             break;
         case MAP_TYPE_UNDERWATER:
             return BATTLE_ENVIRONMENT_NIGHT_UNDERWATER;

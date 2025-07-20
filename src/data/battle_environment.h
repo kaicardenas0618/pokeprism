@@ -84,6 +84,7 @@ const u32 gBattleEnvironmentAnimTilemap_Underwater[] = INCBIN_U32("graphics/batt
 
 const u32 gBattleEnvironmentTiles_Building[] = INCBIN_U32("graphics/battle_environment/building/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Building[] = INCBIN_U16("graphics/battle_environment/building/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_Building[] = INCBIN_U16("graphics/battle_environment/building/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_Building[] = INCBIN_U32("graphics/battle_environment/building/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_Building[] = INCBIN_U32("graphics/battle_environment/building/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Building[] = INCBIN_U32("graphics/battle_environment/building/anim_map.bin.smolTM");
@@ -428,18 +429,22 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .camouflageType = TYPE_WATER,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(Underwater),
     },
+
+    [BATTLE_ENVIRONMENT_NIGHT_BUILDING] =
+    {
+        .naturePower = B_NATURE_POWER_MOVES >= GEN_4 ? MOVE_TRI_ATTACK : MOVE_SWIFT,
+        .secretPowerEffect = MOVE_EFFECT_PARALYSIS,
+        .camouflageType = TYPE_NORMAL,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(Building),
+    },
 };
 
+/*
 static const struct {
     u8 mapScene;
     u8 battleEnvironment;
 } sMapBattleSceneMapping[] = {
-    {MAP_BATTLE_SCENE_GYM,      BATTLE_ENVIRONMENT_BUILDING},
-    {MAP_BATTLE_SCENE_MAGMA,    BATTLE_ENVIRONMENT_MOUNTAIN},
-    {MAP_BATTLE_SCENE_AQUA,     BATTLE_ENVIRONMENT_WATER},
-    {MAP_BATTLE_SCENE_SIDNEY,   BATTLE_ENVIRONMENT_BUILDING},
-    {MAP_BATTLE_SCENE_PHOEBE,   BATTLE_ENVIRONMENT_BUILDING},
-    {MAP_BATTLE_SCENE_GLACIA,   BATTLE_ENVIRONMENT_BUILDING},
-    {MAP_BATTLE_SCENE_DRAKE,    BATTLE_ENVIRONMENT_BUILDING},
-    {MAP_BATTLE_SCENE_FRONTIER, BATTLE_ENVIRONMENT_BUILDING}
+    {MAP_BATTLE_SCENE_NORMAL,      BATTLE_ENVIRONMENT_BUILDING},
+    {MAP_BATTLE_SCENE_MAGMA,       BATTLE_ENVIRONMENT_MOUNTAIN},
 };
+*/
