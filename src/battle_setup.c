@@ -636,9 +636,17 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
     switch (gMapHeader.mapType)
     {
     case MAP_TYPE_TOWN:
+        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
+            return BATTLE_ENVIRONMENT_POND;
+        if (MetatileBehavior_IsIndoorEncounter(tileBehavior))
+            return BATTLE_ENVIRONMENT_BUILDING;
         return BATTLE_ENVIRONMENT_CITY;
         break;
     case MAP_TYPE_CITY:
+        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
+            return BATTLE_ENVIRONMENT_POND;
+        if (MetatileBehavior_IsIndoorEncounter(tileBehavior))
+            return BATTLE_ENVIRONMENT_BUILDING;
         return BATTLE_ENVIRONMENT_CITY;
         break;
     case MAP_TYPE_ROUTE:
