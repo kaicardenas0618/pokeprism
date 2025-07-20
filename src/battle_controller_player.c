@@ -1068,8 +1068,7 @@ void HandleMoveSwitching(u32 battler)
         MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
         if (B_SHOW_EFFECTIVENESS)
             MoveSelectionDisplayMoveEffectiveness(CheckTargetTypeEffectiveness(battler), battler);
-        else
-            MoveSelectionDisplayPpString(battler);
+        MoveSelectionDisplayPpString(battler);
         MoveSelectionDisplayPpNumber(battler);
         MoveSelectionDisplayMoveType(battler);
         AssignUsableZMoves(battler, moveInfo->moves);
@@ -1082,8 +1081,7 @@ void HandleMoveSwitching(u32 battler)
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
         if (B_SHOW_EFFECTIVENESS)
             MoveSelectionDisplayMoveEffectiveness(CheckTargetTypeEffectiveness(battler), battler);
-        else
-            MoveSelectionDisplayPpString(battler);
+        MoveSelectionDisplayPpString(battler);
         MoveSelectionDisplayPpNumber(battler);
         MoveSelectionDisplayMoveType(battler);
     }
@@ -2094,8 +2092,7 @@ void InitMoveSelectionsVarsAndStrings(u32 battler)
     MoveSelectionCreateCursorAt(gMoveSelectionCursor[battler], 0);
     if (B_SHOW_EFFECTIVENESS)
         MoveSelectionDisplayMoveEffectiveness(CheckTargetTypeEffectiveness(battler), battler);
-    else
-        MoveSelectionDisplayPpString(battler);
+    MoveSelectionDisplayPpString(battler);
     MoveSelectionDisplayPpNumber(battler);
     MoveSelectionDisplayMoveType(battler);
 }
@@ -2390,38 +2387,42 @@ static u32 CheckTargetTypeEffectiveness(u32 battler)
 
 static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 battler)
 {
-    static const u8 noIcon[] =  _("");
-    static const u8 effectiveIcon[] =  _("{CIRCLE_HOLLOW}");
-    static const u8 superEffectiveIcon[] =  _("{CIRCLE_DOT}");
-    static const u8 notVeryEffectiveIcon[] =  _("{TRIANGLE}");
-    static const u8 immuneIcon[] =  _("{BIG_MULT_X}");
+    static const u8 effectiveIcon[]         = _("{COLOR_HIGHLIGHT_SHADOW DYNAMIC_COLOR4 TRANSPARENT TRANSPARENT}{CIRCLE_HOLLOW}");
+    static const u8 superEffectiveIcon[]    = _("{COLOR_HIGHLIGHT_SHADOW GREEN TRANSPARENT TRANSPARENT}{CIRCLE_DOT}");
+    static const u8 notVeryEffectiveIcon[]  = _("{COLOR_HIGHLIGHT_SHADOW LIGHT_GRAY TRANSPARENT TRANSPARENT}{TRIANGLE}");
+    static const u8 immuneIcon[]            = _("{COLOR_HIGHLIGHT_SHADOW WHITE TRANSPARENT TRANSPARENT}{BIG_MULT_X}");
+    static const u8 noIcon[]                = _("");
+    
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
-    u8 *txtPtr;
 
-    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfacePP);
+    // Clear and setup the window first
+    FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0xE));
+    PutWindowTilemap(B_WIN_EFFECTIVENESS);
+    CopyWindowToVram(B_WIN_EFFECTIVENESS, COPYWIN_FULL);
 
+    // Skip status moves
     if (!IsBattleMoveStatus(moveInfo->moves[gMoveSelectionCursor[battler]]))
     {
         switch (foeEffectiveness)
         {
         case EFFECTIVENESS_SUPER_EFFECTIVE:
-            StringCopy(txtPtr, superEffectiveIcon);
+            StringCopy(gDisplayedStringBattle, superEffectiveIcon);
             break;
         case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
-            StringCopy(txtPtr, notVeryEffectiveIcon);
+            StringCopy(gDisplayedStringBattle, notVeryEffectiveIcon);
             break;
         case EFFECTIVENESS_NO_EFFECT:
-            StringCopy(txtPtr, immuneIcon);
+            StringCopy(gDisplayedStringBattle, immuneIcon);
             break;
         case EFFECTIVENESS_NORMAL:
-            StringCopy(txtPtr, effectiveIcon);
+            StringCopy(gDisplayedStringBattle, effectiveIcon);
             break;
         default:
         case EFFECTIVENESS_CANNOT_VIEW:
-            StringCopy(txtPtr, noIcon);
+            StringCopy(gDisplayedStringBattle, noIcon);
             break;
         }
-    }
 
-    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_PP);
+        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_EFFECTIVENESS);
+    }
 }
