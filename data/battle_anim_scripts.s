@@ -30392,6 +30392,7 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS2,         gBattleAnimMove_NeedleArm
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_GRASS3,         gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_FOREST,         gBattleAnimMove_MagicalLeaf
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_SAND,           gBattleAnimMove_MudShot
 	goto gBattleAnimMove_SpitUp
 
 gBattleAnimMove_Twister::

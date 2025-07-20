@@ -408,6 +408,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = _("NIGHT - TRAINER GRASS    "),
     [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = _("NIGHT - LONG GRASS       "),
     [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = _("NIGHT - FOREST           "),
+    [BATTLE_ENVIRONMENT_NIGHT_SAND]       = _("NIGHT - SAND             "),
 };
 
 const u8 sShadowSizeLabels[][4] =

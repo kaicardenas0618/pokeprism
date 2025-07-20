@@ -43,6 +43,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_SAND]       = BattleIntroSlide2,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
@@ -304,6 +305,7 @@ static void BattleIntroSlide2(u8 taskId)
     switch (gTasks[taskId].tEnvironment)
     {
     case BATTLE_ENVIRONMENT_SAND:
+    case BATTLE_ENVIRONMENT_NIGHT_SAND:
     case BATTLE_ENVIRONMENT_WATER:
         gBattle_BG1_X += 8;
         break;

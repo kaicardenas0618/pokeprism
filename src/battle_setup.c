@@ -757,7 +757,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_MOUNTAIN;
             break;
         case MAP_TYPE_SAND:
-            return BATTLE_ENVIRONMENT_SAND;
+            return BATTLE_ENVIRONMENT_NIGHT_SAND;
             break;
         }
         
@@ -766,7 +766,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsLongGrass(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_GRASS3;
         if (MetatileBehavior_IsSandOrDeepSand(tileBehavior) || GetSavedWeather() == WEATHER_SANDSTORM)
-            return BATTLE_ENVIRONMENT_SAND;
+            return BATTLE_ENVIRONMENT_NIGHT_SAND;
         if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))
             return BATTLE_ENVIRONMENT_WATER;
         if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
