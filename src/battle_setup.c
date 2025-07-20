@@ -739,7 +739,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
                 return BATTLE_ENVIRONMENT_BUILDING;
             if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
                 return BATTLE_ENVIRONMENT_WATER_CAVE;
-            return BATTLE_ENVIRONMENT_CAVE;
+            return BATTLE_ENVIRONMENT_NIGHT_CAVE;
             break;
         case MAP_TYPE_INDOOR:
             return BATTLE_ENVIRONMENT_BUILDING;

@@ -128,6 +128,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_MOUNTAIN:
         gBattleAnimArgs[4] = RGB(22, 16, 10);
         break;
+    case BATTLE_ENVIRONMENT_CAVE:
+        gBattleAnimArgs[4] = RGB(14, 9, 3);
+        break;
     case BATTLE_ENVIRONMENT_UNDERWATER:
         gBattleAnimArgs[4] = RGB(0, 0, 18);
         break;
@@ -136,9 +139,6 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
         break;
     case BATTLE_ENVIRONMENT_POND:
         gBattleAnimArgs[4] = RGB(11, 22, 31);
-        break;
-    case BATTLE_ENVIRONMENT_CAVE:
-        gBattleAnimArgs[4] = RGB(14, 9, 3);
         break;
     case BATTLE_ENVIRONMENT_WATER_CAVE:
         gBattleAnimArgs[4] = RGB(11, 22, 31);
@@ -168,6 +168,9 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
         break;
     case BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN:
         gBattleAnimArgs[4] = RGB(22, 16, 10);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_CAVE:
+        gBattleAnimArgs[4] = RGB(14, 9, 3);
         break;
 
     default:
