@@ -754,7 +754,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_WATER;
             break;
         case MAP_TYPE_MOUNTAIN:
-            return BATTLE_ENVIRONMENT_MOUNTAIN;
+            return BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN;
             break;
         case MAP_TYPE_SAND:
             return BATTLE_ENVIRONMENT_NIGHT_SAND;
@@ -772,7 +772,7 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
         if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
             return BATTLE_ENVIRONMENT_POND;
         if (MetatileBehavior_IsMountain(tileBehavior))
-            return BATTLE_ENVIRONMENT_MOUNTAIN;
+            return BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN;
         if (TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
         {
             // Is BRIDGE_TYPE_POND_*?

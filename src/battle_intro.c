@@ -31,10 +31,10 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_FOREST]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_CITY]       = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_SAND]       = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_MOUNTAIN]   = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_WATER]      = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_POND]       = BattleIntroSlide1,
-    [BATTLE_ENVIRONMENT_MOUNTAIN]   = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_CAVE]       = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_WATER_CAVE] = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_BUILDING]   = BattleIntroSlide3,
@@ -45,6 +45,7 @@ static const TaskFunc sBattleIntroSlideFuncs[] =
     [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_NIGHT_CITY]       = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_NIGHT_SAND]       = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN]   = BattleIntroSlide1,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)

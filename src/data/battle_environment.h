@@ -40,11 +40,12 @@ const u32 gBattleEnvironmentTilemap_Sand[] = INCBIN_U32("graphics/battle_environ
 const u32 gBattleEnvironmentAnimTiles_Sand[] = INCBIN_U32("graphics/battle_environment/sand/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_Sand[] = INCBIN_U32("graphics/battle_environment/sand/anim_map.bin.smolTM");
 
-const u32 gBattleEnvironmentTiles_Rock[] = INCBIN_U32("graphics/battle_environment/rock/tiles.4bpp.smol");
-const u16 gBattleEnvironmentPalette_Rock[] = INCBIN_U16("graphics/battle_environment/rock/palette.gbapal");
-const u32 gBattleEnvironmentTilemap_Rock[] = INCBIN_U32("graphics/battle_environment/rock/map.bin.smolTM");
-const u32 gBattleEnvironmentAnimTiles_Rock[] = INCBIN_U32("graphics/battle_environment/rock/anim_tiles.4bpp.smol");
-const u32 gBattleEnvironmentAnimTilemap_Rock[] = INCBIN_U32("graphics/battle_environment/rock/anim_map.bin.smolTM");
+const u32 gBattleEnvironmentTiles_Mountain[] = INCBIN_U32("graphics/battle_environment/mountain/tiles.4bpp.smol");
+const u16 gBattleEnvironmentPalette_Mountain[] = INCBIN_U16("graphics/battle_environment/mountain/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_Mountain[] = INCBIN_U16("graphics/battle_environment/mountain/palette_night.gbapal");
+const u32 gBattleEnvironmentTilemap_Mountain[] = INCBIN_U32("graphics/battle_environment/mountain/map.bin.smolTM");
+const u32 gBattleEnvironmentAnimTiles_Mountain[] = INCBIN_U32("graphics/battle_environment/mountain/anim_tiles.4bpp.smol");
+const u32 gBattleEnvironmentAnimTilemap_Mountain[] = INCBIN_U32("graphics/battle_environment/mountain/anim_map.bin.smolTM");
 
 const u32 gBattleEnvironmentTiles_Cave[] = INCBIN_U32("graphics/battle_environment/cave/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_Cave[] = INCBIN_U16("graphics/battle_environment/cave/palette.gbapal");
@@ -180,6 +181,26 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .background = ENVIRONMENT_BACKGROUND(Sand),
     },
 
+    [BATTLE_ENVIRONMENT_MOUNTAIN] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_EARTH_POWER,
+    #elif B_NATURE_POWER_MOVES >= GEN_5
+        .naturePower = MOVE_EARTHQUAKE,
+    #else
+        .naturePower = MOVE_ROCK_SLIDE,
+    #endif
+    #if B_SECRET_POWER_EFFECT >= GEN_5
+        .secretPowerEffect = MOVE_EFFECT_ACC_MINUS_1,
+    #elif B_SECRET_POWER_EFFECT >= GEN_4
+        .secretPowerEffect = MOVE_EFFECT_FLINCH,
+    #else
+        .secretPowerEffect = MOVE_EFFECT_CONFUSION,
+    #endif
+        .camouflageType = B_CAMOUFLAGE_TYPES >= GEN_5 ? TYPE_GROUND : TYPE_ROCK,
+        .background = ENVIRONMENT_BACKGROUND(Mountain),
+    },
+
     [BATTLE_ENVIRONMENT_UNDERWATER] =
     {
         .naturePower = MOVE_HYDRO_PUMP,
@@ -202,26 +223,6 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_ATK_MINUS_1 : MOVE_EFFECT_SPD_MINUS_1,
         .camouflageType = TYPE_WATER,
         .background = ENVIRONMENT_BACKGROUND(PondWater),
-    },
-
-    [BATTLE_ENVIRONMENT_MOUNTAIN] =
-    {
-    #if B_NATURE_POWER_MOVES >= GEN_6
-        .naturePower = MOVE_EARTH_POWER,
-    #elif B_NATURE_POWER_MOVES >= GEN_5
-        .naturePower = MOVE_EARTHQUAKE,
-    #else
-        .naturePower = MOVE_ROCK_SLIDE,
-    #endif
-    #if B_SECRET_POWER_EFFECT >= GEN_5
-        .secretPowerEffect = MOVE_EFFECT_ACC_MINUS_1,
-    #elif B_SECRET_POWER_EFFECT >= GEN_4
-        .secretPowerEffect = MOVE_EFFECT_FLINCH,
-    #else
-        .secretPowerEffect = MOVE_EFFECT_CONFUSION,
-    #endif
-        .camouflageType = B_CAMOUFLAGE_TYPES >= GEN_5 ? TYPE_GROUND : TYPE_ROCK,
-        .background = ENVIRONMENT_BACKGROUND(Rock),
     },
 
     [BATTLE_ENVIRONMENT_CAVE] =
@@ -332,6 +333,26 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_ACC_MINUS_1,
         .camouflageType = TYPE_GROUND,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(Sand),
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_EARTH_POWER,
+    #elif B_NATURE_POWER_MOVES >= GEN_5
+        .naturePower = MOVE_EARTHQUAKE,
+    #else
+        .naturePower = MOVE_ROCK_SLIDE,
+    #endif
+    #if B_SECRET_POWER_EFFECT >= GEN_5
+        .secretPowerEffect = MOVE_EFFECT_ACC_MINUS_1,
+    #elif B_SECRET_POWER_EFFECT >= GEN_4
+        .secretPowerEffect = MOVE_EFFECT_FLINCH,
+    #else
+        .secretPowerEffect = MOVE_EFFECT_CONFUSION,
+    #endif
+        .camouflageType = B_CAMOUFLAGE_TYPES >= GEN_5 ? TYPE_GROUND : TYPE_ROCK,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(Mountain),
     },
 };
 

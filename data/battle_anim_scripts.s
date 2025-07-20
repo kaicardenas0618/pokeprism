@@ -30381,10 +30381,10 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, BATTLE_ENVIRONMENT_FOREST,         gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_CITY,           gBattleAnimMove_NeedleArm
 	jumpargeq 0, BATTLE_ENVIRONMENT_SAND,           gBattleAnimMove_MudShot
+	jumpargeq 0, BATTLE_ENVIRONMENT_MOUNTAIN,       gBattleAnimMove_RockThrow
 	jumpargeq 0, BATTLE_ENVIRONMENT_UNDERWATER,     gBattleAnimMove_Waterfall
 	jumpargeq 0, BATTLE_ENVIRONMENT_WATER,          gBattleAnimMove_Surf
 	jumpargeq 0, BATTLE_ENVIRONMENT_POND,           gBattleAnimMove_BubbleBeam
-	jumpargeq 0, BATTLE_ENVIRONMENT_MOUNTAIN,       gBattleAnimMove_RockThrow
 	jumpargeq 0, BATTLE_ENVIRONMENT_CAVE,           gBattleAnimMove_Bite
 	jumpargeq 0, BATTLE_ENVIRONMENT_WATER_CAVE,     gBattleAnimMove_Surf
 	jumpargeq 0, BATTLE_ENVIRONMENT_BUILDING,       gBattleAnimMove_Strength
@@ -30394,6 +30394,7 @@ gBattleAnimMove_SecretPower::
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_FOREST,         gBattleAnimMove_MagicalLeaf
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_CITY,           gBattleAnimMove_NeedleArm
 	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_SAND,           gBattleAnimMove_MudShot
+	jumpargeq 0, BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN,       gBattleAnimMove_RockThrow
 	goto gBattleAnimMove_SpitUp
 
 gBattleAnimMove_Twister::

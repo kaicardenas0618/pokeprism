@@ -396,10 +396,10 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_FOREST]     = _("NORMAL - FOREST          "),
     [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
     [BATTLE_ENVIRONMENT_SAND]       = _("NORMAL - SAND            "),
+    [BATTLE_ENVIRONMENT_MOUNTAIN]   = _("NORMAL - MOUNTAIN        "),
     [BATTLE_ENVIRONMENT_UNDERWATER] = _("NORMAL - UNDERWATER      "),
     [BATTLE_ENVIRONMENT_WATER]      = _("NORMAL - WATER           "),
     [BATTLE_ENVIRONMENT_POND]       = _("NORMAL - POND            "),
-    [BATTLE_ENVIRONMENT_MOUNTAIN]   = _("NORMAL - MOUNTAIN        "),
     [BATTLE_ENVIRONMENT_CAVE]       = _("NORMAL - CAVE            "),
     [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
@@ -410,6 +410,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = _("NIGHT - FOREST           "),
     [BATTLE_ENVIRONMENT_NIGHT_CITY]       = _("NIGHT - CITY             "),
     [BATTLE_ENVIRONMENT_NIGHT_SAND]       = _("NIGHT - SAND             "),
+    [BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN]   = _("NIGHT - MOUNTAIN         "),
 };
 
 const u8 sShadowSizeLabels[][4] =
@@ -1007,9 +1008,9 @@ static void LoadBattleBg(u8 battleBgType, enum BattleEnvironments battleEnvironm
         LoadPalette(gBattleEnvironmentPalette_Water, 0x20, 0x60);
         break;
     case MAP_BATTLE_SCENE_RAYQUAZA:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Rock, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Rock, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_Rock, 0x20, 0x60);
+        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Mountain, (void*)(BG_CHAR_ADDR(2)));
+        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Mountain, (void*)(BG_SCREEN_ADDR(26)));
+        LoadPalette(gBattleEnvironmentPalette_Mountain, 0x20, 0x60);
         break;
     }
 }
