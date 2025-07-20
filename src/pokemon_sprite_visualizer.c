@@ -398,10 +398,10 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_SAND]       = _("NORMAL - SAND            "),
     [BATTLE_ENVIRONMENT_MOUNTAIN]   = _("NORMAL - MOUNTAIN        "),
     [BATTLE_ENVIRONMENT_CAVE]       = _("NORMAL - CAVE            "),
+    [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
     [BATTLE_ENVIRONMENT_UNDERWATER] = _("NORMAL - UNDERWATER      "),
     [BATTLE_ENVIRONMENT_WATER]      = _("NORMAL - WATER           "),
     [BATTLE_ENVIRONMENT_POND]       = _("NORMAL - POND            "),
-    [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
     // Night Battle Environments
     [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - TALL GRASS       "),
@@ -412,6 +412,7 @@ const u8 gBattleBackgroundTerrainNames[][26] =
     [BATTLE_ENVIRONMENT_NIGHT_SAND]       = _("NIGHT - SAND             "),
     [BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN]   = _("NIGHT - MOUNTAIN         "),
     [BATTLE_ENVIRONMENT_NIGHT_CAVE]       = _("NIGHT - CAVE             "),
+    [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] = _("NIGHT - WATER CAVE       "),
 };
 
 const u8 sShadowSizeLabels[][4] =

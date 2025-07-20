@@ -56,6 +56,7 @@ const u32 gBattleEnvironmentAnimTilemap_Cave[] = INCBIN_U32("graphics/battle_env
 
 const u32 gBattleEnvironmentTiles_WaterCave[] = INCBIN_U32("graphics/battle_environment/water_cave/tiles.4bpp.smol");
 const u16 gBattleEnvironmentPalette_WaterCave[] = INCBIN_U16("graphics/battle_environment/water_cave/palette.gbapal");
+const u16 gBattleEnvironmentPaletteNight_WaterCave[] = INCBIN_U16("graphics/battle_environment/water_cave/palette_night.gbapal");
 const u32 gBattleEnvironmentTilemap_WaterCave[] = INCBIN_U32("graphics/battle_environment/water_cave/map.bin.smolTM");
 const u32 gBattleEnvironmentAnimTiles_WaterCave[] = INCBIN_U32("graphics/battle_environment/cave/anim_tiles.4bpp.smol");
 const u32 gBattleEnvironmentAnimTilemap_WaterCave[] = INCBIN_U32("graphics/battle_environment/cave/anim_map.bin.smolTM");
@@ -218,6 +219,22 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .background = ENVIRONMENT_BACKGROUND(Cave),
     },
 
+    [BATTLE_ENVIRONMENT_WATER_CAVE] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_EARTH_POWER,
+    #elif B_NATURE_POWER_MOVES >= GEN_5
+        .naturePower = MOVE_EARTHQUAKE,
+    #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_ROCK_SLIDE,
+    #else
+        .naturePower = MOVE_SHADOW_BALL,
+    #endif
+        .secretPowerEffect = MOVE_EFFECT_FLINCH,
+        .camouflageType = TYPE_WATER,
+        .background = ENVIRONMENT_BACKGROUND(WaterCave),
+    },
+
     [BATTLE_ENVIRONMENT_UNDERWATER] =
     {
         .naturePower = MOVE_HYDRO_PUMP,
@@ -240,14 +257,6 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = B_SECRET_POWER_EFFECT >= GEN_4 ? MOVE_EFFECT_ATK_MINUS_1 : MOVE_EFFECT_SPD_MINUS_1,
         .camouflageType = TYPE_WATER,
         .background = ENVIRONMENT_BACKGROUND(PondWater),
-    },
-
-    [BATTLE_ENVIRONMENT_WATER_CAVE] =
-    {
-        .naturePower = B_NATURE_POWER_MOVES >= GEN_4 ? MOVE_HYDRO_PUMP : MOVE_SURF,
-        .secretPowerEffect = MOVE_EFFECT_ATK_MINUS_1,
-        .camouflageType = TYPE_WATER,
-        .background = ENVIRONMENT_BACKGROUND(WaterCave),
     },
 
     [BATTLE_ENVIRONMENT_BUILDING] =
@@ -370,6 +379,22 @@ const struct BattleEnvironment gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT] 
         .secretPowerEffect = MOVE_EFFECT_FLINCH,
         .camouflageType = TYPE_ROCK,
         .background = ENVIRONMENT_BACKGROUND_NIGHT(Cave),
+    },
+
+    [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] =
+    {
+    #if B_NATURE_POWER_MOVES >= GEN_6
+        .naturePower = MOVE_EARTH_POWER,
+    #elif B_NATURE_POWER_MOVES >= GEN_5
+        .naturePower = MOVE_EARTHQUAKE,
+    #elif B_NATURE_POWER_MOVES >= GEN_4
+        .naturePower = MOVE_ROCK_SLIDE,
+    #else
+        .naturePower = MOVE_SHADOW_BALL,
+    #endif
+        .secretPowerEffect = MOVE_EFFECT_FLINCH,
+        .camouflageType = TYPE_WATER,
+        .background = ENVIRONMENT_BACKGROUND_NIGHT(WaterCave),
     },
 };
 
