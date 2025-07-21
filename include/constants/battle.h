@@ -601,31 +601,32 @@ enum BattleEnvironments
 #define B_WIN_DUMMY               8
 #define B_WIN_PP_REMAINING        9
 #define B_WIN_MOVE_TYPE          10
-#define B_WIN_SWITCH_PROMPT      11 // "Switch which?"
-#define B_WIN_YESNO              12
-#define B_WIN_LEVEL_UP_BOX       13
-#define B_WIN_LEVEL_UP_BANNER    14
-#define B_WIN_VS_PLAYER          15
-#define B_WIN_VS_OPPONENT        16
-#define B_WIN_VS_MULTI_PLAYER_1  17
-#define B_WIN_VS_MULTI_PLAYER_2  18
-#define B_WIN_VS_MULTI_PLAYER_3  19
-#define B_WIN_VS_MULTI_PLAYER_4  20
-#define B_WIN_VS_OUTCOME_DRAW    21
-#define B_WIN_VS_OUTCOME_LEFT    22
-#define B_WIN_VS_OUTCOME_RIGHT   23
-#define B_WIN_MOVE_DESCRIPTION   24
-#define B_WIN_EFFECTIVENESS      25
+#define B_WIN_MOVE_TYPE2         11
+#define B_WIN_SWITCH_PROMPT      12 // "Switch which?"
+#define B_WIN_YESNO              13
+#define B_WIN_LEVEL_UP_BOX       14
+#define B_WIN_LEVEL_UP_BANNER    15
+#define B_WIN_VS_PLAYER          16
+#define B_WIN_VS_OPPONENT        17
+#define B_WIN_VS_MULTI_PLAYER_1  18
+#define B_WIN_VS_MULTI_PLAYER_2  19
+#define B_WIN_VS_MULTI_PLAYER_3  20
+#define B_WIN_VS_MULTI_PLAYER_4  21
+#define B_WIN_VS_OUTCOME_DRAW    22
+#define B_WIN_VS_OUTCOME_LEFT    23
+#define B_WIN_VS_OUTCOME_RIGHT   24
+#define B_WIN_MOVE_DESCRIPTION   25
+#define B_WIN_EFFECTIVENESS      26
 
 // The following are duplicate id values for windows that Battle Arena uses differently.
-#define ARENA_WIN_PLAYER_NAME      15
-#define ARENA_WIN_VS               16
-#define ARENA_WIN_OPPONENT_NAME    17
-#define ARENA_WIN_MIND             18
-#define ARENA_WIN_SKILL            19
-#define ARENA_WIN_BODY             20
-#define ARENA_WIN_JUDGMENT_TITLE   21
-#define ARENA_WIN_JUDGMENT_TEXT    22
+#define ARENA_WIN_PLAYER_NAME      16
+#define ARENA_WIN_VS               17
+#define ARENA_WIN_OPPONENT_NAME    18
+#define ARENA_WIN_MIND             19
+#define ARENA_WIN_SKILL            20
+#define ARENA_WIN_BODY             21
+#define ARENA_WIN_JUDGMENT_TITLE   22
+#define ARENA_WIN_JUDGMENT_TEXT    23
 
 // Flag for BattlePutTextOnWindow. Never set
 #define B_WIN_COPYTOVRAM (1 << 7)

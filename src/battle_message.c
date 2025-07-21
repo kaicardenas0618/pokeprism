@@ -1673,6 +1673,16 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
         .bgColor = 14,
         .shadowColor = 15,
     },
+    [B_WIN_MOVE_TYPE2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 1,
+        .y = 1,
+        .speed = 0,
+        .fgColor = 13,
+        .bgColor = 14,
+        .shadowColor = 15,
+    },
     [B_WIN_SWITCH_PROMPT] = {
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NARROW,
@@ -1926,6 +1936,16 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
         .shadowColor = 11,
     },
     [B_WIN_MOVE_TYPE] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 1,
+        .y = 1,
+        .speed = 0,
+        .fgColor = 13,
+        .bgColor = 14,
+        .shadowColor = 15,
+    },
+    [B_WIN_MOVE_TYPE2] = {
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NARROW,
         .x = 1,

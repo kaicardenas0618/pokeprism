@@ -419,17 +419,28 @@ static void ZMoveSelectionDisplayPpNumber(u32 battler)
 
 static void ZMoveSelectionDisplayMoveType(u16 zMove, u32 battler)
 {
-    u8 *txtPtr, *end;
     u32 zMoveType = GetBattleMoveType(zMove);
 
-    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
-    *(txtPtr)++ = EXT_CTRL_CODE_BEGIN;
-    *(txtPtr)++ = EXT_CTRL_CODE_FONT;
-    *(txtPtr)++ = FONT_NORMAL;
+    LoadPalette(gBattleTypeIconsPal, 11 * 0x10, 2 * 0x20);
 
-    end = StringCopy(txtPtr, gTypesInfo[zMoveType].name);
-    PrependFontIdToFit(txtPtr, end, FONT_NORMAL, WindowWidthPx(B_WIN_MOVE_TYPE) - 25);
-    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+    if (zMoveType <= TYPE_GRASS)
+    {
+        FillWindowPixelBuffer(B_WIN_MOVE_TYPE2, PIXEL_FILL(0));
+        CopyWindowToVram(B_WIN_MOVE_TYPE2, 3);
+
+        BlitBitmapToWindow(B_WIN_MOVE_TYPE, gBattleTypeIconsGfx + (zMoveType * 0x100), 0, 0, 32, 16);
+        PutWindowTilemap(B_WIN_MOVE_TYPE);
+        CopyWindowToVram(B_WIN_MOVE_TYPE, 3);
+    }
+    else
+    {
+        FillWindowPixelBuffer(B_WIN_MOVE_TYPE, PIXEL_FILL(0));
+        CopyWindowToVram(B_WIN_MOVE_TYPE, 3);
+
+        BlitBitmapToWindow(B_WIN_MOVE_TYPE2, gBattleTypeIconsGfx + (zMoveType * 0x100), 0, 0, 32, 16);
+        PutWindowTilemap(B_WIN_MOVE_TYPE2);
+        CopyWindowToVram(B_WIN_MOVE_TYPE2, 3);
+    }
 }
 
 #define Z_EFFECT_BS_LENGTH  5

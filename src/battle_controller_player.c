@@ -156,8 +156,8 @@ static void (*const sPlayerBufferCommands[CONTROLLER_CMDS_COUNT])(u32 battler) =
 
 static const u8 sBattleSplitIconsGfx[] = INCBIN_U8("graphics/battle_interface/split_icons_battle.4bpp");
 static const u16 sBattleSplitIconsPal[] = INCBIN_U16("graphics/battle_interface/split_icons_battle.gbapal");
-static const u8 sBattleTypeIconsGfx[] = INCBIN_U8("graphics/battle_interface/type_icons_battle.4bpp");
-static const u16 sBattleTypeIconsPal[] = INCBIN_U16("graphics/battle_interface/type_icons_battle.gbapal");
+const u8 gBattleTypeIconsGfx[] = INCBIN_U8("graphics/battle_interface/type_icons_battle.4bpp");
+const u16 gBattleTypeIconsPal[] = INCBIN_U16("graphics/battle_interface/type_icons_battle.gbapal");
 
 void SetControllerToPlayer(u32 battler)
 {
@@ -1703,10 +1703,26 @@ static void MoveSelectionDisplayMoveType(u32 battler)
         type = CheckDynamicMoveType(mon, move, battler, MON_IN_BATTLE);
     }
 
-    LoadPalette(sBattleTypeIconsPal, 11 * 0x10, 2 * 0x20);
-    BlitBitmapToWindow(B_WIN_MOVE_TYPE, sBattleTypeIconsGfx + (type * 0x100), 0, 0, 32, 16);
-    PutWindowTilemap(B_WIN_MOVE_TYPE);
-    CopyWindowToVram(B_WIN_MOVE_TYPE, 3);
+    LoadPalette(gBattleTypeIconsPal, 11 * 0x10, 2 * 0x20);
+
+    if (type <= TYPE_GRASS)
+    {
+        FillWindowPixelBuffer(B_WIN_MOVE_TYPE2, PIXEL_FILL(0));
+        CopyWindowToVram(B_WIN_MOVE_TYPE2, 3);
+
+        BlitBitmapToWindow(B_WIN_MOVE_TYPE, gBattleTypeIconsGfx + (type * 0x100), 0, 0, 32, 16);
+        PutWindowTilemap(B_WIN_MOVE_TYPE);
+        CopyWindowToVram(B_WIN_MOVE_TYPE, 3);
+    }
+    else
+    {
+        FillWindowPixelBuffer(B_WIN_MOVE_TYPE, PIXEL_FILL(0));
+        CopyWindowToVram(B_WIN_MOVE_TYPE, 3);
+
+        BlitBitmapToWindow(B_WIN_MOVE_TYPE2, gBattleTypeIconsGfx + (type * 0x100), 0, 0, 32, 16);
+        PutWindowTilemap(B_WIN_MOVE_TYPE2);
+        CopyWindowToVram(B_WIN_MOVE_TYPE2, 3);
+    }
 }
 
 static void TryMoveSelectionDisplayMoveDescription(u32 battler)
