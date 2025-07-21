@@ -3081,6 +3081,15 @@ void TryToAddMoveInfoWindow(void)
         gBattleStruct->moveInfoSpriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow, LAST_BALL_WIN_X_0 + 1, LAST_USED_WIN_Y + 32, 6);
         gSprites[gBattleStruct->moveInfoSpriteId].sHide = FALSE;
     }
+    else
+    {
+        // Sprite exists but may still be sliding out — interrupt that
+        struct Sprite *sprite = &gSprites[gBattleStruct->moveInfoSpriteId];
+        sprite->sHide = FALSE;
+
+        if (sprite->x <= LAST_BALL_WIN_X_0)
+            sprite->x = LAST_BALL_WIN_X_0 + 1;
+    }
 }
 
 void TryToHideMoveInfoWindow(void)
