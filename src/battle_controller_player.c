@@ -154,8 +154,10 @@ static void (*const sPlayerBufferCommands[CONTROLLER_CMDS_COUNT])(u32 battler) =
     [CONTROLLER_TERMINATOR_NOP]           = BtlController_TerminatorNop
 };
 
-static const u16 sSplitIcons_Pal[] = INCBIN_U16("graphics/battle_interface/split_icons_battle.gbapal");
-static const u8 sSplitIcons_Gfx[] = INCBIN_U8("graphics/battle_interface/split_icons_battle.4bpp");
+static const u8 sBattleSplitIconsGfx[] = INCBIN_U8("graphics/battle_interface/split_icons_battle.4bpp");
+static const u16 sBattleSplitIconsPal[] = INCBIN_U16("graphics/battle_interface/split_icons_battle.gbapal");
+static const u8 sBattleTypeIconsGfx[] = INCBIN_U8("graphics/battle_interface/type_icons_battle.4bpp");
+static const u16 sBattleTypeIconsPal[] = INCBIN_U16("graphics/battle_interface/type_icons_battle.gbapal");
 
 void SetControllerToPlayer(u32 battler)
 {
@@ -1666,10 +1668,8 @@ static void MoveSelectionDisplayPpNumber(u32 battler)
 
 static void MoveSelectionDisplayMoveType(u32 battler)
 {
-    u8 *txtPtr, *end;
     u32 speciesId = gBattleMons[battler].species;
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
-    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
     u32 move = moveInfo->moves[gMoveSelectionCursor[battler]];
     u32 type = GetMoveType(move);
     enum BattleMoveEffects effect = GetMoveEffect(move);
@@ -1689,7 +1689,7 @@ static void MoveSelectionDisplayMoveType(u32 battler)
     else if (GetMoveCategory(move) == DAMAGE_CATEGORY_STATUS
              && (GetActiveGimmick(battler) == GIMMICK_DYNAMAX || IsGimmickSelected(battler, GIMMICK_DYNAMAX)))
     {
-        type = TYPE_NORMAL; // Max Guard is always a Normal-type move
+        type = TYPE_NORMAL;
     }
     else if (effect == EFFECT_TERA_STARSTORM)
     {
@@ -1697,15 +1697,16 @@ static void MoveSelectionDisplayMoveType(u32 battler)
         || (IsGimmickSelected(battler, GIMMICK_TERA) && speciesId == SPECIES_TERAPAGOS_TERASTAL))
             type = TYPE_STELLAR;
     }
-    else if (P_SHOW_DYNAMIC_TYPES) // Non-vanilla changes to battle UI showing dynamic types
+    else if (P_SHOW_DYNAMIC_TYPES)
     {
         struct Pokemon *mon = GetBattlerMon(battler);
         type = CheckDynamicMoveType(mon, move, battler, MON_IN_BATTLE);
     }
-    end = StringCopy(txtPtr, gTypesInfo[type].name);
 
-    PrependFontIdToFit(txtPtr, end, FONT_NORMAL, WindowWidthPx(B_WIN_MOVE_TYPE) - 25);
-    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+    LoadPalette(sBattleTypeIconsPal, 11 * 0x10, 2 * 0x20);
+    BlitBitmapToWindow(B_WIN_MOVE_TYPE, sBattleTypeIconsGfx + (type * 0x100), 0, 0, 32, 16);
+    PutWindowTilemap(B_WIN_MOVE_TYPE);
+    CopyWindowToVram(B_WIN_MOVE_TYPE, 3);
 }
 
 static void TryMoveSelectionDisplayMoveDescription(u32 battler)
@@ -2437,8 +2438,8 @@ static void MoveSelectionDisplaySplitIcon(u32 battler)
 	u32 moveCategory;
 
     moveCategory = GetBattleMoveCategory(move);
-	LoadPalette(sSplitIcons_Pal, 10 * 0x10, 0x20);
-	BlitBitmapToWindow(B_WIN_PSS_ICON, sSplitIcons_Gfx + 0x80 * moveCategory, 0, 0, 16, 16);
+	LoadPalette(sBattleSplitIconsPal, 10 * 0x10, 0x20);
+	BlitBitmapToWindow(B_WIN_PSS_ICON, sBattleSplitIconsGfx + 0x80 * moveCategory, 0, 0, 16, 16);
 	PutWindowTilemap(B_WIN_PSS_ICON);
 	CopyWindowToVram(B_WIN_PSS_ICON, 3);
 }
