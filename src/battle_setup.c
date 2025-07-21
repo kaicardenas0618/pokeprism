@@ -685,9 +685,8 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_MOUNTAIN;
             break;
         case MAP_TYPE_SAND:
-            if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
-                return BATTLE_ENVIRONMENT_BEACH;
-            return BATTLE_ENVIRONMENT_SAND;
+            if (MetatileBehavior_IsSandOrDeepSand(tileBehavior))
+                return BATTLE_ENVIRONMENT_SAND;
             break;
         }
         
@@ -695,11 +694,11 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_GRASS;
         if (MetatileBehavior_IsLongGrass(tileBehavior))
             return BATTLE_ENVIRONMENT_GRASS3;
-        if (MetatileBehavior_IsSandOrDeepSand(tileBehavior) || GetSavedWeather() == WEATHER_SANDSTORM)
+        if (GetSavedWeather() == WEATHER_SANDSTORM)
             return BATTLE_ENVIRONMENT_SAND;
         if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))
             return BATTLE_ENVIRONMENT_WATER;
-        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
+        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior) || MetatileBehavior_IsSandOrDeepSand(tileBehavior))
             return BATTLE_ENVIRONMENT_BEACH;
         if (MetatileBehavior_IsMountain(tileBehavior))
             return BATTLE_ENVIRONMENT_MOUNTAIN;
@@ -766,9 +765,8 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN;
             break;
         case MAP_TYPE_SAND:
-            if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
-                return BATTLE_ENVIRONMENT_NIGHT_BEACH;
-            return BATTLE_ENVIRONMENT_NIGHT_SAND;
+            if (MetatileBehavior_IsSandOrDeepSand(tileBehavior))
+                return BATTLE_ENVIRONMENT_NIGHT_SAND;
             break;
         }
         
@@ -776,11 +774,11 @@ enum BattleEnvironments BattleSetup_GetEnvironmentId(void)
             return BATTLE_ENVIRONMENT_NIGHT_GRASS;
         if (MetatileBehavior_IsLongGrass(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_GRASS3;
-        if (MetatileBehavior_IsSandOrDeepSand(tileBehavior) || GetSavedWeather() == WEATHER_SANDSTORM)
+        if (GetSavedWeather() == WEATHER_SANDSTORM)
             return BATTLE_ENVIRONMENT_NIGHT_SAND;
         if (MetatileBehavior_IsDeepOrOceanWater(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_WATER;
-        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior))
+        if (MetatileBehavior_IsSurfableWaterOrUnderwater(tileBehavior) || MetatileBehavior_IsSandOrDeepSand(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_BEACH;
         if (MetatileBehavior_IsMountain(tileBehavior))
             return BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN;
