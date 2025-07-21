@@ -389,16 +389,9 @@ bool32 MoveSelectionDisplayZMove(u16 zmove, u32 battler)
 
 static void ZMoveSelectionDisplayPower(u16 move, u16 zMove)
 {
-    u8 *txtPtr;
-    u16 power = GetZMovePower(move);
-
-    if (zMove >= MOVE_CATASTROPIKA)
-        power = GetMovePower(zMove);
-
     if (GetMoveCategory(move) != DAMAGE_CATEGORY_STATUS)
     {
-        txtPtr = StringCopy(gDisplayedStringBattle, sText_PowerColon);
-        ConvertIntToDecimalStringN(txtPtr, power, STR_CONV_MODE_LEFT_ALIGN, 3);
+        StringCopy(gDisplayedStringBattle, sText_NoAdditionalEffect);
         BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_NAME_3);
     }
 }

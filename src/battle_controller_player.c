@@ -1737,9 +1737,26 @@ static void TryMoveSelectionDisplayMoveDescription(u32 battler)
 static void MoveSelectionDisplayMoveDescription(u32 battler)
 {
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleResources->bufferA[battler][4]);
-    u16 move = moveInfo->moves[gMoveSelectionCursor[battler]];
+    u16 move;
+    u16 zMove;
+
+    move = moveInfo->moves[gMoveSelectionCursor[battler]];
+    zMove = GetUsableZMove(battler, move);
+
     u16 pwr = GetMovePower(move);
     u16 acc = GetMoveAccuracy(move);
+    
+    if (gBattleStruct->zmove.viewing)
+    {
+        if (zMove >= MOVE_CATASTROPIKA)
+        {
+            pwr = GetMovePower(zMove);
+        }
+        else
+        {
+            pwr = GetZMovePower(move);
+        }
+    }
 
     u8 pwr_num[3], acc_num[3];
     u8 pwr_desc[8] = _("Power: ");
@@ -1755,7 +1772,7 @@ static void MoveSelectionDisplayMoveDescription(u32 battler)
     else
         ConvertIntToDecimalStringN(pwr_num, pwr, STR_CONV_MODE_LEFT_ALIGN, 3);
 
-    if (acc < 2)
+    if (acc < 2 || gBattleStruct->zmove.viewing)
         StringCopy(acc_num, gText_BattleSwitchWhich5);
     else
         ConvertIntToDecimalStringN(acc_num, acc, STR_CONV_MODE_LEFT_ALIGN, 3);
@@ -1769,10 +1786,11 @@ static void MoveSelectionDisplayMoveDescription(u32 battler)
     StringAppend(gDisplayedStringBattle, acc_num);
 
     StringAppend(gDisplayedStringBattle, gText_NewLine);
-    StringAppend(gDisplayedStringBattle, GetMoveDescription(move));
-
+    if (gBattleStruct->zmove.viewing)
+        StringAppend(gDisplayedStringBattle, GetMoveDescription(zMove));
+    else
+        StringAppend(gDisplayedStringBattle, GetMoveDescription(move));
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_DESCRIPTION);
-
     CopyWindowToVram(B_WIN_MOVE_DESCRIPTION, COPYWIN_FULL);
 }
 
