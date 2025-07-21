@@ -220,13 +220,13 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x0340,
     },
-    [B_WIN_PP] = {
+    [B_WIN_PSS_ICON] = {
         .bg = 0,
-        .tilemapLeft = 21,
+        .tilemapLeft = 27,
         .tilemapTop = 55,
-        .width = 4,
+        .width = 2,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 10,
         .baseBlock = 0x0290,
     },
     [B_WIN_DUMMY] = {
@@ -240,7 +240,7 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
     },
     [B_WIN_PP_REMAINING] = {
         .bg = 0,
-        .tilemapLeft = 25,
+        .tilemapLeft = 21,
         .tilemapTop = 55,
         .width = 4,
         .height = 2,
@@ -459,13 +459,13 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x0330,
     },
-    [B_WIN_PP] = {
+    [B_WIN_PSS_ICON] = {
         .bg = 0,
-        .tilemapLeft = 21,
+        .tilemapLeft = 27,
         .tilemapTop = 55,
-        .width = 4,
+        .width = 2,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 10,
         .baseBlock = 0x0290,
     },
     [B_WIN_DUMMY] = {
@@ -479,7 +479,7 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
     },
     [B_WIN_PP_REMAINING] = {
         .bg = 0,
-        .tilemapLeft = 25,
+        .tilemapLeft = 21,
         .tilemapTop = 55,
         .width = 4,
         .height = 2,
