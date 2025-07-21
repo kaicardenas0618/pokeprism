@@ -3098,6 +3098,10 @@ static void DestroyMoveInfoWinGfx(struct Sprite *sprite)
 
 static void SpriteCB_LastUsedBallWin(struct Sprite *sprite)
 {
+    int paletteIndex = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+    if (paletteIndex != 0xFF)
+        sprite->oam.paletteNum = paletteIndex;
+
     if (sprite->sHide)
     {
         if (sprite->x != LAST_BALL_WIN_X_0)
@@ -3109,7 +3113,14 @@ static void SpriteCB_LastUsedBallWin(struct Sprite *sprite)
     else
     {
         if (sprite->x != LAST_BALL_WIN_X_F)
+        {
             sprite->x++;
+        }
+        else
+        {
+            LoadSpritePalette(&sSpritePalette_AbilityPopUp);
+            sprite->oam.paletteNum = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+        }
     }
 }
 
@@ -3135,6 +3146,10 @@ static void SpriteCB_LastUsedBall(struct Sprite *sprite)
 
 static void SpriteCB_MoveInfoWin(struct Sprite *sprite)
 {
+    int paletteIndex = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+    if (paletteIndex != 0xFF)
+        sprite->oam.paletteNum = paletteIndex;
+
     if (sprite->sHide)
     {
         if (sprite->x != LAST_BALL_WIN_X_0)
@@ -3146,7 +3161,14 @@ static void SpriteCB_MoveInfoWin(struct Sprite *sprite)
     else
     {
         if (sprite->x != LAST_BALL_WIN_X_F)
+        {
             sprite->x++;
+        }
+        else
+        {
+            LoadSpritePalette(&sSpritePalette_AbilityPopUp);
+            sprite->oam.paletteNum = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+        }
     }
 }
 
