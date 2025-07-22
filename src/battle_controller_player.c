@@ -2372,9 +2372,11 @@ enum
 {
     EFFECTIVENESS_CANNOT_VIEW,
     EFFECTIVENESS_NO_EFFECT,
+    EFFECTIVENESS_NOT_EFFECTIVE,
     EFFECTIVENESS_NOT_VERY_EFFECTIVE,
     EFFECTIVENESS_NORMAL,
     EFFECTIVENESS_SUPER_EFFECTIVE,
+    EFFECTIVENESS_VERY_EFFECTIVE,
 };
 
 static bool32 ShouldShowTypeEffectiveness(u32 targetId)
@@ -2409,10 +2411,14 @@ static u32 CheckTypeEffectiveness(u32 battlerAtk, u32 battlerDef)
 
     if (modifier == UQ_4_12(0.0))
         return EFFECTIVENESS_NO_EFFECT; // No effect
+    else if (modifier <= UQ_4_12(0.25))
+        return EFFECTIVENESS_NOT_EFFECTIVE; // Not effective
     else if (modifier <= UQ_4_12(0.5))
         return EFFECTIVENESS_NOT_VERY_EFFECTIVE; // Not very effective
-    else if (modifier >= UQ_4_12(2.0))
+    else if ((modifier >= UQ_4_12(2.0)) && (modifier < UQ_4_12(4.0)))
         return EFFECTIVENESS_SUPER_EFFECTIVE; // Super effective
+    else if (modifier >= UQ_4_12(4.0))
+        return EFFECTIVENESS_VERY_EFFECTIVE; // Very effective
     return EFFECTIVENESS_NORMAL; // Normal effectiveness
 }
 
@@ -2434,6 +2440,65 @@ static u32 CheckTargetTypeEffectiveness(u32 battler)
     return foeEffectiveness; // fallthrough for any other circumstance
 }
 
+static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 battler)
+{
+    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
+    u32 move = moveInfo->moves[gMoveSelectionCursor[battler]];
+    u32 moveEffectiveness;
+
+    LoadPalette(sBattleEffectivenessIconsPal, 13 * 0x10, 2 * 0x20);
+
+    if (!IsBattleMoveStatus(move))
+    {
+        switch (foeEffectiveness)
+        {
+        case EFFECTIVENESS_NO_EFFECT:
+            moveEffectiveness = 1;
+            break;
+        case EFFECTIVENESS_NOT_EFFECTIVE:
+            moveEffectiveness = 2;
+            break;
+        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
+            moveEffectiveness = 3;
+            break;
+        case EFFECTIVENESS_NORMAL:
+            moveEffectiveness = 4;
+            break;
+        case EFFECTIVENESS_SUPER_EFFECTIVE:
+            moveEffectiveness = 5;
+            break;
+        case EFFECTIVENESS_VERY_EFFECTIVE:
+            moveEffectiveness = 6;
+            break;
+        default:
+        case EFFECTIVENESS_CANNOT_VIEW:
+            moveEffectiveness = 0;
+            break;
+        }
+
+        if (moveEffectiveness <= 4)
+        {
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(0x1));
+            CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
+
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
+            BlitBitmapToWindow(B_WIN_EFFECTIVENESS, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
+            PutWindowTilemap(B_WIN_EFFECTIVENESS);
+            CopyWindowToVram(B_WIN_EFFECTIVENESS, 3);
+        }
+        else
+        {
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
+            CopyWindowToVram(B_WIN_EFFECTIVENESS, 3);
+
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(0x1));
+            BlitBitmapToWindow(B_WIN_EFFECTIVENESS2, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
+            PutWindowTilemap(B_WIN_EFFECTIVENESS2);
+            CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
+        }
+    }
+}
+
 static void MoveSelectionDisplaySplitIcon(u32 battler)
 {
 	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
@@ -2446,41 +2511,5 @@ static void MoveSelectionDisplaySplitIcon(u32 battler)
 	LoadPalette(sBattleSplitIconsPal, 10 * 0x10, 0x20);
 	BlitBitmapToWindow(B_WIN_PSS_ICON, sBattleSplitIconsGfx + 0x80 * moveCategory, 0, 0, 16, 16);
 	PutWindowTilemap(B_WIN_PSS_ICON);
-	CopyWindowToVram(B_WIN_PSS_ICON, COPYWIN_FULL);
-}
-
-static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 battler)
-{
-    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
-    u32 move = moveInfo->moves[gMoveSelectionCursor[battler]];
-    u32 moveEffectiveness;
-
-    if (!IsBattleMoveStatus(move))
-    {
-        switch (foeEffectiveness)
-        {
-        case EFFECTIVENESS_NO_EFFECT:
-            moveEffectiveness = 0;
-            break;
-        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
-            moveEffectiveness = 1;
-            break;
-        case EFFECTIVENESS_NORMAL:
-            moveEffectiveness = 2;
-            break;
-        case EFFECTIVENESS_SUPER_EFFECTIVE:
-            moveEffectiveness = 3;
-            break;
-        default:
-        case EFFECTIVENESS_CANNOT_VIEW:
-            return;
-            break;
-        }
-
-        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
-        LoadPalette(sBattleEffectivenessIconsPal, 13 * 0x10, 0x20);
-        BlitBitmapToWindow(B_WIN_EFFECTIVENESS, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
-        PutWindowTilemap(B_WIN_EFFECTIVENESS);
-        CopyWindowToVram(B_WIN_EFFECTIVENESS, COPYWIN_FULL);
-    }
+	CopyWindowToVram(B_WIN_PSS_ICON, 3);
 }

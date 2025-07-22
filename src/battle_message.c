@@ -1831,6 +1831,16 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
         .bgColor = 14,
         .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
     },
+    [B_WIN_EFFECTIVENESS2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 0,
+        .y = 2,
+        .speed = 0,
+        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .bgColor = 14,
+        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+    },
 };
 
 static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
@@ -2091,6 +2101,16 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
         .fontId = FONT_NARROW,
         .x = 0,
         .y = 1,
+        .speed = 0,
+        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .bgColor = 14,
+        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+    },
+    [B_WIN_EFFECTIVENESS2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 0,
+        .y = 2,
         .speed = 0,
         .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
         .bgColor = 14,
