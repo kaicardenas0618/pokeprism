@@ -156,6 +156,8 @@ static void (*const sPlayerBufferCommands[CONTROLLER_CMDS_COUNT])(u32 battler) =
 
 static const u8 sBattleSplitIconsGfx[] = INCBIN_U8("graphics/battle_interface/split_icons_battle.4bpp");
 static const u16 sBattleSplitIconsPal[] = INCBIN_U16("graphics/battle_interface/split_icons_battle.gbapal");
+static const u8 sBattleEffectivenessIconsGfx[] = INCBIN_U8("graphics/battle_interface/effectiveness_icons_battle.4bpp");
+static const u16 sBattleEffectivenessIconsPal[] = INCBIN_U16("graphics/battle_interface/effectiveness_icons_battle.gbapal");
 const u8 gBattleTypeIconsGfx[] = INCBIN_U8("graphics/battle_interface/type_icons_battle.4bpp");
 const u16 gBattleTypeIconsPal[] = INCBIN_U16("graphics/battle_interface/type_icons_battle.gbapal");
 
@@ -2432,48 +2434,6 @@ static u32 CheckTargetTypeEffectiveness(u32 battler)
     return foeEffectiveness; // fallthrough for any other circumstance
 }
 
-static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 battler)
-{
-    static const u8 effectiveIcon[]         = _("{COLOR_HIGHLIGHT_SHADOW DYNAMIC_COLOR4 TRANSPARENT TRANSPARENT}{CIRCLE_HOLLOW}");
-    static const u8 superEffectiveIcon[]    = _("{COLOR_HIGHLIGHT_SHADOW GREEN TRANSPARENT TRANSPARENT}{CIRCLE_DOT}");
-    static const u8 notVeryEffectiveIcon[]  = _("{COLOR_HIGHLIGHT_SHADOW LIGHT_GRAY TRANSPARENT TRANSPARENT}{TRIANGLE}");
-    static const u8 immuneIcon[]            = _("{COLOR_HIGHLIGHT_SHADOW WHITE TRANSPARENT TRANSPARENT}{BIG_MULT_X}");
-    static const u8 noIcon[]                = _("");
-    
-    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
-
-    // Clear and setup the window first
-    FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0xE));
-    PutWindowTilemap(B_WIN_EFFECTIVENESS);
-    CopyWindowToVram(B_WIN_EFFECTIVENESS, COPYWIN_FULL);
-
-    // Skip status moves
-    if (!IsBattleMoveStatus(moveInfo->moves[gMoveSelectionCursor[battler]]))
-    {
-        switch (foeEffectiveness)
-        {
-        case EFFECTIVENESS_SUPER_EFFECTIVE:
-            StringCopy(gDisplayedStringBattle, superEffectiveIcon);
-            break;
-        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
-            StringCopy(gDisplayedStringBattle, notVeryEffectiveIcon);
-            break;
-        case EFFECTIVENESS_NO_EFFECT:
-            StringCopy(gDisplayedStringBattle, immuneIcon);
-            break;
-        case EFFECTIVENESS_NORMAL:
-            StringCopy(gDisplayedStringBattle, effectiveIcon);
-            break;
-        default:
-        case EFFECTIVENESS_CANNOT_VIEW:
-            StringCopy(gDisplayedStringBattle, noIcon);
-            break;
-        }
-
-        BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_EFFECTIVENESS);
-    }
-}
-
 static void MoveSelectionDisplaySplitIcon(u32 battler)
 {
 	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
@@ -2484,5 +2444,40 @@ static void MoveSelectionDisplaySplitIcon(u32 battler)
 	LoadPalette(sBattleSplitIconsPal, 10 * 0x10, 0x20);
 	BlitBitmapToWindow(B_WIN_PSS_ICON, sBattleSplitIconsGfx + 0x80 * moveCategory, 0, 0, 16, 16);
 	PutWindowTilemap(B_WIN_PSS_ICON);
-	CopyWindowToVram(B_WIN_PSS_ICON, 3);
+	CopyWindowToVram(B_WIN_PSS_ICON, COPYWIN_FULL);
+}
+
+static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 battler)
+{
+    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
+    u32 move = moveInfo->moves[gMoveSelectionCursor[battler]];
+    u32 moveEffectiveness;
+
+    if (!IsBattleMoveStatus(move))
+    {
+        switch (foeEffectiveness)
+        {
+        case EFFECTIVENESS_NO_EFFECT:
+            moveEffectiveness = 0;
+            break;
+        case EFFECTIVENESS_NOT_VERY_EFFECTIVE:
+            moveEffectiveness = 1;
+            break;
+        case EFFECTIVENESS_NORMAL:
+            moveEffectiveness = 2;
+            break;
+        case EFFECTIVENESS_SUPER_EFFECTIVE:
+            moveEffectiveness = 3;
+            break;
+        default:
+        case EFFECTIVENESS_CANNOT_VIEW:
+            return;
+            break;
+        }
+
+        LoadPalette(sBattleEffectivenessIconsPal, 13 * 0x10, 0x20);
+        BlitBitmapToWindow(B_WIN_EFFECTIVENESS, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
+        PutWindowTilemap(B_WIN_EFFECTIVENESS);
+        CopyWindowToVram(B_WIN_EFFECTIVENESS, COPYWIN_FULL);
+    }
 }
