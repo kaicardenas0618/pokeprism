@@ -267,7 +267,7 @@ enum
     CONTROLLER_CMDS_COUNT
 };
 
-#define ACTION_ICON_TILE_SIZE 32
+#define ACTION_ICON_TILE_SIZE 128
 #define TAG_ACTION_ICON       2900
 
 enum {
@@ -279,6 +279,7 @@ enum {
     ACTION_PARTY_HOVER,
     ACTION_RUN,
     ACTION_RUN_HOVER,
+    ACTION_COUNT
 };
 
 extern struct UnusedControllerStruct gUnusedControllerStruct;

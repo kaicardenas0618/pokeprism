@@ -164,59 +164,100 @@ const u8 gBattleTypeIconsGfx[] = INCBIN_U8("graphics/battle_interface/type_icons
 const u16 gBattleTypeIconsPal[] = INCBIN_U16("graphics/battle_interface/type_icons_battle.gbapal");
 static const u8 sBattleActionMenuIconsGfx[] = INCBIN_U8("graphics/battle_interface/action_menu_icons_battle.4bpp");
 
-static const struct SpriteFrameImage sActionMenuSpriteImages[] =
+// Action Icon structs
+static const struct SpriteSheet sSpriteSheet_ActionIcon =
 {
-    [ACTION_BATTLE]        = { .data = sBattleActionMenuIconsGfx + ACTION_BATTLE        * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_BATTLE_HOVER]  = { .data = sBattleActionMenuIconsGfx + ACTION_BATTLE_HOVER  * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_BAG]           = { .data = sBattleActionMenuIconsGfx + ACTION_BAG           * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_BAG_HOVER]     = { .data = sBattleActionMenuIconsGfx + ACTION_BAG_HOVER     * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_PARTY]         = { .data = sBattleActionMenuIconsGfx + ACTION_PARTY         * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_PARTY_HOVER]   = { .data = sBattleActionMenuIconsGfx + ACTION_PARTY_HOVER   * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_RUN]           = { .data = sBattleActionMenuIconsGfx + ACTION_RUN           * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
-    [ACTION_RUN_HOVER]     = { .data = sBattleActionMenuIconsGfx + ACTION_RUN_HOVER     * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    .data = sBattleActionMenuIconsGfx,
+    .size = ACTION_ICON_TILE_SIZE * ACTION_COUNT,
+    .tag = TAG_ACTION_ICON,
 };
 
-static const union AnimCmd sAnim_ActionIcon_Normal[] =
+static const struct SpritePalette sSpritePalette_ActionIcon =
 {
-    ANIMCMD_FRAME(0, 0),
-    ANIMCMD_END,
-};
-
-static const union AnimCmd sAnim_ActionIcon_Hover[] =
-{
-    ANIMCMD_FRAME(1, 0),
-    ANIMCMD_END,
-};
-
-static const union AnimCmd *const sAnimTable_ActionIcon[] =
-{
-    [0] = sAnim_ActionIcon_Normal,
-    [1] = sAnim_ActionIcon_Hover,
+    .data = gBattleWindowTextPalette,
+    .tag = TAG_ACTION_ICON,
 };
 
 static const struct OamData sOam_ActionIcon =
 {
-    .size = SPRITE_SIZE(16x16),
     .shape = SPRITE_SHAPE(16x16),
+    .size = SPRITE_SIZE(16x16),
     .priority = 0,
-    .paletteNum = 5,  // gBattleWindowTextPalette
+    .paletteNum = 5,
 };
 
+// Action Icon Anims
+static const union AnimCmd sAnim_ActionIcon_Battle[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_BattleHover[] =
+{
+    ANIMCMD_FRAME(4, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_Bag[] =
+{
+    ANIMCMD_FRAME(8, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_BagHover[] =
+{
+    ANIMCMD_FRAME(12, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_Party[] =
+{
+    ANIMCMD_FRAME(16, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_PartyHover[] =
+{
+    ANIMCMD_FRAME(20, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_Run[] =
+{
+    ANIMCMD_FRAME(24, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_ActionIcon_RunHover[] =
+{
+    ANIMCMD_FRAME(28, 0),
+    ANIMCMD_END
+};
+
+
+static const union AnimCmd *const sAnimTable_ActionIcon[] =
+{
+    sAnim_ActionIcon_Battle,
+    sAnim_ActionIcon_BattleHover,
+    sAnim_ActionIcon_Bag,
+    sAnim_ActionIcon_BagHover,
+    sAnim_ActionIcon_Party,
+    sAnim_ActionIcon_PartyHover,
+    sAnim_ActionIcon_Run,
+    sAnim_ActionIcon_RunHover,
+};
+
+// Action Icon SpriteTemplate
 static const struct SpriteTemplate sSpriteTemplate_ActionIcon =
 {
     .tileTag = TAG_ACTION_ICON,
     .paletteTag = TAG_ACTION_ICON,
     .oam = &sOam_ActionIcon,
     .anims = sAnimTable_ActionIcon,
-    .images = sActionMenuSpriteImages,
+    .images = NULL,
     .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy,
-};
-
-static const struct SpritePalette sSpritePalette_ActionIcons =
-{
-    .data = gBattleWindowTextPalette,
-    .tag = TAG_ACTION_ICON,
 };
 
 void SetControllerToPlayer(u32 battler)
@@ -2075,17 +2116,37 @@ static void HandleChooseActionAfterDma3(u32 battler)
 
 static void PlayerHandleChooseAction(u32 battler)
 {
-    s32 i;
+    u8 spriteId;
 
     gBattlerControllerFuncs[battler] = HandleChooseActionAfterDma3;
     BattleTv_ClearExplosionFaintCause();
     BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
 
-    for (i = 0; i < 4; i++)
+    LoadSpriteSheet(&sSpriteSheet_ActionIcon);
+    LoadSpritePalette(&sSpritePalette_ActionIcon);
+
+    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 100, 64, 0);
+    if (spriteId != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[spriteId], ACTION_BATTLE);
+
+    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 140, 64, 0);
+    if (spriteId != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[spriteId], ACTION_BAG);
+
+    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 100, 96, 0);
+    if (spriteId != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[spriteId], ACTION_PARTY);
+
+    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 140, 96, 0);
+    if (spriteId != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[spriteId], ACTION_RUN);
+
+    for (s32 i = 0; i < 4; i++)
         ActionSelectionDestroyCursorAt(i);
 
     TryRestoreLastUsedBall();
     ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+
     PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, battler, gBattlerPartyIndexes[battler]);
     BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
 
@@ -2095,29 +2156,30 @@ static void PlayerHandleChooseAction(u32 battler)
         u32 move = gBattleMons[B_POSITION_PLAYER_RIGHT].moves[gBattleStruct->chosenMovePositions[B_POSITION_PLAYER_RIGHT]];
         StringAppend(gStringVar1, GetMoveName(move));
         u32 moveTarget = GetBattlerMoveTargetType(B_POSITION_PLAYER_RIGHT, move);
+
         if (moveTarget == MOVE_TARGET_SELECTED)
         {
-            if (gAiBattleData->chosenTarget[B_POSITION_PLAYER_RIGHT] == B_POSITION_OPPONENT_LEFT)
+            switch (gAiBattleData->chosenTarget[B_POSITION_PLAYER_RIGHT])
+            {
+            case B_POSITION_OPPONENT_LEFT:
                 StringAppend(gStringVar1, COMPOUND_STRING(" -{UP_ARROW}"));
-            else if (gAiBattleData->chosenTarget[B_POSITION_PLAYER_RIGHT] == B_POSITION_OPPONENT_RIGHT)
+                break;
+            case B_POSITION_OPPONENT_RIGHT:
                 StringAppend(gStringVar1, COMPOUND_STRING(" {UP_ARROW}-"));
-            else if (gAiBattleData->chosenTarget[B_POSITION_PLAYER_RIGHT] == B_POSITION_PLAYER_LEFT)
+                break;
+            case B_POSITION_PLAYER_LEFT:
+            case B_POSITION_PLAYER_RIGHT:
                 StringAppend(gStringVar1, COMPOUND_STRING(" {DOWN_ARROW}-"));
-            else if (gAiBattleData->chosenTarget[B_POSITION_PLAYER_RIGHT] == B_POSITION_PLAYER_RIGHT)
-                StringAppend(gStringVar1, COMPOUND_STRING(" {DOWN_ARROW}-"));
+                break;
+            }
         }
         else if (moveTarget == MOVE_TARGET_BOTH)
-        {
             StringAppend(gStringVar1, COMPOUND_STRING(" {UP_ARROW}{UP_ARROW}"));
-        }
         else if (moveTarget == MOVE_TARGET_FOES_AND_ALLY)
-        {
             StringAppend(gStringVar1, COMPOUND_STRING(" {V_D_ARROW}{UP_ARROW}"));
-        }
         else if (moveTarget == MOVE_TARGET_ALL_BATTLERS)
-        {
             StringAppend(gStringVar1, COMPOUND_STRING(" {V_D_ARROW}{V_D_ARROW}"));
-        }
+
         BattlePutTextOnWindow(gStringVar1, B_WIN_ACTION_PROMPT);
     }
     else
