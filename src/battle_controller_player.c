@@ -2441,6 +2441,8 @@ static void MoveSelectionDisplaySplitIcon(u32 battler)
 	u32 moveCategory;
 
     moveCategory = GetBattleMoveCategory(move);
+
+    FillWindowPixelBuffer(B_WIN_PSS_ICON, PIXEL_FILL(0xE));
 	LoadPalette(sBattleSplitIconsPal, 10 * 0x10, 0x20);
 	BlitBitmapToWindow(B_WIN_PSS_ICON, sBattleSplitIconsGfx + 0x80 * moveCategory, 0, 0, 16, 16);
 	PutWindowTilemap(B_WIN_PSS_ICON);
@@ -2475,6 +2477,7 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 batt
             break;
         }
 
+        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
         LoadPalette(sBattleEffectivenessIconsPal, 13 * 0x10, 0x20);
         BlitBitmapToWindow(B_WIN_EFFECTIVENESS, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
         PutWindowTilemap(B_WIN_EFFECTIVENESS);
