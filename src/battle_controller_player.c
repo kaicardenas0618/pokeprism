@@ -12,6 +12,7 @@
 #include "battle_gimmick.h"
 #include "bg.h"
 #include "data.h"
+#include "graphics.h"
 #include "item.h"
 #include "item_menu.h"
 #include "link.h"
@@ -25,6 +26,7 @@
 #include "recorded_battle.h"
 #include "reshow_battle_screen.h"
 #include "sound.h"
+#include "sprite.h"
 #include "string_util.h"
 #include "task.h"
 #include "test_runner.h"
@@ -160,6 +162,62 @@ static const u8 sBattleEffectivenessIconsGfx[] = INCBIN_U8("graphics/battle_inte
 static const u16 sBattleEffectivenessIconsPal[] = INCBIN_U16("graphics/battle_interface/effectiveness_icons_battle.gbapal");
 const u8 gBattleTypeIconsGfx[] = INCBIN_U8("graphics/battle_interface/type_icons_battle.4bpp");
 const u16 gBattleTypeIconsPal[] = INCBIN_U16("graphics/battle_interface/type_icons_battle.gbapal");
+static const u8 sBattleActionMenuIconsGfx[] = INCBIN_U8("graphics/battle_interface/action_menu_icons_battle.4bpp");
+
+static const struct SpriteFrameImage sActionMenuSpriteImages[] =
+{
+    [ACTION_BATTLE]        = { .data = sBattleActionMenuIconsGfx + ACTION_BATTLE        * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_BATTLE_HOVER]  = { .data = sBattleActionMenuIconsGfx + ACTION_BATTLE_HOVER  * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_BAG]           = { .data = sBattleActionMenuIconsGfx + ACTION_BAG           * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_BAG_HOVER]     = { .data = sBattleActionMenuIconsGfx + ACTION_BAG_HOVER     * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_PARTY]         = { .data = sBattleActionMenuIconsGfx + ACTION_PARTY         * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_PARTY_HOVER]   = { .data = sBattleActionMenuIconsGfx + ACTION_PARTY_HOVER   * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_RUN]           = { .data = sBattleActionMenuIconsGfx + ACTION_RUN           * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+    [ACTION_RUN_HOVER]     = { .data = sBattleActionMenuIconsGfx + ACTION_RUN_HOVER     * ACTION_ICON_TILE_SIZE, .size = ACTION_ICON_TILE_SIZE },
+};
+
+static const union AnimCmd sAnim_ActionIcon_Normal[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END,
+};
+
+static const union AnimCmd sAnim_ActionIcon_Hover[] =
+{
+    ANIMCMD_FRAME(1, 0),
+    ANIMCMD_END,
+};
+
+static const union AnimCmd *const sAnimTable_ActionIcon[] =
+{
+    [0] = sAnim_ActionIcon_Normal,
+    [1] = sAnim_ActionIcon_Hover,
+};
+
+static const struct OamData sOam_ActionIcon =
+{
+    .size = SPRITE_SIZE(16x16),
+    .shape = SPRITE_SHAPE(16x16),
+    .priority = 0,
+    .paletteNum = 5,  // gBattleWindowTextPalette
+};
+
+static const struct SpriteTemplate sSpriteTemplate_ActionIcon =
+{
+    .tileTag = TAG_ACTION_ICON,
+    .paletteTag = TAG_ACTION_ICON,
+    .oam = &sOam_ActionIcon,
+    .anims = sAnimTable_ActionIcon,
+    .images = sActionMenuSpriteImages,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
+static const struct SpritePalette sSpritePalette_ActionIcons =
+{
+    .data = gBattleWindowTextPalette,
+    .tag = TAG_ACTION_ICON,
+};
 
 void SetControllerToPlayer(u32 battler)
 {
@@ -2478,20 +2536,20 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 batt
 
         if (moveEffectiveness <= 4)
         {
-            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(0x1));
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(1));
             CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
 
-            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(1));
             BlitBitmapToWindow(B_WIN_EFFECTIVENESS, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
             PutWindowTilemap(B_WIN_EFFECTIVENESS);
             CopyWindowToVram(B_WIN_EFFECTIVENESS, 3);
         }
         else
         {
-            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(1));
             CopyWindowToVram(B_WIN_EFFECTIVENESS, 3);
 
-            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(0x1));
+            FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(1));
             BlitBitmapToWindow(B_WIN_EFFECTIVENESS2, sBattleEffectivenessIconsGfx + 0x80 * moveEffectiveness, 0, 0, 16, 16);
             PutWindowTilemap(B_WIN_EFFECTIVENESS2);
             CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
@@ -2499,8 +2557,8 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 batt
     }
     else
     {
-        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
-        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(0x1));
+        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(1));
+        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(1));
         CopyWindowToVram(B_WIN_EFFECTIVENESS, 3);
         CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
     }

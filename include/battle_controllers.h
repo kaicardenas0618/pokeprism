@@ -267,6 +267,20 @@ enum
     CONTROLLER_CMDS_COUNT
 };
 
+#define ACTION_ICON_TILE_SIZE 32
+#define TAG_ACTION_ICON       2900
+
+enum {
+    ACTION_BATTLE,
+    ACTION_BATTLE_HOVER,
+    ACTION_BAG,
+    ACTION_BAG_HOVER,
+    ACTION_PARTY,
+    ACTION_PARTY_HOVER,
+    ACTION_RUN,
+    ACTION_RUN_HOVER,
+};
+
 extern struct UnusedControllerStruct gUnusedControllerStruct;
 extern void (*gBattlerControllerFuncs[MAX_BATTLERS_COUNT])(u32 battler);
 extern void (*gBattlerControllerEndFuncs[MAX_BATTLERS_COUNT])(u32 battler);
