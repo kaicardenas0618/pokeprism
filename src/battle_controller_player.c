@@ -2497,6 +2497,13 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 batt
             CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
         }
     }
+    else
+    {
+        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS, PIXEL_FILL(0x1));
+        FillWindowPixelBuffer(B_WIN_EFFECTIVENESS2, PIXEL_FILL(0x1));
+        CopyWindowToVram(B_WIN_EFFECTIVENESS, 3);
+        CopyWindowToVram(B_WIN_EFFECTIVENESS2, 3);
+    }
 }
 
 static void MoveSelectionDisplaySplitIcon(u32 battler)
