@@ -746,6 +746,7 @@ void HandleInputShowEntireFieldTargets(u32 battler)
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
     {
+        TryToAddMoveInfoWindow();
         PlaySE(SE_SELECT);
         HideAllTargets();
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
@@ -775,6 +776,7 @@ void HandleInputShowTargets(u32 battler)
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
     {
+        TryToAddMoveInfoWindow();
         PlaySE(SE_SELECT);
         HideShownTargets(battler);
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
