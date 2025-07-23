@@ -267,10 +267,27 @@ enum
     CONTROLLER_CMDS_COUNT
 };
 
+#define ACTION_ICON_TILE_SIZE 128
+#define TAG_ACTION_ICON       2900
+
+enum {
+    ACTION_BATTLE,
+    ACTION_BATTLE_HOVER,
+    ACTION_BAG,
+    ACTION_BAG_HOVER,
+    ACTION_PARTY,
+    ACTION_PARTY_HOVER,
+    ACTION_RUN,
+    ACTION_RUN_HOVER,
+    ACTION_COUNT
+};
+
 extern struct UnusedControllerStruct gUnusedControllerStruct;
 extern void (*gBattlerControllerFuncs[MAX_BATTLERS_COUNT])(u32 battler);
 extern void (*gBattlerControllerEndFuncs[MAX_BATTLERS_COUNT])(u32 battler);
 extern u8 gBattleControllerData[MAX_BATTLERS_COUNT];
+extern bool8 gDisableActionMenuCursor;
+extern bool8 gShouldDestroyActionIcons;
 
 // general functions
 void HandleLinkBattleSetup(void);

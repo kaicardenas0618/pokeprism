@@ -372,33 +372,38 @@ const u8 gFrontAnimNames[][34] =
 const u8 gBattleBackgroundNames[][30] =
 {
     [MAP_BATTLE_SCENE_NORMAL]   = _("NORMAL                  "),
-    [MAP_BATTLE_SCENE_GYM]      = _("GYM                     "),
-    [MAP_BATTLE_SCENE_MAGMA]    = _("MAGMA                   "),
-    [MAP_BATTLE_SCENE_AQUA]     = _("AQUA                    "),
-    [MAP_BATTLE_SCENE_SIDNEY]   = _("SIDNEY                  "),
-    [MAP_BATTLE_SCENE_PHOEBE]   = _("PHOEBE                  "),
-    [MAP_BATTLE_SCENE_GLACIA]   = _("GLACIA                  "),
-    [MAP_BATTLE_SCENE_DRAKE]    = _("DRAKE                   "),
-    [MAP_BATTLE_SCENE_FRONTIER] = _("FRONTIER                "),
-    [MAP_BATTLE_SCENE_LEADER]   = _("LEADER                  "),
-    [MAP_BATTLE_SCENE_WALLACE]  = _("WALLACE                 "),
-    [MAP_BATTLE_SCENE_GROUDON]  = _("GROUDON                 "),
-    [MAP_BATTLE_SCENE_KYOGRE]   = _("KYOGRE                  "),
-    [MAP_BATTLE_SCENE_RAYQUAZA] = _("RAYQUAZA                "),
 };
 
 const u8 gBattleBackgroundTerrainNames[][26] =
 {
-    [BATTLE_ENVIRONMENT_GRASS]      = _("NORMAL - GRASS           "),
-    [BATTLE_ENVIRONMENT_LONG_GRASS] = _("NORMAL - LONG GRASS      "),
+    // Day Battle Environments
+    [BATTLE_ENVIRONMENT_GRASS]      = _("NORMAL - TALL GRASS      "),
+    [BATTLE_ENVIRONMENT_GRASS2]     = _("NORMAL - TRAINER GRASS   "),
+    [BATTLE_ENVIRONMENT_GRASS3]     = _("NORMAL - LONG GRASS      "),
+    [BATTLE_ENVIRONMENT_FOREST]     = _("NORMAL - FOREST          "),
+    [BATTLE_ENVIRONMENT_CITY]       = _("NORMAL - CITY            "),
     [BATTLE_ENVIRONMENT_SAND]       = _("NORMAL - SAND            "),
-    [BATTLE_ENVIRONMENT_UNDERWATER] = _("NORMAL - UNDERWATER      "),
-    [BATTLE_ENVIRONMENT_WATER]      = _("NORMAL - WATER           "),
-    [BATTLE_ENVIRONMENT_POND]       = _("NORMAL - POND            "),
     [BATTLE_ENVIRONMENT_MOUNTAIN]   = _("NORMAL - MOUNTAIN        "),
     [BATTLE_ENVIRONMENT_CAVE]       = _("NORMAL - CAVE            "),
+    [BATTLE_ENVIRONMENT_WATER_CAVE] = _("NORMAL - WATER CAVE      "),
+    [BATTLE_ENVIRONMENT_BEACH]      = _("NORMAL - BEACH           "),
+    [BATTLE_ENVIRONMENT_WATER]      = _("NORMAL - WATER           "),
+    [BATTLE_ENVIRONMENT_UNDERWATER] = _("NORMAL - UNDERWATER      "),
     [BATTLE_ENVIRONMENT_BUILDING]   = _("NORMAL - BUILDING        "),
-    [BATTLE_ENVIRONMENT_PLAIN]      = _("NORMAL - PLAIN           "),
+    // Night Battle Environments
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = _("NIGHT - TALL GRASS       "),
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = _("NIGHT - TRAINER GRASS    "),
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = _("NIGHT - LONG GRASS       "),
+    [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = _("NIGHT - FOREST           "),
+    [BATTLE_ENVIRONMENT_NIGHT_CITY]       = _("NIGHT - CITY             "),
+    [BATTLE_ENVIRONMENT_NIGHT_SAND]       = _("NIGHT - SAND             "),
+    [BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN]   = _("NIGHT - MOUNTAIN         "),
+    [BATTLE_ENVIRONMENT_NIGHT_CAVE]       = _("NIGHT - CAVE             "),
+    [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] = _("NIGHT - WATER CAVE       "),
+    [BATTLE_ENVIRONMENT_NIGHT_BEACH]      = _("NIGHT - BEACH            "),
+    [BATTLE_ENVIRONMENT_NIGHT_WATER]      = _("NIGHT - WATER            "),
+    [BATTLE_ENVIRONMENT_NIGHT_UNDERWATER] = _("NIGHT - UNDERWATER       "),
+    [BATTLE_ENVIRONMENT_NIGHT_BUILDING]   = _("NIGHT - BUILDING         "),
 };
 
 const u8 sShadowSizeLabels[][4] =
@@ -935,71 +940,6 @@ static void LoadBattleBg(u8 battleBgType, enum BattleEnvironments battleEnvironm
         DecompressDataWithHeaderVram(gBattleEnvironmentInfo[battleEnvironment].background.tilemap, (void*)(BG_SCREEN_ADDR(26)));
         LoadPalette(gBattleEnvironmentInfo[battleEnvironment].background.palette, 0x20, 0x60);
         break;
-    case MAP_BATTLE_SCENE_GYM:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Building, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Building, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_BuildingGym, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_MAGMA:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumMagma, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_AQUA:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumAqua, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_SIDNEY:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumSidney, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_PHOEBE:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumPhoebe, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_GLACIA:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumGlacia, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_DRAKE:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumDrake, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_FRONTIER:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Building, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Building, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_Frontier, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_LEADER:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Building, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Building, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_BuildingLeader, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_WALLACE:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Stadium, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Stadium, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_StadiumWallace, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_GROUDON:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Cave, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Cave, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_Groudon, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_KYOGRE:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Water, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Water, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_Kyogre, 0x20, 0x60);
-        break;
-    case MAP_BATTLE_SCENE_RAYQUAZA:
-        DecompressDataWithHeaderVram(gBattleEnvironmentTiles_Rayquaza, (void*)(BG_CHAR_ADDR(2)));
-        DecompressDataWithHeaderVram(gBattleEnvironmentTilemap_Rayquaza, (void*)(BG_SCREEN_ADDR(26)));
-        LoadPalette(gBattleEnvironmentPalette_Rayquaza, 0x20, 0x60);
-        break;
     }
 }
 
@@ -1024,7 +964,7 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
     {
         if (increment)
         {
-            if (data->battleEnvironment == BATTLE_ENVIRONMENT_PLAIN)
+            if (data->battleEnvironment == BATTLE_ENVIRONMENT_GRASS2)
                 data->battleBgType += 1;
             else
                 data->battleEnvironment += 1;
@@ -1032,30 +972,10 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
         else
         {
             if (data->battleEnvironment == BATTLE_ENVIRONMENT_GRASS)
-                data->battleBgType = MAP_BATTLE_SCENE_RAYQUAZA;
+                data->battleBgType = MAP_BATTLE_SCENE_NORMAL;
             else
                 data->battleEnvironment -= 1;
         }
-    }
-    else if (data->battleBgType == MAP_BATTLE_SCENE_GYM)
-    {
-        if (increment)
-            data->battleBgType += 1;
-        else
-        {
-            data->battleBgType = MAP_BATTLE_SCENE_NORMAL;
-            data->battleEnvironment = BATTLE_ENVIRONMENT_PLAIN;
-        }
-    }
-    else if (data->battleBgType == MAP_BATTLE_SCENE_RAYQUAZA)
-    {
-        if (increment)
-        {
-            data->battleBgType = MAP_BATTLE_SCENE_NORMAL;
-            data->battleEnvironment = BATTLE_ENVIRONMENT_GRASS;
-        }
-        else
-            data->battleBgType -= 1;
     }
     else
     {

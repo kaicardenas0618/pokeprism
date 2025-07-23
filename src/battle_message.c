@@ -433,7 +433,7 @@ const u8 *const gBattleStringsTable[STRINGID_COUNT] =
     [STRINGID_GOTCHAPKMNCAUGHTWALLY]                = COMPOUND_STRING("Gotcha! {B_DEF_NAME} was caught!{WAIT_SE}{PLAY_BGM MUS_CAUGHT}{PAUSE 127}"),
     [STRINGID_GIVENICKNAMECAPTURED]                 = COMPOUND_STRING("Would you like to give {B_DEF_NAME} a nickname?"),
     [STRINGID_PKMNSENTTOPC]                         = COMPOUND_STRING("{B_DEF_NAME} has been sent to {B_PC_CREATOR_NAME} PC!"), //Still used lanette's pc since terminology is different
-    [STRINGID_PKMNDATAADDEDTODEX]                   = COMPOUND_STRING("{B_DEF_NAME}'s data has been added to the Pokédex!\p"),
+    [STRINGID_PKMNDATAADDEDTODEX]                   = COMPOUND_STRING("{B_DEF_NAME} was registered in the Pokédex.\p"),
     [STRINGID_ITISRAINING]                          = COMPOUND_STRING("It's raining!"),
     [STRINGID_SANDSTORMISRAGING]                    = COMPOUND_STRING("The sandstorm is raging!"),
     [STRINGID_CANTESCAPE2]                          = COMPOUND_STRING("You couldn't get away!\p"),
@@ -1421,10 +1421,10 @@ const u8 gText_WhatWillPkmnDo[] = _("What will\n{B_BUFF1} do?");
 const u8 gText_WhatWillPkmnDo2[] = _("What will\n{B_PLAYER_NAME} do?");
 const u8 gText_WhatWillWallyDo[] = _("What will\nWALLY do?");
 const u8 gText_LinkStandby[] = _("{PAUSE 16}Link standby…");
-const u8 gText_BattleMenu[] = _("Battle{CLEAR_TO 56}Bag\nPokémon{CLEAR_TO 56}Run");
+const u8 gText_BattleMenu[] = _("{CLEAR_TO 19}{COLOR_HIGHLIGHT_SHADOW WHITE TRANSPARENT LIGHT_BLUE}Fight{CLEAR_TO 67}{COLOR_HIGHLIGHT_SHADOW LIGHT_GRAY TRANSPARENT LIGHT_BLUE}Bag\n{CLEAR_TO 19}{COLOR_HIGHLIGHT_SHADOW GREEN TRANSPARENT LIGHT_BLUE}Party{CLEAR_TO 67}{COLOR_HIGHLIGHT_SHADOW BLUE TRANSPARENT LIGHT_BLUE}Run");
 const u8 gText_SafariZoneMenu[] = _("Ball{CLEAR_TO 56}{POKEBLOCK}\nGo Near{CLEAR_TO 56}Run");
-const u8 gText_MoveInterfacePP[] = _("PP ");
-const u8 gText_MoveInterfaceType[] = _("TYPE/");
+const u8 gText_MoveInterfaceEffectiveness[] = _("");
+const u8 gText_MoveInterfaceType[] = _("");
 const u8 gText_MoveInterfacePpType[] = _("{PALETTE 5}{COLOR_HIGHLIGHT_SHADOW DYNAMIC_COLOR4 DYNAMIC_COLOR5 DYNAMIC_COLOR6}PP\nTYPE/");
 const u8 gText_MoveInterfaceDynamicColors[] = _("{PALETTE 5}{COLOR_HIGHLIGHT_SHADOW DYNAMIC_COLOR4 DYNAMIC_COLOR5 DYNAMIC_COLOR6}");
 const u8 gText_WhichMoveToForget4[] = _("{PALETTE 5}{COLOR_HIGHLIGHT_SHADOW DYNAMIC_COLOR4 DYNAMIC_COLOR5 DYNAMIC_COLOR6}Which move should\nbe forgotten?");
@@ -1564,23 +1564,23 @@ static const u8 sText_EmptyStatus[] = _("$$$$$$$");
 static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
 {
     [B_WIN_MSG] = {
-        .fillValue = PIXEL_FILL(0xF),
+        .fillValue = PIXEL_FILL(0xB),
         .fontId = FONT_NORMAL,
         .x = 0,
         .y = 1,
         .speed = 1,
         .fgColor = 1,
-        .bgColor = 15,
+        .bgColor = 11,
         .shadowColor = 6,
     },
     [B_WIN_ACTION_PROMPT] = {
-        .fillValue = PIXEL_FILL(0xF),
+        .fillValue = PIXEL_FILL(0xB),
         .fontId = FONT_NORMAL,
         .x = 1,
         .y = 1,
         .speed = 0,
         .fgColor = 1,
-        .bgColor = 15,
+        .bgColor = 11,
         .shadowColor = 6,
     },
     [B_WIN_ACTION_MENU] = {
@@ -1633,15 +1633,15 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
         .bgColor = 14,
         .shadowColor = 15,
     },
-    [B_WIN_PP] = {
+    [B_WIN_PSS_ICON] = {
         .fillValue = PIXEL_FILL(0xE),
-        .fontId = FONT_NARROW,
+        .fontId = FONT_NORMAL,
         .x = 0,
         .y = 1,
         .speed = 0,
-        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .fgColor = 13,
         .bgColor = 14,
-        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+        .shadowColor = 15,
     },
     [B_WIN_DUMMY] = {
         .fillValue = PIXEL_FILL(0xE),
@@ -1656,7 +1656,7 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
     [B_WIN_PP_REMAINING] = {
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NORMAL,
-        .x = 2,
+        .x = 1,
         .y = 1,
         .speed = 0,
         .fgColor = 13,
@@ -1666,7 +1666,17 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
     [B_WIN_MOVE_TYPE] = {
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NARROW,
-        .x = 0,
+        .x = 1,
+        .y = 1,
+        .speed = 0,
+        .fgColor = 13,
+        .bgColor = 14,
+        .shadowColor = 15,
+    },
+    [B_WIN_MOVE_TYPE2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 1,
         .y = 1,
         .speed = 0,
         .fgColor = 13,
@@ -1811,28 +1821,48 @@ static const struct BattleWindowText sTextOnWindowsInfo_Normal[] =
         .bgColor = TEXT_DYNAMIC_COLOR_5,
         .shadowColor = TEXT_DYNAMIC_COLOR_6,
     },
+    [B_WIN_EFFECTIVENESS] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 0,
+        .y = 2,
+        .speed = 0,
+        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .bgColor = 14,
+        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+    },
+    [B_WIN_EFFECTIVENESS2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 0,
+        .y = 2,
+        .speed = 0,
+        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .bgColor = 14,
+        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+    },
 };
 
 static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
 {
     [B_WIN_MSG] = {
-        .fillValue = PIXEL_FILL(0xF),
+        .fillValue = PIXEL_FILL(0xB),
         .fontId = FONT_NORMAL,
         .x = 0,
         .y = 1,
         .speed = 1,
         .fgColor = 1,
-        .bgColor = 15,
+        .bgColor = 11,
         .shadowColor = 6,
     },
     [B_WIN_ACTION_PROMPT] = {
-        .fillValue = PIXEL_FILL(0xF),
+        .fillValue = PIXEL_FILL(0xB),
         .fontId = FONT_NORMAL,
         .x = 1,
         .y = 1,
         .speed = 0,
         .fgColor = 1,
-        .bgColor = 15,
+        .bgColor = 11,
         .shadowColor = 6,
     },
     [B_WIN_ACTION_MENU] = {
@@ -1885,15 +1915,15 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
         .bgColor = 14,
         .shadowColor = 15,
     },
-    [B_WIN_PP] = {
+    [B_WIN_PSS_ICON] = {
         .fillValue = PIXEL_FILL(0xE),
-        .fontId = FONT_NARROW,
+        .fontId = FONT_NORMAL,
         .x = 0,
         .y = 1,
         .speed = 0,
-        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .fgColor = 13,
         .bgColor = 14,
-        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+        .shadowColor = 15,
     },
     [B_WIN_DUMMY] = {
         .fillValue = PIXEL_FILL(0xE),
@@ -1908,7 +1938,7 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
     [B_WIN_PP_REMAINING] = {
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NORMAL,
-        .x = 2,
+        .x = 1,
         .y = 1,
         .speed = 0,
         .fgColor = 12,
@@ -1918,7 +1948,17 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
     [B_WIN_MOVE_TYPE] = {
         .fillValue = PIXEL_FILL(0xE),
         .fontId = FONT_NARROW,
-        .x = 0,
+        .x = 1,
+        .y = 1,
+        .speed = 0,
+        .fgColor = 13,
+        .bgColor = 14,
+        .shadowColor = 15,
+    },
+    [B_WIN_MOVE_TYPE2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 1,
         .y = 1,
         .speed = 0,
         .fgColor = 13,
@@ -2055,6 +2095,26 @@ static const struct BattleWindowText sTextOnWindowsInfo_Arena[] =
         .fgColor = TEXT_DYNAMIC_COLOR_4,
         .bgColor = TEXT_DYNAMIC_COLOR_5,
         .shadowColor = TEXT_DYNAMIC_COLOR_6,
+    },
+    [B_WIN_EFFECTIVENESS] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 0,
+        .y = 1,
+        .speed = 0,
+        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .bgColor = 14,
+        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
+    },
+    [B_WIN_EFFECTIVENESS2] = {
+        .fillValue = PIXEL_FILL(0xE),
+        .fontId = FONT_NARROW,
+        .x = 0,
+        .y = 2,
+        .speed = 0,
+        .fgColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 13 : 12,
+        .bgColor = 14,
+        .shadowColor = B_SHOW_EFFECTIVENESS != SHOW_EFFECTIVENESS_NEVER ? 15 : 11,
     },
 };
 

@@ -6,6 +6,7 @@
 #include "bg.h"
 #include "gpu_regs.h"
 #include "main.h"
+#include "rtc.h"
 #include "scanline_effect.h"
 #include "task.h"
 #include "test_runner.h"
@@ -24,16 +25,34 @@ static const u8 sBattleAnimBgCnts[] = {REG_OFFSET_BG0CNT, REG_OFFSET_BG1CNT, REG
 
 static const TaskFunc sBattleIntroSlideFuncs[] =
 {
+    // Day Battle Environments
     [BATTLE_ENVIRONMENT_GRASS]      = BattleIntroSlide1,
-    [BATTLE_ENVIRONMENT_LONG_GRASS] = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_GRASS2]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_GRASS3]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_FOREST]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_CITY]       = BattleIntroSlide3,
     [BATTLE_ENVIRONMENT_SAND]       = BattleIntroSlide2,
-    [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
-    [BATTLE_ENVIRONMENT_WATER]      = BattleIntroSlide2,
-    [BATTLE_ENVIRONMENT_POND]       = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_MOUNTAIN]   = BattleIntroSlide1,
     [BATTLE_ENVIRONMENT_CAVE]       = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_WATER_CAVE] = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_BEACH]      = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_WATER]      = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_UNDERWATER] = BattleIntroSlide2,
     [BATTLE_ENVIRONMENT_BUILDING]   = BattleIntroSlide3,
-    [BATTLE_ENVIRONMENT_PLAIN]      = BattleIntroSlide3,
+    // Night Battle Environments
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS]      = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS2]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_GRASS3]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_FOREST]     = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_CITY]       = BattleIntroSlide3,
+    [BATTLE_ENVIRONMENT_NIGHT_SAND]       = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN]   = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_CAVE]       = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE] = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_BEACH]      = BattleIntroSlide1,
+    [BATTLE_ENVIRONMENT_NIGHT_WATER]      = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_NIGHT_UNDERWATER] = BattleIntroSlide2,
+    [BATTLE_ENVIRONMENT_NIGHT_BUILDING]   = BattleIntroSlide3,
 };
 
 void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
@@ -120,7 +139,10 @@ void HandleIntroSlide(u8 environment)
     }
     else if (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL) == SPECIES_KYOGRE)
     {
-        environment = BATTLE_ENVIRONMENT_UNDERWATER;
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            environment = BATTLE_ENVIRONMENT_UNDERWATER;
+        else
+            environment = BATTLE_ENVIRONMENT_NIGHT_UNDERWATER;
         taskId = CreateTask(BattleIntroSlide2, 0);
     }
     else
@@ -244,7 +266,7 @@ static void BattleIntroSlide1(u8 taskId)
         }
         else
         {
-            if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_LONG_GRASS)
+            if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_GRASS3 || gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_NIGHT_GRASS3)
             {
                 if (gBattle_BG1_Y != (u16)(-80))
                     gBattle_BG1_Y -= 2;
@@ -295,15 +317,18 @@ static void BattleIntroSlide2(u8 taskId)
     switch (gTasks[taskId].tEnvironment)
     {
     case BATTLE_ENVIRONMENT_SAND:
+    case BATTLE_ENVIRONMENT_NIGHT_SAND:
     case BATTLE_ENVIRONMENT_WATER:
+    case BATTLE_ENVIRONMENT_NIGHT_WATER:
         gBattle_BG1_X += 8;
         break;
     case BATTLE_ENVIRONMENT_UNDERWATER:
+    case BATTLE_ENVIRONMENT_NIGHT_UNDERWATER:
         gBattle_BG1_X += 6;
         break;
     }
 
-    if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_WATER)
+    if (gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_WATER || gTasks[taskId].tEnvironment == BATTLE_ENVIRONMENT_NIGHT_WATER)
     {
         gBattle_BG1_Y = Cos2(gTasks[taskId].data[6]) / 512 - 8;
         if (gTasks[taskId].data[6] < 180)

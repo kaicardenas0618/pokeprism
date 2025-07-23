@@ -16,6 +16,7 @@
 #include "menu.h"
 #include "overworld.h"
 #include "palette.h"
+#include "rtc.h"
 #include "sound.h"
 #include "sprite.h"
 #include "task.h"
@@ -172,13 +173,13 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .width = 14,
         .height = 4,
         .paletteNum = 0,
-        .baseBlock = 0x01c0,
+        .baseBlock = 0x01c4,
     },
     [B_WIN_ACTION_MENU] = {
         .bg = 0,
-        .tilemapLeft = 17,
+        .tilemapLeft = 16,
         .tilemapTop = 35,
-        .width = 12,
+        .width = 13,
         .height = 4,
         .paletteNum = 5,
         .baseBlock = 0x0190,
@@ -219,13 +220,13 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x0340,
     },
-    [B_WIN_PP] = {
+    [B_WIN_PSS_ICON] = {
         .bg = 0,
-        .tilemapLeft = 21,
+        .tilemapLeft = 27,
         .tilemapTop = 55,
-        .width = 4,
+        .width = 2,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 10,
         .baseBlock = 0x0290,
     },
     [B_WIN_DUMMY] = {
@@ -239,7 +240,7 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
     },
     [B_WIN_PP_REMAINING] = {
         .bg = 0,
-        .tilemapLeft = 25,
+        .tilemapLeft = 21,
         .tilemapTop = 55,
         .width = 4,
         .height = 2,
@@ -250,10 +251,19 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .bg = 0,
         .tilemapLeft = 21,
         .tilemapTop = 57,
-        .width = 8,
+        .width = 4,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 11,
         .baseBlock = 0x02a0,
+    },
+    [B_WIN_MOVE_TYPE2] = {
+        .bg = 0,
+        .tilemapLeft = 21,
+        .tilemapTop = 57,
+        .width = 4,
+        .height = 2,
+        .paletteNum = 12,
+        .baseBlock = 0x02a8,
     },
     [B_WIN_SWITCH_PROMPT] = {
         .bg = 0,
@@ -381,6 +391,24 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x0350,
     },
+    [B_WIN_EFFECTIVENESS] = {
+        .bg = 0,
+        .tilemapLeft = 27,
+        .tilemapTop = 57,
+        .width = 2,
+        .height = 2,
+        .paletteNum = 13,
+        .baseBlock = 0x03CD,
+    },
+    [B_WIN_EFFECTIVENESS2] = {
+        .bg = 0,
+        .tilemapLeft = 27,
+        .tilemapTop = 57,
+        .width = 2,
+        .height = 2,
+        .paletteNum = 14,
+        .baseBlock = 0x03D2,
+    },
     DUMMY_WIN_TEMPLATE
 };
 
@@ -402,13 +430,13 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .width = 14,
         .height = 4,
         .paletteNum = 0,
-        .baseBlock = 0x01c0,
+        .baseBlock = 0x01c4,
     },
     [B_WIN_ACTION_MENU] = {
         .bg = 0,
-        .tilemapLeft = 17,
+        .tilemapLeft = 16,
         .tilemapTop = 35,
-        .width = 12,
+        .width = 13,
         .height = 4,
         .paletteNum = 5,
         .baseBlock = 0x0190,
@@ -449,13 +477,13 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x0330,
     },
-    [B_WIN_PP] = {
+    [B_WIN_PSS_ICON] = {
         .bg = 0,
-        .tilemapLeft = 21,
+        .tilemapLeft = 27,
         .tilemapTop = 55,
-        .width = 4,
+        .width = 2,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 10,
         .baseBlock = 0x0290,
     },
     [B_WIN_DUMMY] = {
@@ -469,7 +497,7 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
     },
     [B_WIN_PP_REMAINING] = {
         .bg = 0,
-        .tilemapLeft = 25,
+        .tilemapLeft = 21,
         .tilemapTop = 55,
         .width = 4,
         .height = 2,
@@ -480,10 +508,19 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .bg = 0,
         .tilemapLeft = 21,
         .tilemapTop = 57,
-        .width = 8,
+        .width = 4,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 11,
         .baseBlock = 0x02a0,
+    },
+    [B_WIN_MOVE_TYPE2] = {
+        .bg = 0,
+        .tilemapLeft = 21,
+        .tilemapTop = 57,
+        .width = 4,
+        .height = 2,
+        .paletteNum = 12,
+        .baseBlock = 0x02a8,
     },
     [B_WIN_SWITCH_PROMPT] = {
         .bg = 0,
@@ -602,6 +639,24 @@ static const struct WindowTemplate sBattleArenaWindowTemplates[] =
         .paletteNum = 5,
         .baseBlock = 0x0350,
     },
+    [B_WIN_EFFECTIVENESS] = {
+        .bg = 0,
+        .tilemapLeft = 27,
+        .tilemapTop = 57,
+        .width = 2,
+        .height = 2,
+        .paletteNum = 13,
+        .baseBlock = 0x03CD,
+    },
+    [B_WIN_EFFECTIVENESS2] = {
+        .bg = 0,
+        .tilemapLeft = 27,
+        .tilemapTop = 57,
+        .width = 2,
+        .height = 2,
+        .paletteNum = 14,
+        .baseBlock = 0x03D2,
+    },
     DUMMY_WIN_TEMPLATE
 };
 
@@ -611,6 +666,7 @@ const struct WindowTemplate *const gBattleWindowTemplates[] =
     [B_WIN_TYPE_ARENA]  = sBattleArenaWindowTemplates,
 };
 
+/*
 // If current map scene equals any of the values in sMapBattleSceneMapping,
 // use its battle terrain value. Otherwise, use the default.
 static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
@@ -621,14 +677,24 @@ static u8 GetBattleEnvironmentByMapScene(u8 mapBattleScene)
         if (mapBattleScene == sMapBattleSceneMapping[i].mapScene)
             return sMapBattleSceneMapping[i].battleEnvironment;
     }
-    return BATTLE_ENVIRONMENT_PLAIN;
+
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+        return BATTLE_ENVIRONMENT_GRASS2;
+    else
+        return BATTLE_ENVIRONMENT_NIGHT_GRASS2;
 }
+*/
 
 // Loads the initial battle terrain.
 static void LoadBattleEnvironmentGfx(u16 terrain)
 {
-    if (terrain >= NELEMS(gBattleEnvironmentInfo))
-        terrain = BATTLE_ENVIRONMENT_PLAIN;  // If higher than the number of entries in gBattleEnvironmentInfo, use the default.
+    if (terrain >= NELEMS(gBattleEnvironmentInfo)) // If higher than the number of entries in gBattleEnvironmentInfo, use the default.
+    {
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            terrain = BATTLE_ENVIRONMENT_GRASS2;
+        else
+            terrain = BATTLE_ENVIRONMENT_NIGHT_GRASS2;
+    }
     // Copy to bg3
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.tileset, (void *)(BG_CHAR_ADDR(2)));
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.tilemap, (void *)(BG_SCREEN_ADDR(26)));
@@ -640,7 +706,12 @@ static void LoadBattleEnvironmentGfx(u16 terrain)
 static void LoadBattleEnvironmentEntryGfx(u16 terrain)
 {
     if (terrain >= NELEMS(gBattleEnvironmentInfo))
-        terrain = BATTLE_ENVIRONMENT_PLAIN;
+    {
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            terrain = BATTLE_ENVIRONMENT_GRASS2;
+        else
+            terrain = BATTLE_ENVIRONMENT_NIGHT_GRASS2;
+    }
     // Copy to bg1
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.entryTileset, (void *)BG_CHAR_ADDR(1));
     DecompressDataWithHeaderVram(gBattleEnvironmentInfo[terrain].background.entryTilemap, (void *)BG_SCREEN_ADDR(28));
@@ -648,37 +719,33 @@ static void LoadBattleEnvironmentEntryGfx(u16 terrain)
 
 static u8 GetBattleEnvironmentOverride(void)
 {
-    u8 battleScene = GetCurrentMapBattleScene();
+    //u8 battleScene = GetCurrentMapBattleScene();
 
     if (gBattleTypeFlags & (BATTLE_TYPE_FRONTIER | BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK | BATTLE_TYPE_EREADER_TRAINER))
-        return BATTLE_ENVIRONMENT_FRONTIER;
+    {
+        if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+            return BATTLE_ENVIRONMENT_BUILDING;
+        else
+            return BATTLE_ENVIRONMENT_NIGHT_BUILDING;
+    }
+    /*
     else if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY)
     {
         switch (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL))
         {
         case SPECIES_GROUDON:
-            return BATTLE_ENVIRONMENT_GROUDON;
+            return BATTLE_ENVIRONMENT_CAVE;
         case SPECIES_KYOGRE:
-            return BATTLE_ENVIRONMENT_KYOGRE;
+            return BATTLE_ENVIRONMENT_UNDERWATER;
         case SPECIES_RAYQUAZA:
-            return BATTLE_ENVIRONMENT_RAYQUAZA;
+            return BATTLE_ENVIRONMENT_MOUNTAIN;
         default:
             return gBattleEnvironment;
         }
     }
-    else if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
-    {
-        u32 trainerClass = GetTrainerClassFromId(TRAINER_BATTLE_PARAM.opponentA);
-        if (trainerClass == TRAINER_CLASS_LEADER)
-            return BATTLE_ENVIRONMENT_LEADER;
-        else if (trainerClass == TRAINER_CLASS_CHAMPION)
-            return BATTLE_ENVIRONMENT_CHAMPION;
-    }
+    */
 
-    if (battleScene == MAP_BATTLE_SCENE_NORMAL)
-        return gBattleEnvironment;
-
-    return GetBattleEnvironmentByMapScene(battleScene);
+    return gBattleEnvironment;
 }
 
 void BattleInitBgsAndWindows(void)
@@ -1024,7 +1091,10 @@ void DrawBattleEntryBackground(void)
     {
         if (!(gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) || gPartnerTrainerId > TRAINER_PARTNER(PARTNER_NONE))
         {
-            LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
+            if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
+            else
+                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_NIGHT_BUILDING);
         }
         else
         {
@@ -1038,6 +1108,7 @@ void DrawBattleEntryBackground(void)
             CopyBgTilemapBufferToVram(2);
         }
     }
+    /*
     else if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY)
     {
         switch (GetMonData(&gEnemyParty[0], MON_DATA_SPECIES, NULL))
@@ -1049,7 +1120,7 @@ void DrawBattleEntryBackground(void)
             LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_UNDERWATER);
             break;
         case SPECIES_RAYQUAZA:
-            LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_RAYQUAZA);
+            LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_MOUNTAIN);
             break;
         default:
             DecompressDataWithHeaderVram(gBattleEnvironmentInfo[gBattleEnvironment].background.entryTileset, (void *)(BG_CHAR_ADDR(1)));
@@ -1057,31 +1128,10 @@ void DrawBattleEntryBackground(void)
             break;
         }
     }
+    */
     else
     {
-        if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
-        {
-            enum TrainerClassID trainerClass = GetTrainerClassFromId(TRAINER_BATTLE_PARAM.opponentA);
-            if (trainerClass == TRAINER_CLASS_LEADER)
-            {
-                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
-                return;
-            }
-            else if (trainerClass == TRAINER_CLASS_CHAMPION)
-            {
-                LoadBattleEnvironmentEntryGfx(BATTLE_ENVIRONMENT_BUILDING);
-                return;
-            }
-        }
-
-        if (GetCurrentMapBattleScene() == MAP_BATTLE_SCENE_NORMAL)
-        {
-            LoadBattleEnvironmentEntryGfx(gBattleEnvironment);
-        }
-        else
-        {
-            LoadBattleEnvironmentEntryGfx(gBattleEnvironment);
-        }
+        LoadBattleEnvironmentEntryGfx(gBattleEnvironment);
     }
 }
 

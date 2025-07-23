@@ -999,6 +999,9 @@ static void InitMapBasedOnPlayerLocation(void)
     case MAP_TYPE_TOWN:
     case MAP_TYPE_CITY:
     case MAP_TYPE_ROUTE:
+    case MAP_TYPE_FOREST:
+    case MAP_TYPE_MOUNTAIN:
+    case MAP_TYPE_SAND:
     case MAP_TYPE_UNDERWATER:
     case MAP_TYPE_OCEAN_ROUTE:
         sRegionMap->mapSecId = gMapHeader.regionMapSectionId;

@@ -830,8 +830,37 @@ static void Task_ExitPartyMenu(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
-        SetMainCallback2(gPartyMenu.exitCallback);
+        if (sPartyBgTilemapBuffer != NULL)
+        {
+            Free(sPartyBgTilemapBuffer);
+            sPartyBgTilemapBuffer = NULL;
+        }
+
+        if (sPartyScrollingBgTilemapBuffer != NULL)
+        {
+            Free(sPartyScrollingBgTilemapBuffer);
+            sPartyScrollingBgTilemapBuffer = NULL;
+        }
+
+        if (sPartyBgGfxTilemap != NULL)
+        {
+            Free(sPartyBgGfxTilemap);
+            sPartyBgGfxTilemap = NULL;
+        }
+
+        FreeAllSpritePalettes();
+
+        ResetTempTileDataBuffers();
+
+        ResetAllBgsCoordinates();
+
+        FreeAllWindowBuffers();
+
+        sPartyMenuInternal = NULL;
+
         FreePartyPointers();
+
+        SetMainCallback2(gPartyMenu.exitCallback);
         DestroyTask(taskId);
     }
 }
@@ -961,18 +990,40 @@ static void PartyPaletteBufferCopy(u8 palNum)
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(3)], &gPlttBufferFaded[offset], PLTT_SIZE_4BPP);
 }
 
-static void FreePartyPointers(void)
+void FreePartyPointers(void)
 {
-    if (sPartyMenuInternal)
-        Free(sPartyMenuInternal);
-    if (sPartyBgTilemapBuffer)
+    if (sPartyBgTilemapBuffer != NULL)
+    {
         Free(sPartyBgTilemapBuffer);
-    if (sPartyBgGfxTilemap)
-        Free(sPartyBgGfxTilemap);
-    if (sPartyMenuBoxes)
+        sPartyBgTilemapBuffer = NULL;
+    }
+
+    if (sPartyScrollingBgTilemapBuffer != NULL)
+    {
+        Free(sPartyScrollingBgTilemapBuffer);
+        sPartyScrollingBgTilemapBuffer = NULL;
+    }
+
+    if (sPartyMenuBoxes != NULL)
+    {
         Free(sPartyMenuBoxes);
+        sPartyMenuBoxes = NULL;
+    }
+
+    if (sPartyMenuInternal != NULL)
+    {
+        Free(sPartyMenuInternal);
+        sPartyMenuInternal = NULL;
+    }
+
+    if (sPartyBgGfxTilemap != NULL)
+    {
+        Free(sPartyBgGfxTilemap);
+        sPartyBgGfxTilemap = NULL;
+    }
     FreeAllWindowBuffers();
 }
+
 
 static void InitPartyMenuBoxes(u8 layout)
 {

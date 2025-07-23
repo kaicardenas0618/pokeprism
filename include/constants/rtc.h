@@ -69,9 +69,9 @@
     #define NIGHT_HOUR_END     6
 #elif OW_TIMES_OF_DAY >= GEN_8
     #define MORNING_HOUR_BEGIN 6
-    #define MORNING_HOUR_END   10
+    #define MORNING_HOUR_END   8
 
-    #define DAY_HOUR_BEGIN     10
+    #define DAY_HOUR_BEGIN     8
     #define DAY_HOUR_END       19
 
     #define EVENING_HOUR_BEGIN 19

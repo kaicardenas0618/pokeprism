@@ -118,12 +118,12 @@ void SetGimmickAsActivated(u32 battler, enum Gimmick gimmick)
 #define SINGLES_GIMMICK_TRIGGER_POS_X_OPTIMAL (30)
 #define SINGLES_GIMMICK_TRIGGER_POS_X_PRIORITY (31)
 #define SINGLES_GIMMICK_TRIGGER_POS_X_SLIDE (15)
-#define SINGLES_GIMMICK_TRIGGER_POS_Y_DIFF (-11)
+#define SINGLES_GIMMICK_TRIGGER_POS_Y_DIFF (-4)
 
-#define DOUBLES_GIMMICK_TRIGGER_POS_X_OPTIMAL (30)
-#define DOUBLES_GIMMICK_TRIGGER_POS_X_PRIORITY (31)
-#define DOUBLES_GIMMICK_TRIGGER_POS_X_SLIDE (15)
-#define DOUBLES_GIMMICK_TRIGGER_POS_Y_DIFF (-4)
+#define DOUBLES_GIMMICK_TRIGGER_START_X (240)
+#define DOUBLES_GIMMICK_TRIGGER_FIXED_X (230)
+#define DOUBLES_GIMMICK_TRIGGER_FIXED_Y (65)
+#define DOUBLES_GIMMICK_TRIGGER_PRIORITY_THRESHOLD (31)
 
 #define tBattler    data[0]
 #define tHide       data[1]
@@ -135,16 +135,14 @@ void ChangeGimmickTriggerSprite(u32 spriteId, u32 animId)
 
 void CreateGimmickTriggerSprite(u32 battler)
 {
-    const struct GimmickInfo * gimmick = &gGimmicksInfo[gBattleStruct->gimmick.usableGimmick[battler]];
+    const struct GimmickInfo *gimmick = &gGimmicksInfo[gBattleStruct->gimmick.usableGimmick[battler]];
 
-    // Exit if there shouldn't be a sprite produced.
+    // Exit if this side can't show the sprite
     if (!IsOnPlayerSide(battler)
      || gBattleStruct->gimmick.usableGimmick[battler] == GIMMICK_NONE
      || gimmick->triggerSheet == NULL
      || HasTrainerUsedGimmick(battler, gBattleStruct->gimmick.usableGimmick[battler]))
-    {
         return;
-    }
 
     LoadSpritePalette(gimmick->triggerPal);
     if (GetSpriteTileStartByTag(TAG_GIMMICK_TRIGGER_TILE) == 0xFFFF)
@@ -152,18 +150,25 @@ void CreateGimmickTriggerSprite(u32 battler)
 
     if (gBattleStruct->gimmick.triggerSpriteId == 0xFF)
     {
+        s16 x, y;
         if (IsDoubleBattle())
-            gBattleStruct->gimmick.triggerSpriteId = CreateSprite(gimmick->triggerTemplate,
-                                                                  gSprites[gHealthboxSpriteIds[battler]].x - DOUBLES_GIMMICK_TRIGGER_POS_X_SLIDE,
-                                                                  gSprites[gHealthboxSpriteIds[battler]].y - DOUBLES_GIMMICK_TRIGGER_POS_Y_DIFF, 0);
+        {
+            // Start offscreen to the right, fixed target position
+            x = DOUBLES_GIMMICK_TRIGGER_START_X;  // e.g. 240
+            y = DOUBLES_GIMMICK_TRIGGER_FIXED_Y;
+        }
         else
-            gBattleStruct->gimmick.triggerSpriteId = CreateSprite(gimmick->triggerTemplate,
-                                                                  gSprites[gHealthboxSpriteIds[battler]].x - SINGLES_GIMMICK_TRIGGER_POS_X_SLIDE,
-                                                                  gSprites[gHealthboxSpriteIds[battler]].y - SINGLES_GIMMICK_TRIGGER_POS_Y_DIFF, 0);
+        {
+            x = gSprites[gHealthboxSpriteIds[battler]].x - SINGLES_GIMMICK_TRIGGER_POS_X_SLIDE;
+            y = gSprites[gHealthboxSpriteIds[battler]].y - SINGLES_GIMMICK_TRIGGER_POS_Y_DIFF;
+        }
+
+        gBattleStruct->gimmick.triggerSpriteId = CreateSprite(gimmick->triggerTemplate, x, y, 0);
     }
 
-    gSprites[gBattleStruct->gimmick.triggerSpriteId].tBattler = battler;
-    gSprites[gBattleStruct->gimmick.triggerSpriteId].tHide = FALSE;
+    struct Sprite *sprite = &gSprites[gBattleStruct->gimmick.triggerSpriteId];
+    sprite->tBattler = battler;
+    sprite->tHide = FALSE;
 
     ChangeGimmickTriggerSprite(gBattleStruct->gimmick.triggerSpriteId, 0);
 }
@@ -198,56 +203,54 @@ void DestroyGimmickTriggerSprite(void)
 
 static void SpriteCb_GimmickTrigger(struct Sprite *sprite)
 {
-    s32 xSlide, xPriority, xOptimal;
-    s32 yDiff;
-    s32 xHealthbox = gSprites[gHealthboxSpriteIds[sprite->tBattler]].x;
+    u8 battler = sprite->tBattler;
+    s16 xTarget, xHideTarget, xPriorityStart;
+    s16 yFixed;
 
     if (IsDoubleBattle())
     {
-        xSlide = DOUBLES_GIMMICK_TRIGGER_POS_X_SLIDE;
-        xPriority = DOUBLES_GIMMICK_TRIGGER_POS_X_PRIORITY;
-        xOptimal = DOUBLES_GIMMICK_TRIGGER_POS_X_OPTIMAL;
-        yDiff = DOUBLES_GIMMICK_TRIGGER_POS_Y_DIFF;
+        xTarget = DOUBLES_GIMMICK_TRIGGER_FIXED_X;
+        xHideTarget = DOUBLES_GIMMICK_TRIGGER_START_X;
+        xPriorityStart = DOUBLES_GIMMICK_TRIGGER_PRIORITY_THRESHOLD;
+        yFixed = DOUBLES_GIMMICK_TRIGGER_FIXED_Y;
     }
     else
     {
-        xSlide = SINGLES_GIMMICK_TRIGGER_POS_X_SLIDE;
-        xPriority = SINGLES_GIMMICK_TRIGGER_POS_X_PRIORITY;
-        xOptimal = SINGLES_GIMMICK_TRIGGER_POS_X_OPTIMAL;
-        yDiff = SINGLES_GIMMICK_TRIGGER_POS_Y_DIFF;
+        s16 xHealthbox = gSprites[gHealthboxSpriteIds[battler]].x;
+        s16 yHealthbox = gSprites[gHealthboxSpriteIds[battler]].y;
+
+        xTarget = xHealthbox - SINGLES_GIMMICK_TRIGGER_POS_X_OPTIMAL;
+        xHideTarget = xHealthbox - SINGLES_GIMMICK_TRIGGER_POS_X_SLIDE;
+        xPriorityStart = xHealthbox - SINGLES_GIMMICK_TRIGGER_POS_X_PRIORITY;
+        yFixed = yHealthbox - SINGLES_GIMMICK_TRIGGER_POS_Y_DIFF;
     }
 
     if (sprite->tHide)
     {
-        if (sprite->x < xHealthbox - xSlide)
+        if (sprite->x < xHideTarget)
             sprite->x++;
 
-        if (sprite->x >= xHealthbox - xPriority)
-            sprite->oam.priority = 2;
-        else
-            sprite->oam.priority = 1;
-
-        sprite->y = gSprites[gHealthboxSpriteIds[sprite->tBattler]].y - yDiff;
-        sprite->y2 = gSprites[gHealthboxSpriteIds[sprite->tBattler]].y2 - yDiff;
-        if (sprite->x == xHealthbox - xSlide)
+        if (sprite->x == xHideTarget)
             DestroyGimmickTriggerSprite();
     }
     else
     {
-        // Edge case: in doubles, if selecting move and next mon's action too fast, the second battler's gimmick icon uses the x from the first battler's gimmick icon
-        if (sprite->y != gSprites[gHealthboxSpriteIds[sprite->tBattler]].y - yDiff)
-            sprite->x = xHealthbox - xSlide;
-
-        if (sprite->x > xHealthbox - xOptimal)
+        if (sprite->x > xTarget)
             sprite->x--;
+    }
 
-        if (sprite->x >= xHealthbox - xPriority)
-            sprite->oam.priority = 2;
-        else
-            sprite->oam.priority = 1;
+    sprite->oam.priority = (sprite->x >= xPriorityStart) ? 2 : 1;
 
-        sprite->y = gSprites[gHealthboxSpriteIds[sprite->tBattler]].y - yDiff;
-        sprite->y2 = gSprites[gHealthboxSpriteIds[sprite->tBattler]].y2 - yDiff;
+    sprite->y = yFixed;
+
+    if (!IsDoubleBattle())
+    {
+        sprite->y2 = gSprites[gHealthboxSpriteIds[battler]].y2;
+    }
+    else
+    {
+        sprite->y = yFixed;
+        sprite->y2 = gSprites[gHealthboxSpriteIds[sprite->tBattler]].y2;
     }
 }
 

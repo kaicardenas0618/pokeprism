@@ -34,6 +34,7 @@
 #include "constants/songs.h"
 #include "constants/items.h"
 #include "caps.h"
+#include "rtc.h"
 
 enum
 {   // Corresponds to gHealthboxElementsGfxTable (and the tables after it) in graphics.c
@@ -173,6 +174,7 @@ enum
 static const u8 *GetHealthboxElementGfxPtr(u8);
 static u8 *AddTextPrinterAndCreateWindowOnHealthbox(const u8 *, u32, u32, u32, u32 *);
 static u8 *AddTextPrinterAndCreateWindowOnHealthboxToFit(const u8 *, u32, u32, u32, u32 *, u32);
+static u8 *AddHPTextPrinterAndCreateWindowOnHealthbox(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId);
 
 static void RemoveWindowOnHealthbox(u32 windowId);
 static void UpdateHpTextInHealthboxInDoubles(u32 healthboxSpriteId, u32 maxOrCurrent, s16 currHp, s16 maxHp);
@@ -207,6 +209,9 @@ static void Task_FreeAbilityPopUpGfx(u8);
 static void SpriteCB_LastUsedBall(struct Sprite *);
 static void SpriteCB_LastUsedBallWin(struct Sprite *);
 static void SpriteCB_MoveInfoWin(struct Sprite *sprite);
+
+static u8 *AddTextPrinterAndCreateWindowOnHealthboxLightText(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId);
+static void PrintHpOnHealthboxLightText(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor, u32 rightTile, u32 leftTile);
 
 static const struct OamData sOamData_64x32 =
 {
@@ -928,7 +933,7 @@ static void UpdateLvlInHealthbox(u8 healthboxSpriteId, u8 lvl)
         UpdateIndicatorVisibilityAndType(healthboxSpriteId, TRUE);
     }
 
-    windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(text, xPos, 3, 2, &windowId);
+    windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(text, xPos, 3, 0, &windowId);
     spriteTileNum = gSprites[healthboxSpriteId].oam.tileNum * TILE_SIZE_4BPP;
 
     if (IsOnPlayerSide(battler))
@@ -966,7 +971,7 @@ static void PrintHpOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor,
     *txtPtr++ = CHAR_SLASH;
     txtPtr = ConvertIntToDecimalStringN(txtPtr, maxHp, STR_CONV_MODE_LEFT_ALIGN, 4);
     // Print last 6 chars on the right window
-    windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(txtPtr - 6, 0, 5, bgColor, &windowId);
+    windowTileData = AddHPTextPrinterAndCreateWindowOnHealthbox(txtPtr - 6, 0, 5, 3, &windowId);
     HpTextIntoHealthboxObject(objVram + rightTile, windowTileData, 4);
     RemoveWindowOnHealthbox(windowId);
     // Print the rest of the chars on the left window
@@ -976,7 +981,7 @@ static void PrintHpOnHealthbox(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor,
         x = 9, tilesCount = 3;
     else
         x = 6, tilesCount = 2, leftTile += 0x20;
-    windowTileData = AddTextPrinterAndCreateWindowOnHealthbox(text, x, 5, bgColor, &windowId);
+    windowTileData = AddHPTextPrinterAndCreateWindowOnHealthbox(text, x, 5, 3, &windowId);
     HpTextIntoHealthboxObject(objVram + leftTile, windowTileData, tilesCount);
     RemoveWindowOnHealthbox(windowId);
 }
@@ -1080,6 +1085,58 @@ void UpdateHpTextInHealthbox(u32 healthboxSpriteId, u32 maxOrCurrent, s16 currHp
     }
 }
 
+static u8 *AddTextPrinterAndCreateWindowOnHealthboxWithFontLightText(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId, u32 fontId)
+{
+    u16 winId;
+    u8 color[3];
+    struct WindowTemplate winTemplate = sHealthboxWindowTemplate;
+
+    winId = AddWindow(&winTemplate);
+    FillWindowPixelBuffer(winId, PIXEL_FILL(bgColor));
+
+    color[0] = bgColor;
+    color[1] = 3;
+    color[2] = 2;
+
+    AddTextPrinterParameterized4(winId, fontId, x, y, 0, 0, color, TEXT_SKIP_DRAW, str);
+
+    *windowId = winId;
+    return (u8 *)(GetWindowAttribute(winId, WINDOW_TILE_DATA));
+}
+
+static u8 *AddTextPrinterAndCreateWindowOnHealthboxLightText(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId)
+{
+    return AddTextPrinterAndCreateWindowOnHealthboxWithFontLightText(str, x, y, bgColor, windowId, FONT_SMALL);
+}
+
+static void PrintHpOnHealthboxLightText(u32 spriteId, s16 currHp, s16 maxHp, u32 bgColor, u32 rightTile, u32 leftTile)
+{
+    u8 *windowTileData;
+    u32 windowId, tilesCount, x;
+    u8 text[28], *txtPtr;
+    void *objVram = (void *)(OBJ_VRAM0) + gSprites[spriteId].oam.tileNum * TILE_SIZE_4BPP;
+
+    // To fit 4 digit HP values we need to modify a bit the way hp is printed on Healthbox.
+    // 6 chars can fit on the right healthbox, the rest goes to the left one
+    txtPtr = ConvertIntToDecimalStringN(text, currHp, STR_CONV_MODE_RIGHT_ALIGN, 4);
+    *txtPtr++ = CHAR_SLASH;
+    txtPtr = ConvertIntToDecimalStringN(txtPtr, maxHp, STR_CONV_MODE_LEFT_ALIGN, 4);
+    // Print last 6 chars on the right window
+    windowTileData = AddTextPrinterAndCreateWindowOnHealthboxLightText(txtPtr - 6, 0, 4, bgColor, &windowId);
+    HpTextIntoHealthboxObject(objVram + rightTile, windowTileData, 4);
+    RemoveWindowOnHealthbox(windowId);
+    // Print the rest of the chars on the left window
+    txtPtr[-6] = EOS;
+    // if max hp is 3 digits print on block closer to the right window, if 4 digits print further from the right window
+    if (maxHp >= 1000)
+        x = 9, tilesCount = 3;
+    else
+        x = 6, tilesCount = 2, leftTile += 0x20;
+    windowTileData = AddTextPrinterAndCreateWindowOnHealthboxLightText(text, x, 4, bgColor, &windowId);
+    HpTextIntoHealthboxObject(objVram + leftTile, windowTileData, tilesCount);
+    RemoveWindowOnHealthbox(windowId);
+}
+
 static void UpdateHpTextInHealthboxInDoubles(u32 healthboxSpriteId, u32 maxOrCurrent, s16 currHp, s16 maxHp)
 {
     u32 barSpriteId = gSprites[healthboxSpriteId].data[5];
@@ -1088,11 +1145,11 @@ static void UpdateHpTextInHealthboxInDoubles(u32 healthboxSpriteId, u32 maxOrCur
     {
         if (gBattleSpritesDataPtr->battlerData[gSprites[healthboxSpriteId].data[6]].hpNumbersNoBars) // don't print text if only bars are visible
         {
-            PrintHpOnHealthbox(barSpriteId, currHp, maxHp, 0, 0x80, 0x20);
+            PrintHpOnHealthboxLightText(barSpriteId, currHp, maxHp, 0, 0x80, 0x20);
             // Clears the end of the healthbar gfx.
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_FRAME_END),
-                          (void *)(OBJ_VRAM0 + 0x680) + (gSprites[healthboxSpriteId].oam.tileNum * TILE_SIZE_4BPP),
-                           0x20);
+            //CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_FRAME_END),
+            //              (void *)(OBJ_VRAM0 + 0x680) + (gSprites[healthboxSpriteId].oam.tileNum * TILE_SIZE_4BPP),
+            //               0x18);
             // Erases HP bar leftover.
             FillHealthboxObject((void *)(OBJ_VRAM0) + (gSprites[barSpriteId].oam.tileNum * TILE_SIZE_4BPP), 0, 2);
         }
@@ -1204,7 +1261,7 @@ void SwapHpBarsWithHpText(void)
                 {
                     UpdateStatusIconInHealthbox(gHealthboxSpriteIds[i]);
                     UpdateHealthboxAttribute(gHealthboxSpriteIds[i], mon, HEALTHBOX_HEALTH_BAR);
-                    CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_FRAME_END_BAR), (void *)(OBJ_VRAM0 + 0x680 + gSprites[gHealthboxSpriteIds[i]].oam.tileNum * TILE_SIZE_4BPP), 32);
+                    //CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_FRAME_END_BAR), (void *)(OBJ_VRAM0 + 0x680 + gSprites[gHealthboxSpriteIds[i]].oam.tileNum * TILE_SIZE_4BPP), 32);
                 }
             }
             else
@@ -1745,7 +1802,7 @@ static void UpdateNickInHealthbox(u8 healthboxSpriteId, struct Pokemon *mon)
         break;
     }
 
-    windowTileData = AddTextPrinterAndCreateWindowOnHealthboxToFit(gDisplayedStringBattle, 0, 3, 2, &windowId, 55);
+    windowTileData = AddTextPrinterAndCreateWindowOnHealthboxToFit(gDisplayedStringBattle, 0, 3, 0, &windowId, 55);
 
     spriteTileNum = gSprites[healthboxSpriteId].oam.tileNum * TILE_SIZE_4BPP;
 
@@ -2354,8 +2411,30 @@ static u8 *AddTextPrinterAndCreateWindowOnHealthboxWithFont(const u8 *str, u32 x
     FillWindowPixelBuffer(winId, PIXEL_FILL(bgColor));
 
     color[0] = bgColor;
-    color[1] = 1;
-    color[2] = 3;
+    if (!IsBetweenHours(gLocalTime.hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END))
+        color[1] = 3;
+    else
+        color[1] = 2;
+    color[2] = 4;
+
+    AddTextPrinterParameterized4(winId, fontId, x, y, 0, 0, color, TEXT_SKIP_DRAW, str);
+
+    *windowId = winId;
+    return (u8 *)(GetWindowAttribute(winId, WINDOW_TILE_DATA));
+}
+
+static u8 *AddHPTextPrinterAndCreateWindowOnHealthboxWithFont(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId, u32 fontId)
+{
+    u16 winId;
+    u8 color[3];
+    struct WindowTemplate winTemplate = sHealthboxWindowTemplate;
+
+    winId = AddWindow(&winTemplate);
+    FillWindowPixelBuffer(winId, PIXEL_FILL(bgColor));
+
+    color[0] = bgColor;
+    color[1] = 2;
+    color[2] = bgColor;
 
     AddTextPrinterParameterized4(winId, fontId, x, y, 0, 0, color, TEXT_SKIP_DRAW, str);
 
@@ -2372,6 +2451,11 @@ static u8 *AddTextPrinterAndCreateWindowOnHealthboxToFit(const u8 *str, u32 x, u
 {
     u32 fontId = GetFontIdToFit(str, FONT_SMALL, 0, width);
     return AddTextPrinterAndCreateWindowOnHealthboxWithFont(str, x, y, bgColor, windowId, fontId);
+}
+
+static u8 *AddHPTextPrinterAndCreateWindowOnHealthbox(const u8 *str, u32 x, u32 y, u32 bgColor, u32 *windowId)
+{
+    return AddHPTextPrinterAndCreateWindowOnHealthboxWithFont(str, x, y, bgColor, windowId, FONT_SMALL);
 }
 
 static void RemoveWindowOnHealthbox(u32 windowId)
@@ -2427,15 +2511,15 @@ static void SafariTextIntoHealthboxObject(void *dest, u8 *windowTileData, u32 wi
 /*
  * BG = BackGround
  * FG = ForeGround
- * SH = SHadow
+ * SH = Shadow
  */
-#define ABILITY_POP_UP_BATTLER_BG_TXTCLR 2
+#define ABILITY_POP_UP_BATTLER_BG_TXTCLR 8
 #define ABILITY_POP_UP_BATTLER_FG_TXTCLR 7
-#define ABILITY_POP_UP_BATTLER_SH_TXTCLR 1
+#define ABILITY_POP_UP_BATTLER_SH_TXTCLR 4
 
-#define ABILITY_POP_UP_ABILITY_BG_TXTCLR 7
-#define ABILITY_POP_UP_ABILITY_FG_TXTCLR 9
-#define ABILITY_POP_UP_ABILITY_SH_TXTCLR 1
+#define ABILITY_POP_UP_ABILITY_BG_TXTCLR 8
+#define ABILITY_POP_UP_ABILITY_FG_TXTCLR 7
+#define ABILITY_POP_UP_ABILITY_SH_TXTCLR 4
 
 #define sState          data[0]
 #define sAutoDestroy    data[1]
@@ -2886,10 +2970,10 @@ static const struct SpriteSheet sSpriteSheet_MoveInfoWindow =
     sMoveInfoWindowGfx, sizeof(sMoveInfoWindowGfx), MOVE_INFO_WINDOW_TAG
 };
 
-#define LAST_USED_BALL_X_F    14
-#define LAST_USED_BALL_X_0    -14
-#define LAST_USED_BALL_Y      ((IsDoubleBattle()) ? 78 : 68)
-#define LAST_USED_BALL_Y_BNC  ((IsDoubleBattle()) ? 76 : 66)
+#define LAST_USED_BALL_X_F    13
+#define LAST_USED_BALL_X_0    -13
+#define LAST_USED_BALL_Y      ((IsDoubleBattle()) ? 68 : 68)
+#define LAST_USED_BALL_Y_BNC  ((IsDoubleBattle()) ? 66 : 66)
 
 #define LAST_BALL_WIN_X_F       (LAST_USED_BALL_X_F - 0)
 #define LAST_BALL_WIN_X_0       (LAST_USED_BALL_X_0 - 0)
@@ -2994,8 +3078,17 @@ void TryToAddMoveInfoWindow(void)
 
     if (gBattleStruct->moveInfoSpriteId == MAX_SPRITES)
     {
-        gBattleStruct->moveInfoSpriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow, LAST_BALL_WIN_X_0, LAST_USED_WIN_Y + 32, 6);
+        gBattleStruct->moveInfoSpriteId = CreateSprite(&sSpriteTemplate_MoveInfoWindow, LAST_BALL_WIN_X_0 + 1, LAST_USED_WIN_Y + 32, 6);
         gSprites[gBattleStruct->moveInfoSpriteId].sHide = FALSE;
+    }
+    else
+    {
+        // Sprite exists but may still be sliding out — interrupt that
+        struct Sprite *sprite = &gSprites[gBattleStruct->moveInfoSpriteId];
+        sprite->sHide = FALSE;
+
+        if (sprite->x <= LAST_BALL_WIN_X_0)
+            sprite->x = LAST_BALL_WIN_X_0 + 1;
     }
 }
 
@@ -3014,6 +3107,10 @@ static void DestroyMoveInfoWinGfx(struct Sprite *sprite)
 
 static void SpriteCB_LastUsedBallWin(struct Sprite *sprite)
 {
+    int paletteIndex = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+    if (paletteIndex != 0xFF)
+        sprite->oam.paletteNum = paletteIndex;
+
     if (sprite->sHide)
     {
         if (sprite->x != LAST_BALL_WIN_X_0)
@@ -3025,7 +3122,14 @@ static void SpriteCB_LastUsedBallWin(struct Sprite *sprite)
     else
     {
         if (sprite->x != LAST_BALL_WIN_X_F)
+        {
             sprite->x++;
+        }
+        else
+        {
+            LoadSpritePalette(&sSpritePalette_AbilityPopUp);
+            sprite->oam.paletteNum = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+        }
     }
 }
 
@@ -3051,6 +3155,10 @@ static void SpriteCB_LastUsedBall(struct Sprite *sprite)
 
 static void SpriteCB_MoveInfoWin(struct Sprite *sprite)
 {
+    int paletteIndex = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+    if (paletteIndex != 0xFF)
+        sprite->oam.paletteNum = paletteIndex;
+
     if (sprite->sHide)
     {
         if (sprite->x != LAST_BALL_WIN_X_0)
@@ -3062,7 +3170,14 @@ static void SpriteCB_MoveInfoWin(struct Sprite *sprite)
     else
     {
         if (sprite->x != LAST_BALL_WIN_X_F)
+        {
             sprite->x++;
+        }
+        else
+        {
+            LoadSpritePalette(&sSpritePalette_AbilityPopUp);
+            sprite->oam.paletteNum = IndexOfSpritePaletteTag(TAG_ABILITY_POP_UP);
+        }
     }
 }
 

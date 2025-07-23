@@ -26,4 +26,7 @@ void SetZEffect(void);
 void AssignUsableZMoves(u32 battler, u16 *moves);
 u32 GetZMovePower(u32 move);
 
+extern const u8 gBattleTypeIconsGfx[];
+extern const u16 gBattleTypeIconsPal[];
+
 #endif // GUARD_BATTLE_Z_MOVE_H

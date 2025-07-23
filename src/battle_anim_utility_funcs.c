@@ -106,23 +106,24 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     u32 selectedPalettes = UnpackSelectedBattlePalettes(gBattleAnimArgs[0]);
     switch (gBattleEnvironment)
     {
+    // Day Battle Environments
     case BATTLE_ENVIRONMENT_GRASS:
         gBattleAnimArgs[4] = RGB(12, 24, 2);
         break;
-    case BATTLE_ENVIRONMENT_LONG_GRASS:
+    case BATTLE_ENVIRONMENT_GRASS2:
+        gBattleAnimArgs[4] = RGB(12, 24, 2);
+        break;
+    case BATTLE_ENVIRONMENT_GRASS3:
         gBattleAnimArgs[4] = RGB(0, 15, 2);
+        break;
+    case BATTLE_ENVIRONMENT_FOREST:
+        gBattleAnimArgs[4] = RGB(0, 15, 2);
+        break;
+    case BATTLE_ENVIRONMENT_CITY:
+        gBattleAnimArgs[4] = RGB_WHITE;
         break;
     case BATTLE_ENVIRONMENT_SAND:
         gBattleAnimArgs[4] = RGB(30, 24, 11);
-        break;
-    case BATTLE_ENVIRONMENT_UNDERWATER:
-        gBattleAnimArgs[4] = RGB(0, 0, 18);
-        break;
-    case BATTLE_ENVIRONMENT_WATER:
-        gBattleAnimArgs[4] = RGB(11, 22, 31);
-        break;
-    case BATTLE_ENVIRONMENT_POND:
-        gBattleAnimArgs[4] = RGB(11, 22, 31);
         break;
     case BATTLE_ENVIRONMENT_MOUNTAIN:
         gBattleAnimArgs[4] = RGB(22, 16, 10);
@@ -130,10 +131,63 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
     case BATTLE_ENVIRONMENT_CAVE:
         gBattleAnimArgs[4] = RGB(14, 9, 3);
         break;
+    case BATTLE_ENVIRONMENT_WATER_CAVE:
+        gBattleAnimArgs[4] = RGB(11, 22, 31);
+        break;
+    case BATTLE_ENVIRONMENT_BEACH:
+        gBattleAnimArgs[4] = RGB(11, 22, 31);
+        break;
+    case BATTLE_ENVIRONMENT_WATER:
+        gBattleAnimArgs[4] = RGB(11, 22, 31);
+        break;
+    case BATTLE_ENVIRONMENT_UNDERWATER:
+        gBattleAnimArgs[4] = RGB(0, 0, 18);
+        break;
     case BATTLE_ENVIRONMENT_BUILDING:
         gBattleAnimArgs[4] = RGB_WHITE;
         break;
-    case BATTLE_ENVIRONMENT_PLAIN:
+
+    // Night Battle Environments
+    case BATTLE_ENVIRONMENT_NIGHT_GRASS:
+        gBattleAnimArgs[4] = RGB(12, 24, 2);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_GRASS2:
+        gBattleAnimArgs[4] = RGB(12, 24, 2);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_GRASS3:
+        gBattleAnimArgs[4] = RGB(0, 15, 2);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_FOREST:
+        gBattleAnimArgs[4] = RGB(0, 15, 2);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_CITY:
+        gBattleAnimArgs[4] = RGB_WHITE;
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_SAND:
+        gBattleAnimArgs[4] = RGB(30, 24, 11);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_MOUNTAIN:
+        gBattleAnimArgs[4] = RGB(22, 16, 10);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_CAVE:
+        gBattleAnimArgs[4] = RGB(14, 9, 3);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_WATER_CAVE:
+        gBattleAnimArgs[4] = RGB(11, 22, 31);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_BEACH:
+        gBattleAnimArgs[4] = RGB(11, 22, 31);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_WATER:
+        gBattleAnimArgs[4] = RGB(11, 22, 31);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_UNDERWATER:
+        gBattleAnimArgs[4] = RGB(0, 0, 18);
+        break;
+    case BATTLE_ENVIRONMENT_NIGHT_BUILDING:
+        gBattleAnimArgs[4] = RGB_WHITE;
+        break;
+
     default:
         gBattleAnimArgs[4] = RGB_WHITE;
         break;
