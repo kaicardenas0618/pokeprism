@@ -286,6 +286,8 @@ extern struct UnusedControllerStruct gUnusedControllerStruct;
 extern void (*gBattlerControllerFuncs[MAX_BATTLERS_COUNT])(u32 battler);
 extern void (*gBattlerControllerEndFuncs[MAX_BATTLERS_COUNT])(u32 battler);
 extern u8 gBattleControllerData[MAX_BATTLERS_COUNT];
+extern bool8 gDisableActionMenuCursor;
+extern bool8 gShouldDestroyActionIcons;
 
 // general functions
 void HandleLinkBattleSetup(void);

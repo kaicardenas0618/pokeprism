@@ -98,6 +98,9 @@ static u32 CheckTypeEffectiveness(u32 battlerAtk, u32 battlerDef);
 static u32 CheckTargetTypeEffectiveness(u32 battler);
 static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 battler);
 
+bool8 gDisableActionMenuCursor = FALSE;
+static u8 sActionIconSpriteIds[4];
+
 static void (*const sPlayerBufferCommands[CONTROLLER_CMDS_COUNT])(u32 battler) =
 {
     [CONTROLLER_GETMONDATA]               = BtlController_HandleGetMonData,
@@ -345,6 +348,34 @@ static u32 GetNextBall(u32 ballId)
         return ballNext;
 }
 
+static void UpdateActionIconsHover(u32 battler)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        if (sActionIconSpriteIds[i] != MAX_SPRITES)
+        {
+            u8 anim = (i == gActionSelectionCursor[battler]) ? (i * 2 + 1) : (i * 2);
+            StartSpriteAnim(&gSprites[sActionIconSpriteIds[i]], anim);
+        }
+    }
+}
+
+static void DestroyActionMenuIcons(void)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        u8 spriteId = sActionIconSpriteIds[i];
+        if (spriteId < MAX_SPRITES)
+        {
+            DestroySprite(&gSprites[spriteId]);
+            FreeSpriteOamMatrix(&gSprites[spriteId]);
+            sActionIconSpriteIds[i] = MAX_SPRITES;
+        }
+    }
+
+    FreeSpriteTilesByTag(TAG_ACTION_ICON);
+}
+
 static void HandleInputChooseAction(u32 battler)
 {
     u16 itemId = gBattleResources->bufferA[battler][2] | (gBattleResources->bufferA[battler][3] << 8);
@@ -419,62 +450,64 @@ static void HandleInputChooseAction(u32 battler)
     {
         PlaySE(SE_SELECT);
         TryHideLastUsedBall();
+        DestroyActionMenuIcons();
 
         switch (gActionSelectionCursor[battler])
         {
-        case 0: // Top left
+        case 0:
             BtlController_EmitTwoReturnValues(battler, B_COMM_TO_ENGINE, B_ACTION_USE_MOVE, 0);
+            gDisableActionMenuCursor = FALSE;
             break;
-        case 1: // Top right
+        case 1:
             BtlController_EmitTwoReturnValues(battler, B_COMM_TO_ENGINE, B_ACTION_USE_ITEM, 0);
+            gDisableActionMenuCursor = FALSE;
             break;
-        case 2: // Bottom left
+        case 2:
             BtlController_EmitTwoReturnValues(battler, B_COMM_TO_ENGINE, B_ACTION_SWITCH, 0);
+            gDisableActionMenuCursor = TRUE;
             break;
-        case 3: // Bottom right
+        case 3:
             BtlController_EmitTwoReturnValues(battler, B_COMM_TO_ENGINE, B_ACTION_RUN, 0);
+            gDisableActionMenuCursor = FALSE;
             break;
         }
+        
         BtlController_Complete(battler);
     }
-    else if (JOY_NEW(DPAD_LEFT))
+    if (JOY_NEW(DPAD_LEFT))
     {
-        if (gActionSelectionCursor[battler] & 1) // if is B_ACTION_USE_ITEM or B_ACTION_RUN
+        if (gActionSelectionCursor[battler] & 1)
         {
             PlaySE(SE_SELECT);
-            ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
             gActionSelectionCursor[battler] ^= 1;
-            ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+            UpdateActionIconsHover(battler);
         }
     }
     else if (JOY_NEW(DPAD_RIGHT))
     {
-        if (!(gActionSelectionCursor[battler] & 1)) // if is B_ACTION_USE_MOVE or B_ACTION_SWITCH
+        if (!(gActionSelectionCursor[battler] & 1))
         {
             PlaySE(SE_SELECT);
-            ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
             gActionSelectionCursor[battler] ^= 1;
-            ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+            UpdateActionIconsHover(battler);
         }
     }
     else if (JOY_NEW(DPAD_UP))
     {
-        if (gActionSelectionCursor[battler] & 2) // if is B_ACTION_SWITCH or B_ACTION_RUN
+        if (gActionSelectionCursor[battler] & 2)
         {
             PlaySE(SE_SELECT);
-            ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
             gActionSelectionCursor[battler] ^= 2;
-            ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+            UpdateActionIconsHover(battler);
         }
     }
     else if (JOY_NEW(DPAD_DOWN))
     {
-        if (!(gActionSelectionCursor[battler] & 2)) // if is B_ACTION_USE_MOVE or B_ACTION_USE_ITEM
+        if (!(gActionSelectionCursor[battler] & 2))
         {
             PlaySE(SE_SELECT);
-            ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
             gActionSelectionCursor[battler] ^= 2;
-            ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
+            UpdateActionIconsHover(battler);
         }
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
@@ -484,7 +517,6 @@ static void HandleInputChooseAction(u32 battler)
          && !(gAbsentBattlerFlags & (1u << GetBattlerAtPosition(B_POSITION_PLAYER_LEFT)))
          && !(gBattleTypeFlags & BATTLE_TYPE_MULTI))
         {
-            // Return item to bag if partner had selected one (if consumable).
             if (gBattleResources->bufferA[battler][1] == B_ACTION_USE_ITEM && GetItemConsumability(itemId))
             {
                 AddBagItem(itemId, 1);
@@ -495,12 +527,10 @@ static void HandleInputChooseAction(u32 battler)
         }
         else if (B_QUICK_MOVE_CURSOR_TO_RUN)
         {
-            if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER)) // If wild battle, pressing B moves cursor to "Run".
+            if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
             {
                 PlaySE(SE_SELECT);
-                ActionSelectionDestroyCursorAt(gActionSelectionCursor[battler]);
                 gActionSelectionCursor[battler] = 3;
-                ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
             }
         }
     }
@@ -557,6 +587,7 @@ void HandleInputChooseTarget(u32 battler)
     }
     else if (JOY_NEW(B_BUTTON) || gPlayerDpadHoldFrames > 59)
     {
+        TryToAddMoveInfoWindow();
         PlaySE(SE_SELECT);
         gSprites[gBattlerSpriteIds[gMultiUsePlayerCursor]].callback = SpriteCB_HideAsMoveTarget;
         gBattlerControllerFuncs[battler] = HandleInputChooseMove;
@@ -2116,8 +2147,6 @@ static void HandleChooseActionAfterDma3(u32 battler)
 
 static void PlayerHandleChooseAction(u32 battler)
 {
-    u8 spriteId;
-
     gBattlerControllerFuncs[battler] = HandleChooseActionAfterDma3;
     BattleTv_ClearExplosionFaintCause();
     BattlePutTextOnWindow(gText_BattleMenu, B_WIN_ACTION_MENU);
@@ -2125,27 +2154,25 @@ static void PlayerHandleChooseAction(u32 battler)
     LoadSpriteSheet(&sSpriteSheet_ActionIcon);
     LoadSpritePalette(&sSpritePalette_ActionIcon);
 
-    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 100, 64, 0);
-    if (spriteId != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[spriteId], ACTION_BATTLE);
+    sActionIconSpriteIds[0] = CreateSprite(&sSpriteTemplate_ActionIcon, 136, 129, 0);
+    if (sActionIconSpriteIds[0] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sActionIconSpriteIds[0]], ACTION_BATTLE);
 
-    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 140, 64, 0);
-    if (spriteId != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[spriteId], ACTION_BAG);
+    sActionIconSpriteIds[1] = CreateSprite(&sSpriteTemplate_ActionIcon, 224, 129, 0);
+    if (sActionIconSpriteIds[1] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sActionIconSpriteIds[1]], ACTION_BAG);
 
-    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 100, 96, 0);
-    if (spriteId != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[spriteId], ACTION_PARTY);
+    sActionIconSpriteIds[2] = CreateSprite(&sSpriteTemplate_ActionIcon, 136, 145, 0);
+    if (sActionIconSpriteIds[2] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sActionIconSpriteIds[2]], ACTION_PARTY);
 
-    spriteId = CreateSprite(&sSpriteTemplate_ActionIcon, 140, 96, 0);
-    if (spriteId != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[spriteId], ACTION_RUN);
+    sActionIconSpriteIds[3] = CreateSprite(&sSpriteTemplate_ActionIcon, 224, 145, 0);
+    if (sActionIconSpriteIds[3] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sActionIconSpriteIds[3]], ACTION_RUN);
 
-    for (s32 i = 0; i < 4; i++)
-        ActionSelectionDestroyCursorAt(i);
+    UpdateActionIconsHover(battler);
 
     TryRestoreLastUsedBall();
-    ActionSelectionCreateCursorAt(gActionSelectionCursor[battler], 0);
 
     PREPARE_MON_NICK_BUFFER(gBattleTextBuff1, battler, gBattlerPartyIndexes[battler]);
     BattleStringExpandPlaceholdersToDisplayedString(gText_WhatWillPkmnDo);
