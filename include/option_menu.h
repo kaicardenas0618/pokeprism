@@ -2,15 +2,16 @@
 #define GUARD_OPTION_MENU_H
 
 #define tMenuSelection   data[0]
-#define tTextSpeed       data[1]
-#define tBattleSceneOff  data[2]
-#define tBattleStyle     data[3]
-#define tSound           data[4]
-#define tButtonMode      data[5]
-#define tWindowFrameType data[6]
-#define tScrollBgs       data[7]
-#define tCurrentPage     data[8]
-#define tPageSelection   data[9]
+#define tCurrentPage     data[1]
+#define tPageSelection   data[2]
+#define tTextSpeed       data[3]
+#define tBattleScene     data[4]
+#define tBattleStyle     data[5]
+#define tSound           data[6]
+#define tButtonMode      data[7]
+#define tWindowFrameType data[8]
+#define tScrollBgs       data[9]
+#define tClockMode       data[10]
 
 enum
 {
@@ -21,6 +22,7 @@ enum
     MENUITEM_BUTTONMODE,
     MENUITEM_FRAMETYPE,
     MENUITEM_SCROLLBGS,
+    MENUITEM_CLOCKMODE,
     MENUITEM_COUNT,
 };
 
@@ -37,14 +39,6 @@ enum
     PAGE_UI,
     PAGE_COUNT
 };
-
-#define YPOS_TEXTSPEED    (MENUITEM_TEXTSPEED * 16)
-#define YPOS_BATTLESCENE  (MENUITEM_BATTLESCENE * 16)
-#define YPOS_BATTLESTYLE  (MENUITEM_BATTLESTYLE * 16)
-#define YPOS_SOUND        (MENUITEM_SOUND * 16)
-#define YPOS_BUTTONMODE   (MENUITEM_BUTTONMODE * 16)
-#define YPOS_FRAMETYPE    (MENUITEM_FRAMETYPE * 16)
-#define YPOS_SCROLLBGS    (MENUITEM_SCROLLBGS * 16)
 
 void CB2_InitOptionMenu(void);
 

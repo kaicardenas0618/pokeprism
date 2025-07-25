@@ -246,25 +246,6 @@ extern const u8 gText_SavingTime[];
 extern const u8 gText_BattlePyramidConfirmRest[];
 extern const u8 gText_BattlePyramidConfirmRetire[];
 
-// option menu texts
-extern const u8 gText_TextSpeedSlow[];
-extern const u8 gText_TextSpeedMid[];
-extern const u8 gText_TextSpeedFast[];
-extern const u8 gText_BattleSceneOn[];
-extern const u8 gText_BattleSceneOff[];
-extern const u8 gText_BattleStyleShift[];
-extern const u8 gText_BattleStyleSet[];
-extern const u8 gText_SoundMono[];
-extern const u8 gText_SoundStereo[];
-extern const u8 gText_FrameTypeRed[];
-extern const u8 gText_FrameTypeAqua[];
-extern const u8 gText_FrameTypeWhite[];
-extern const u8 gText_FrameTypeYellow[];
-extern const u8 gText_ButtonTypeNormal[];
-extern const u8 gText_ButtonTypeLR[];
-extern const u8 gText_ButtonTypeLEqualsA[];
-extern const u8 gText_ScrollBgsOn[];
-extern const u8 gText_ScrollBgsOff[];
 extern const u8 gText_OptionMenu[];
 
 extern const u8 gText_MaleSymbol[];
