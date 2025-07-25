@@ -16,13 +16,6 @@ struct StartMenuResources
     u16 selectedMenu;
 };
 
-struct StartMenuButton {
-    const u32 *gfx;
-    const u8 text[16]; // Optional, if needed for text overlays
-    u16 flag;          // 0 if always available, otherwise a flag to check
-    void (*callback)(void);
-};
-
 enum StartMenuWindowIds
 {
     WINDOW_HP_BARS,
