@@ -522,6 +522,7 @@ static void HandleInputChooseAction(u32 battler)
                 AddBagItem(itemId, 1);
             }
             PlaySE(SE_SELECT);
+            DestroyActionMenuIcons();
             BtlController_EmitTwoReturnValues(battler, B_COMM_TO_ENGINE, B_ACTION_CANCEL_PARTNER, 0);
             BtlController_Complete(battler);
         }
