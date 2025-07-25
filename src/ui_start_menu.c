@@ -1052,7 +1052,7 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
     {
         struct SpritePalette cursorPal = {sSpritePal_Cursor.data, sSpritePal_Cursor.tag};
         LoadPalette(sStartMenuPalette, PLTT_ID(0), PLTT_SIZE_4BPP);
-        LoadPalette(sHPBar_Pal, PLTT_ID(1), 16);
+        LoadPalette(sHPBar_Pal, PLTT_ID(1), PLTT_SIZE_4BPP);
 
         //LoadCompressedSpriteSheet(&sSpriteSheet_IconBox);
         //LoadSpritePalette(&sSpritePal_IconBox);
@@ -1173,8 +1173,7 @@ static void PrintMapNameAndTime(void)
         else if (gLocalTime.hours == 12)
         {
             hours = 12;
-            if (suffix == sText_AM)
-                suffix = sText_PM;
+            suffix = sText_PM;
         }
         else
         {
