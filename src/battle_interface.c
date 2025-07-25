@@ -603,10 +603,10 @@ enum
 static const u16 sStatusIconColors[] =
 {
     [PAL_STATUS_PSN] = RGB(24, 12, 24),
-    [PAL_STATUS_PAR] = RGB(23, 23, 3),
-    [PAL_STATUS_SLP] = RGB(20, 20, 17),
-    [PAL_STATUS_FRZ] = RGB(17, 22, 28),
-    [PAL_STATUS_BRN] = RGB(28, 14, 10),
+    [PAL_STATUS_PAR] = RGB(31, 28, 0),
+    [PAL_STATUS_SLP] = RGB(15, 18, 15),
+    [PAL_STATUS_FRZ] = RGB(7, 24, 31),
+    [PAL_STATUS_BRN] = RGB(31, 0, 0),
 };
 
 static const struct WindowTemplate sHealthboxWindowTemplate = {
@@ -1926,7 +1926,7 @@ static void UpdateStatusIconInHealthbox(u8 healthboxSpriteId)
     }
 
     pltAdder = PLTT_ID(gSprites[healthboxSpriteId].oam.paletteNum);
-    pltAdder += battler + 12;
+    pltAdder += battler + 13;
 
     FillPalette(sStatusIconColors[statusPalId], OBJ_PLTT_OFFSET + pltAdder, PLTT_SIZEOF(1));
     CpuCopy16(&gPlttBufferUnfaded[OBJ_PLTT_OFFSET + pltAdder], (u16 *)OBJ_PLTT + pltAdder, PLTT_SIZEOF(1));
