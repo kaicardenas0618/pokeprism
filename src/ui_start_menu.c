@@ -153,10 +153,14 @@ static const u8 sHPBar_10_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_ba
 static const u8 sHPBar_0_Percent_Gfx[]    = INCBIN_U8("graphics/start_menu/hp_bar/0_percent.4bpp");
 static const u16 sHPBar_Pal[] = INCBIN_U16("graphics/start_menu/hp_bar/hpbar.gbapal");
 
-static const u32 sGreyMenuButtonMap_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/map_dark_sprite.4bpp.lz");
-static const u32 sGreyMenuButtonDex_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/dex_dark_sprite.4bpp.lz");
-static const u32 sGreyMenuButtonParty_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/party_dark_sprite.4bpp.lz");
-static const u16 sGreyMenuButton_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/dark.gbapal");
+static const u32 sPokedexButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/pokedex.4bpp");
+static const u32 sPokemonButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/pokemon.4bpp");
+static const u32 sBagButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/bag.4bpp");
+static const u32 sCardButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/card.4bpp");
+static const u32 sOptionsButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/options.4bpp");
+static const u32 sDexNavButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/dexnav.4bpp");
+static const u32 sQuestsButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/quests.4bpp");
+static const u16 sMenuButtons_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_palette.gbapal");
 
 #define TAG_CURSOR       30004
 //#define TAG_ICON_BOX     30006
@@ -353,90 +357,6 @@ static const struct SpriteTemplate sSpriteTemplate_StatusIcons =
     .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy,
 };
-
-#define TAG_GREY_ICON       20001
-#define TAG_GREY_ICON_MAP   20003
-#define TAG_GREY_ICON_DEX   20005
-#define TAG_GREY_ICON_PARTY 20007
-
-static const struct OamData sOamData_GreyMenuButton =
-{
-    .size = SPRITE_SIZE(64x32),
-    .shape = SPRITE_SHAPE(64x32),
-    .priority = 1,
-};
-
-static const struct CompressedSpriteSheet sSpriteSheet_GreyMenuButtonMap =
-{
-    .data = sGreyMenuButtonMap_Gfx,
-    .size = 64*32*4/2,
-    .tag = TAG_GREY_ICON_MAP,
-};
-
-static const struct CompressedSpriteSheet sSpriteSheet_GreyMenuButtonParty =
-{
-    .data = sGreyMenuButtonParty_Gfx,
-    .size = 64*32*4/2,
-    .tag = TAG_GREY_ICON_PARTY,
-};
-
-static const struct CompressedSpriteSheet sSpriteSheet_GreyMenuButtonDex =
-{
-    .data = sGreyMenuButtonDex_Gfx,
-    .size = 64*32*4/2,
-    .tag = TAG_GREY_ICON_DEX,
-};
-
-static const struct SpritePalette sSpritePal_GreyMenuButton =
-{
-    .data = sGreyMenuButton_Pal,
-    .tag = TAG_GREY_ICON
-};
-
-static const union AnimCmd sSpriteAnim_GreyMenuButton[] =
-{
-    ANIMCMD_FRAME(0, 32),
-    ANIMCMD_JUMP(0),
-};
-
-static const union AnimCmd *const sSpriteAnimTable_GreyMenuButton[] =
-{
-    sSpriteAnim_GreyMenuButton,
-};
-
-static const struct SpriteTemplate sSpriteTemplate_GreyMenuButtonMap =
-{
-    .tileTag = TAG_GREY_ICON_MAP,
-    .paletteTag = TAG_GREY_ICON,
-    .oam = &sOamData_GreyMenuButton,
-    .anims = sSpriteAnimTable_GreyMenuButton,
-    .images = NULL,
-    .affineAnims = gDummySpriteAffineAnimTable,
-    .callback = SpriteCallbackDummy
-};
-
-static const struct SpriteTemplate sSpriteTemplate_GreyMenuButtonDex =
-{
-    .tileTag = TAG_GREY_ICON_DEX,
-    .paletteTag = TAG_GREY_ICON,
-    .oam = &sOamData_GreyMenuButton,
-    .anims = sSpriteAnimTable_GreyMenuButton,
-    .images = NULL,
-    .affineAnims = gDummySpriteAffineAnimTable,
-    .callback = SpriteCallbackDummy
-};
-
-static const struct SpriteTemplate sSpriteTemplate_GreyMenuButtonParty =
-{
-    .tileTag = TAG_GREY_ICON_PARTY,
-    .paletteTag = TAG_GREY_ICON,
-    .oam = &sOamData_GreyMenuButton,
-    .anims = sSpriteAnimTable_GreyMenuButton,
-    .images = NULL,
-    .affineAnims = gDummySpriteAffineAnimTable,
-    .callback = SpriteCallbackDummy
-};
-
 
 #define CURSOR_LEFT_COL_X 128
 #define CURSOR_RIGHT_COL_X 128 + 64 + 8
@@ -692,45 +612,6 @@ static void StartMenu_DisplayHP(void)
     CopyWindowToVram(WINDOW_HP_BARS, COPYWIN_GFX);
 }
 
-static void CreateGreyedMenuBoxes(void)
-{
-    if(!FlagGet(FLAG_SYS_POKEDEX_GET))
-    {
-        if (sStartMenuDataPtr->greyMenuBoxIds[0] == SPRITE_NONE)
-            sStartMenuDataPtr->greyMenuBoxIds[0] = CreateSprite(&sSpriteTemplate_GreyMenuButtonDex, CURSOR_LEFT_COL_X, CURSOR_TOP_ROW_Y, 1);
-        gSprites[sStartMenuDataPtr->greyMenuBoxIds[0]].invisible = FALSE;
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->greyMenuBoxIds[0]], 0);
-    }
-    
-    if(!FlagGet(FLAG_SYS_POKEMON_GET))
-    {
-        if (sStartMenuDataPtr->greyMenuBoxIds[1] == SPRITE_NONE)
-            sStartMenuDataPtr->greyMenuBoxIds[1] = CreateSprite(&sSpriteTemplate_GreyMenuButtonParty, CURSOR_RIGHT_COL_X, CURSOR_TOP_ROW_Y, 1);
-        gSprites[sStartMenuDataPtr->greyMenuBoxIds[1]].invisible = FALSE;
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->greyMenuBoxIds[1]], 0);
-    }
-
-    if(!FlagGet(FLAG_SYS_POKENAV_GET))
-    {
-        if (sStartMenuDataPtr->greyMenuBoxIds[2] == SPRITE_NONE)
-            sStartMenuDataPtr->greyMenuBoxIds[2] = CreateSprite(&sSpriteTemplate_GreyMenuButtonMap, CURSOR_LEFT_COL_X, CURSOR_BTM_ROW_Y, 1);
-        gSprites[sStartMenuDataPtr->greyMenuBoxIds[2]].invisible = FALSE;
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->greyMenuBoxIds[2]], 0);
-    }
-    
-    return;
-}
-
-static void DestroyGreyMenuBoxes(void)
-{
-    u8 i = 0;
-    for(i = 0; i < 3; i++)
-    {
-        DestroySprite(&gSprites[sStartMenuDataPtr->greyMenuBoxIds[i]]);
-        sStartMenuDataPtr->greyMenuBoxIds[i] = SPRITE_NONE;
-    }
-}
-
 #define AILMENT_NONE  0
 #define AILMENT_PSN   1
 #define AILMENT_PRZ   2
@@ -840,10 +721,6 @@ void StartMenu_Init(MainCallback callback)
         sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
         sStartMenuDataPtr->iconMonSpriteIds[i] = SPRITE_NONE;
     }
-    for(i= 0; i < 3; i++)
-    {
-        sStartMenuDataPtr->greyMenuBoxIds[i] = SPRITE_NONE;
-    }
     InitCursorInPlace();
 
     gFieldCallback = NULL;
@@ -923,7 +800,6 @@ static bool8 StartMenu_DoGfxSetup(void)
         break;
     case 5:
         PrintMapNameAndTime(); // print all sprites
-        CreateGreyedMenuBoxes();
         //CreateIconBox();
         CreateCursor();
         CreatePartyMonIcons();
@@ -963,7 +839,6 @@ static void StartMenu_FreeResources(void)
     //DestroyIconBoxes();
     DestroyMonIcons();
     DestroyStatusSprites();
-    DestroyGreyMenuBoxes();
     FreeAllWindowBuffers();    
 }
 
@@ -1061,10 +936,6 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         LoadCompressedSpriteSheet(&sSpriteSheet_StatusIcons);
         LoadSpritePalette(&sSpritePalette_StatusIcons);
 
-        LoadCompressedSpriteSheet(&sSpriteSheet_GreyMenuButtonMap);
-        LoadCompressedSpriteSheet(&sSpriteSheet_GreyMenuButtonDex);
-        LoadCompressedSpriteSheet(&sSpriteSheet_GreyMenuButtonParty);
-        LoadSpritePalette(&sSpritePal_GreyMenuButton);
         sStartMenuDataPtr->gfxLoadState++;
         break;
     }
@@ -1197,9 +1068,9 @@ static void PrintMapNameAndTime(void)
 
     str = sDayOfWeekStrings[dayOfWeek];
 
-    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, 10, y, sTimeTextColors, TEXT_SKIP_DRAW, str); //print dayof week
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, 10, y, sTimeTextColors, TEXT_SKIP_DRAW, str); // print day of week
     ConvertIntToDecimalStringN(gStringVar4, hours, STR_CONV_MODE_RIGHT_ALIGN, 3);
-    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gStringVar4); //these three print the time, you can put the colon to only print half the time to flash it if you want
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gStringVar4); // these three print the time, you can put the colon to only print half the time to flash it if you want
     x += 18;
     AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gText_Colon2);
     x += width;
