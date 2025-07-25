@@ -144,6 +144,7 @@ static void SaveGameTask(u8 taskId);
 static void Task_SaveAfterLinkBattle(u8 taskId);
 static void Task_WaitForBattleTowerLinkSave(u8 taskId);
 static bool8 FieldCB_ReturnToFieldStartMenu(void);
+static void Task_StartMenu_Save(u8 taskId);
 
 static const struct WindowTemplate sWindowTemplate_SafariBalls = {
     .bg = 0,
@@ -572,12 +573,10 @@ static void CreateStartMenuTask(TaskFunc followupFunc)
 
 static bool8 FieldCB_ReturnToFieldStartMenu(void)
 {
-    /*if (InitStartMenuStep() == FALSE)
+    if (InitStartMenuStep() == FALSE)
     {
         return FALSE;
-    }*/
-
-    StartMenu_Init();
+    }
 
     ReturnToFieldOpenStartMenu();
     return TRUE;
@@ -618,7 +617,20 @@ void ShowStartMenu(void)
         PlayerFreeze();
         StopPlayerAvatar();
     }
-    CreateStartMenuTask(Task_ShowStartMenu);
+    else
+    {
+        CreateStartMenuTask(Task_ShowStartMenu);
+        LockPlayerFieldControls();
+        return;
+    }
+    if (GetSafariZoneFlag() || InBattlePyramid() || InBattlePike() || InUnionRoom() || InMultiPartnerRoom())
+    {
+        CreateStartMenuTask(Task_ShowStartMenu);
+        LockPlayerFieldControls();
+        return;
+    }
+    BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
+    CreateTask(Task_StartMenu_Open, 0);
     LockPlayerFieldControls();
 }
 
@@ -871,6 +883,50 @@ static bool8 SaveStartCallback(void)
     return FALSE;
 }
 
+void StartMenu_SaveCallback(void)
+{
+    WarpFadeInScreen();
+    InitSave();
+    CreateTask(Task_StartMenu_Save, 0);
+    return;
+}
+
+static void Task_StartMenu_Save(u8 taskId)
+{
+    s16 *state = gTasks[taskId].data;
+
+    if (!gPaletteFade.active)
+    {
+        switch (*state)
+        {
+            case 0:
+                ShowSaveInfoWindow();
+                *state = 1;
+                break;
+            case 1:
+                ShowSaveMessage(gText_SavingDontTurnOff, SaveDoSaveCallback);
+                *state = 2;
+                break;
+            case 2:
+                if (SaveCallback())
+                    *state = 3;
+                break;
+            case 3:
+                if (SaveCallback())
+                    *state = 4;
+                break;
+            case 4:
+                DestroyTask(taskId);
+                ClearDialogWindowAndFrameToTransparent(0, TRUE);
+                HideSaveMessageWindow();
+                ScriptUnfreezeObjectEvents();
+                UnlockPlayerFieldControls();
+                SoftResetInBattlePyramid();
+                break;
+        }
+    }
+}
+
 static bool8 SaveCallback(void)
 {
     switch (RunSaveCallback())
@@ -878,10 +934,6 @@ static bool8 SaveCallback(void)
     case SAVE_IN_PROGRESS:
         return FALSE;
     case SAVE_CANCELED: // Back to start menu
-        ClearDialogWindowAndFrameToTransparent(0, FALSE);
-        InitStartMenu();
-        gMenuCallback = HandleStartMenuInput;
-        return FALSE;
     case SAVE_SUCCESS:
     case SAVE_ERROR:    // Close start menu
         ClearDialogWindowAndFrameToTransparent(0, TRUE);

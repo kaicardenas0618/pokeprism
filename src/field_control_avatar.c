@@ -224,30 +224,9 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
         return TRUE;
     if (input->pressedStartButton)
     {
-        if (FuncIsActiveTask(Task_MapNamePopUpWindow))  // Popup still visible
-        {
-            // Close the popup immediately
-            HideMapNamePopUpWindow();
-            if (FuncIsActiveTask(Task_DexNavSearch))
-            {
-                u8 taskId = FindTaskIdByFunc(Task_DexNavSearch);
-                EndDexNavSearch(taskId);
-            }
-            PlaySE(SE_WIN_OPEN);
-            StartMenu_Init();
-            return TRUE;
-        }
-        else
-        {
-            PlaySE(SE_WIN_OPEN);
-            if (FuncIsActiveTask(Task_DexNavSearch))
-            {
-                u8 taskId = FindTaskIdByFunc(Task_DexNavSearch);
-                EndDexNavSearch(taskId);
-            }
-            StartMenu_Init();
-            return TRUE;
-        }
+        PlaySE(SE_WIN_OPEN);
+        ShowStartMenu();
+        return TRUE;
     }
 
     if (input->tookStep && TryFindHiddenPokemon())

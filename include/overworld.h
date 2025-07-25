@@ -174,6 +174,7 @@ bool32 Overworld_SendKeysToLinkIsRunning(void);
 bool32 IsSendingKeysOverCable(void);
 void ClearLinkPlayerObjectEvents(void);
 bool16 SetTimeOfDay(u16 hours);
+void CB2_ReturnToStartMenu(void);
 
 // Item Description Headers
 enum ItemObtainFlags

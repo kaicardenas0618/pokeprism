@@ -1,12 +1,40 @@
 #ifndef GUARD_UI_START_MENU_H
 #define GUARD_UI_START_MENU_H
 
-void StartMenu_Init(void);
-void GoToHandleInput(void);
+#include "main.h"
 
-//--PARTY-ICONS--
-#define PARTY_ICON_X_START 20
-#define PARTY_ICON_Y       14
-#define PARTY_ICON_SPACING 32
+struct StartMenuResources
+{
+    MainCallback savedCallback;
+    u8 gfxLoadState;
+    u16 cursorSpriteId;
+    u16 iconBoxSpriteIds[6];
+    u16 iconMonSpriteIds[6];
+    u16 iconStatusSpriteIds[6];
+    u16 selector_x;
+    u16 selector_y;
+    u16 selectedMenu;
+    u16 greyMenuBoxIds[3];
+};
 
-#endif // GUARD_UI_START_MENU_H
+enum StartMenuWindowIds
+{
+    WINDOW_HP_BARS,
+    WINDOW_TOP_BAR,
+    WINDOW_BOTTOM_BAR,
+};
+
+enum StartMenuBoxes
+{
+    START_MENU_POKEDEX,
+    START_MENU_PARTY,
+    START_MENU_BAG,
+    START_MENU_CARD,
+    START_MENU_MAP,
+    START_MENU_OPTIONS,
+};
+
+void Task_StartMenu_Open(u8 taskId);
+void StartMenu_Init(MainCallback callback);
+
+#endif // GUARD_UI_MENU_H
