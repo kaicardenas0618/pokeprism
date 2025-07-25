@@ -153,14 +153,8 @@ static const u8 sHPBar_10_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_ba
 static const u8 sHPBar_0_Percent_Gfx[]    = INCBIN_U8("graphics/start_menu/hp_bar/0_percent.4bpp");
 static const u16 sHPBar_Pal[] = INCBIN_U16("graphics/start_menu/hp_bar/hpbar.gbapal");
 
-static const u32 sPokedexButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/pokedex.4bpp");
-static const u32 sPokemonButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/pokemon.4bpp");
-static const u32 sBagButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/bag.4bpp");
-static const u32 sCardButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/card.4bpp");
-static const u32 sOptionsButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/options.4bpp");
-static const u32 sDexNavButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/dexnav.4bpp");
-static const u32 sQuestsButton_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/quests.4bpp");
-static const u16 sMenuButtons_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_palette.gbapal");
+static const u32 sMenuButtons_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/menu_buttons.4bpp");
+static const u16 sMenuButtons_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons.gbapal");
 
 #define TAG_CURSOR       30004
 //#define TAG_ICON_BOX     30006
