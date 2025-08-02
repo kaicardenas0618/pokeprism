@@ -67,6 +67,7 @@ static void PlaceStartMenuScrollIndicatorArrows(void);
 static void RemoveStartMenuScrollIndicatorArrows(void);
 static void StartMenu_CreateButtons(void);
 static void StartMenu_UpdateVisibleButtons(void);
+static void DestroyAllMenuButtons(void);
 static void StartMenu_InitWindows(void);
 static void Task_StartMenu_WaitFadeIn(u8 taskId);
 static void Task_StartMenu_Main(u8 taskId);
@@ -1028,6 +1029,7 @@ static void StartMenu_FreeResources(void)
     TryFree(sBg2TilemapBuffer);
     DestroyCursor();
     RemoveStartMenuScrollIndicatorArrows();
+    DestroyAllMenuButtons();
     //DestroyIconBoxes();
     DestroyMonIcons();
     DestroyStatusSprites();
@@ -1217,6 +1219,18 @@ static void StartMenu_UpdateVisibleButtons(void)
                         sButtonAnimIndices[menuIndex][0]);
         StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]],
                         sButtonAnimIndices[menuIndex][1]);
+    }
+}
+
+static void DestroyAllMenuButtons(void)
+{
+    for (int i = 0; i < START_MENU_BUTTON_COUNT; i++)
+    {
+        if (sStartMenuDataPtr->MenuButtonSpriteIds[i] != SPRITE_NONE)
+        {
+            DestroySprite(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i]]);
+            sStartMenuDataPtr->MenuButtonSpriteIds[i] = SPRITE_NONE;
+        }
     }
 }
 
