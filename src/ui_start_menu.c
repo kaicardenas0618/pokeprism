@@ -542,43 +542,43 @@ struct SpriteCordsStruct {
 
 static void CursorCallback(struct Sprite *sprite)
 {
-    struct SpriteCordsStruct spriteCords[4][2] =
-    {
-        {{CURSOR_LEFT_COL_X,  CURSOR_TOP_ROW_Y},    {CURSOR_LEFT_COL_X + 64, CURSOR_TOP_ROW_Y}},
-        {{CURSOR_LEFT_COL_X,  CURSOR_MID1_ROW_Y},   {CURSOR_LEFT_COL_X + 64, CURSOR_MID1_ROW_Y}},
-        {{CURSOR_LEFT_COL_X,  CURSOR_MID2_ROW_Y},   {CURSOR_LEFT_COL_X + 64, CURSOR_MID2_ROW_Y}},
-        {{CURSOR_LEFT_COL_X,  CURSOR_BTM_ROW_Y},    {CURSOR_LEFT_COL_X + 64, CURSOR_BTM_ROW_Y}},
+    static const u8 sCursorYCoords[4] = {
+        CURSOR_TOP_ROW_Y,
+        CURSOR_MID1_ROW_Y,
+        CURSOR_MID2_ROW_Y,
+        CURSOR_BTM_ROW_Y,
     };
 
-    u8 x = sStartMenuDataPtr->selector_x;
     u8 y = sStartMenuDataPtr->selector_y;
-
-    gSelectedMenu = x + (y * 2);
 
     if (sprite == &gSprites[sStartMenuDataPtr->cursorSpriteIds[0]])
     {
-        sprite->x = spriteCords[y][0].x;
-        sprite->y = spriteCords[y][0].y;
+        sprite->x = CURSOR_LEFT_COL_X;
+        sprite->y = sCursorYCoords[y];
     }
     else if (sprite == &gSprites[sStartMenuDataPtr->cursorSpriteIds[1]])
     {
-        sprite->x = spriteCords[y][1].x;
-        sprite->y = spriteCords[y][1].y;
+        sprite->x = CURSOR_LEFT_COL_X + 64;
+        sprite->y = sCursorYCoords[y];
+    }
+
+    for (int i = 0; i < 8; i += 2)
+    {
+        u8 buttonSpriteId = sStartMenuDataPtr->MenuButtonSpriteIds[i];
+        struct Sprite *buttonSprite = &gSprites[buttonSpriteId];
+
+        if (abs(sprite->y - buttonSprite->y) < 4)
+        {
+            gSelectedMenu = i / 2;
+            break;
+        }
     }
 }
 
 static void InitCursorInPlace(void)
 {
-    sStartMenuDataPtr->selector_x = (gSelectedMenu % 2) ? 1 : 0;
-
-    if (gSelectedMenu <= 1)
-        sStartMenuDataPtr->selector_y = 0;
-    else if (gSelectedMenu <= 3)
-        sStartMenuDataPtr->selector_y = 1;
-    else if (gSelectedMenu <= 5)
-        sStartMenuDataPtr->selector_y = 2;
-    else
-        sStartMenuDataPtr->selector_y = 3;
+    sStartMenuDataPtr->selector_x = 0;
+    sStartMenuDataPtr->selector_y = gSelectedMenu;
 }
 
 #define ICON_BOX_1_START_X          24
@@ -1427,23 +1427,16 @@ static void Task_StartMenu_Main(u8 taskId)
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
         gTasks[taskId].func = Task_StartMenu_TurnOff;
     }
-    if (JOY_NEW(DPAD_LEFT) || JOY_NEW(DPAD_RIGHT)) // these change the position of the selector, the actual x/y of the sprite is handled in its callback CursorCallback
-    {
-        if(sStartMenuDataPtr->selector_x == 0)
-            sStartMenuDataPtr->selector_x = 1;
-        else
-            sStartMenuDataPtr->selector_x = 0; 
-    }
     if (JOY_NEW(DPAD_UP))
     {
         if (sStartMenuDataPtr->selector_y == 0)
-            sStartMenuDataPtr->selector_y = 2;
+            sStartMenuDataPtr->selector_y = 3;
         else
             sStartMenuDataPtr->selector_y--;
     }
     if (JOY_NEW(DPAD_DOWN))
     {
-        if (sStartMenuDataPtr->selector_y == 2)
+        if (sStartMenuDataPtr->selector_y == 3)
             sStartMenuDataPtr->selector_y = 0;
         else
             sStartMenuDataPtr->selector_y++;
