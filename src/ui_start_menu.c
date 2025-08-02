@@ -1441,7 +1441,7 @@ static void Task_StartMenu_Main(u8 taskId)
         else
             sStartMenuDataPtr->selector_y++;
     }
-    if (JOY_NEW(A_BUTTON)) //when A is pressed, load the Task for the Menu the cursor is on, for some they require a flag to be set
+    if (JOY_NEW(A_BUTTON))
     {
         switch(gSelectedMenu)
         {
@@ -1523,7 +1523,6 @@ static void Task_StartMenu_Main(u8 taskId)
         gTasks[taskId].sFrameToSecondTimer = 0;
     }
     gTasks[taskId].sFrameToSecondTimer++;
-
 }
 
 #undef sFrameToSecondTimer
