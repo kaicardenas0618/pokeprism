@@ -1511,13 +1511,13 @@ static void Task_StartMenu_Main(u8 taskId)
         }
     }
 
-    if(JOY_NEW(START_BUTTON)) // If start button pressed go to Save Confirmation Control Task
+    if (JOY_NEW(START_BUTTON)) // If start button pressed go to Save Confirmation Control Task
     {
         PrintSaveConfirmToWindow();
         gTasks[taskId].func = Task_HandleSaveConfirmation;
     }
 
-    if(gTasks[taskId].sFrameToSecondTimer >= 60) // every 60 frames update the time
+    if (gTasks[taskId].sFrameToSecondTimer >= 60) // every 60 frames update the time
     {
         PrintMapNameAndTime();
         gTasks[taskId].sFrameToSecondTimer = 0;
