@@ -3723,7 +3723,7 @@ void CB2_ReturnToStartMenu(void)
 {
     FieldClearVBlankHBlankCallbacks();
 
-    if (GetSafariZoneFlag() || InBattlePyramid() || InBattlePike() || InUnionRoom() || InMultiPartnerRoom())
+    if (GetSafariZoneFlag() || CurrentBattlePyramidLocation() || InBattlePike() || InUnionRoom() || InMultiPartnerRoom())
     {
         SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
         return;
