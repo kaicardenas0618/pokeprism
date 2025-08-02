@@ -2757,3 +2757,8 @@ void IncrementDexNavChain(void)
     if (gSaveBlock3Ptr->dexNavChain < DEXNAV_CHAIN_MAX)
         gSaveBlock3Ptr->dexNavChain++;
 }
+
+void CB2_OpenDexNavFromStartMenu(void)
+{
+    DexNavGuiInit(CB2_ReturnToStartMenu);
+}

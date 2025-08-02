@@ -4,6 +4,7 @@
 #include "bg.h"
 #include "data.h"
 #include "decompress.h"
+#include "dexnav.h"
 #include "event_data.h"
 #include "field_weather.h"
 #include "gpu_regs.h"
@@ -1364,6 +1365,17 @@ void Task_OpenOptionsMenuStartMenu(u8 taskId)
     }
 }
 
+void Task_OpenDexNavStartMenu(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_OpenDexNavFromStartMenu);
+    }
+}
+
 void Task_ReturnToFieldOnSave(u8 taskId)
 {
     if (!gPaletteFade.active)
@@ -1481,7 +1493,8 @@ static void Task_StartMenu_Main(u8 taskId)
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenQuestsStartMenu;
                 }
-                else{
+                else
+                {
                     PlaySE(SE_BOO);
                 }
                 break;
@@ -1489,6 +1502,18 @@ static void Task_StartMenu_Main(u8 taskId)
                 PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenOptionsMenuStartMenu;
+                break;
+            case START_MENU_DEXNAV:
+                if(FlagGet(FLAG_SYS_DEXNAV_GET))
+                {
+                    PlaySE(SE_SELECT);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_OpenDexNavStartMenu;
+                }
+                else
+                {
+                    PlaySE(SE_BOO);
+                }
                 break;
         }
     }
