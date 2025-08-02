@@ -55,6 +55,7 @@ static EWRAM_DATA struct StartMenuResources *sStartMenuDataPtr = NULL;
 static EWRAM_DATA u8 *sBg1TilemapBuffer = NULL;
 static EWRAM_DATA u8 *sBg2TilemapBuffer = NULL;
 static EWRAM_DATA u8 gSelectedMenu = 0;
+static EWRAM_DATA u8 gSavedSelectorY = 0;
 
 //==========STATIC=DEFINES==========//
 static void StartMenu_RunSetup(void);
@@ -574,14 +575,14 @@ static void CursorCallback(struct Sprite *sprite)
         sprite->y = sCursorYCoords[y];
     }
 
-    for (int i = 0; i < 8; i += 2)
+    for (int i = 0; i < VISIBLE_BUTTONS * 2; i += 2)
     {
         u8 buttonSpriteId = sStartMenuDataPtr->MenuButtonSpriteIds[i];
         struct Sprite *buttonSprite = &gSprites[buttonSpriteId];
 
         if (abs(sprite->y - buttonSprite->y) < 4)
         {
-            gSelectedMenu = i / 2;
+            gSelectedMenu = sStartMenuDataPtr->scrollOffset + (i / 2);
             break;
         }
     }
@@ -589,7 +590,20 @@ static void CursorCallback(struct Sprite *sprite)
 
 static void InitCursorInPlace(void)
 {
-    sStartMenuDataPtr->selector_y = gSelectedMenu;
+    if (gSelectedMenu >= TOTAL_MENU_OPTIONS)
+        gSelectedMenu = 0;
+
+    if (gSavedSelectorY >= VISIBLE_BUTTONS)
+        gSavedSelectorY = 0;
+
+    int scrollOffsetCandidate = gSelectedMenu - gSavedSelectorY;
+    if (scrollOffsetCandidate < 0)
+        scrollOffsetCandidate = 0;
+    if (scrollOffsetCandidate > TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
+        scrollOffsetCandidate = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+
+    sStartMenuDataPtr->scrollOffset = scrollOffsetCandidate;
+    sStartMenuDataPtr->selector_y = gSelectedMenu - scrollOffsetCandidate;
 }
 
 #define ICON_BOX_1_START_X          24
@@ -897,8 +911,6 @@ void StartMenu_Init(MainCallback callback)
     }
 
     InitCursorInPlace();
-    sStartMenuDataPtr->scrollOffset = 0;
-    sStartMenuDataPtr->selector_y  = 0;
 
     gFieldCallback = NULL;
     
@@ -1153,11 +1165,11 @@ static void StartMenu_UpdateVisibleButtons(void)
     for (i = 0; i < VISIBLE_BUTTONS; i++)
     {
         menuIndex = (sStartMenuDataPtr->scrollOffset + i) % TOTAL_MENU_OPTIONS;
-        gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2    ]].y =
+        gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2]].y =
             START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING;
         gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]].y =
             START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING;
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2    ]],
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2]],
                         sButtonAnimIndices[menuIndex][0]);
         StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]],
                         sButtonAnimIndices[menuIndex][1]);
@@ -1463,7 +1475,7 @@ static void Task_StartMenu_Main(u8 taskId)
             sStartMenuDataPtr->selector_y--;
         }
     }
-    
+
     if (JOY_NEW(DPAD_DOWN))
     {
         if (sStartMenuDataPtr->selector_y == VISIBLE_BUTTONS - 1)
@@ -1493,7 +1505,8 @@ static void Task_StartMenu_Main(u8 taskId)
         }
     }
 
-    gSelectedMenu = (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y) % TOTAL_MENU_OPTIONS;
+    gSelectedMenu = sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y;
+    gSavedSelectorY = sStartMenuDataPtr->selector_y;
 
     StartMenu_UpdateVisibleButtons();
 
