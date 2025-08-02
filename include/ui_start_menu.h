@@ -13,7 +13,8 @@ struct StartMenuResources
     u16 iconMonSpriteIds[6];
     u16 iconStatusSpriteIds[6];
     u16 selector_y;
-    u8 scrollOffset;
+    u16 scrollOffset;
+    u8 scrollIndicatorArrowPairId;
 };
 
 enum StartMenuWindowIds

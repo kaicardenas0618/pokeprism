@@ -63,6 +63,8 @@ static bool8 StartMenu_DoGfxSetup(void);
 static bool8 StartMenu_InitBgs(void);
 static void StartMenu_FadeAndBail(void);
 static bool8 StartMenu_LoadGraphics(void);
+static void PlaceStartMenuScrollIndicatorArrows(void);
+static void RemoveStartMenuScrollIndicatorArrows(void);
 static void StartMenu_CreateButtons(void);
 static void StartMenu_UpdateVisibleButtons(void);
 static void StartMenu_InitWindows(void);
@@ -172,7 +174,7 @@ static const struct OamData sOamData_Cursor =
 {
     .size = SPRITE_SIZE(64x32),
     .shape = SPRITE_SHAPE(64x32),
-    .priority = 0,
+    .priority = 1,
 };
 
 static const struct CompressedSpriteSheet sSpriteSheet_Cursor =
@@ -386,7 +388,7 @@ static const struct OamData sOam_MenuButton =
 {
     .shape = SPRITE_SHAPE(64x32),
     .size = SPRITE_SIZE(64x32),
-    .priority = 1,
+    .priority = 2,
     .paletteNum = 5,
 };
 
@@ -903,6 +905,7 @@ void StartMenu_Init(MainCallback callback)
     sStartMenuDataPtr->savedCallback = callback;
     sStartMenuDataPtr->cursorSpriteIds[0] = SPRITE_NONE;
     sStartMenuDataPtr->cursorSpriteIds[1] = SPRITE_NONE;
+    sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
 
     for(i= 0; i < 6; i++)
     {
@@ -1024,6 +1027,7 @@ static void StartMenu_FreeResources(void)
     TryFree(sBg1TilemapBuffer);
     TryFree(sBg2TilemapBuffer);
     DestroyCursor();
+    RemoveStartMenuScrollIndicatorArrows();
     //DestroyIconBoxes();
     DestroyMonIcons();
     DestroyStatusSprites();
@@ -1131,6 +1135,8 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         InitCursorInPlace();
         CreateCursor();
 
+        PlaceStartMenuScrollIndicatorArrows();
+
         sStartMenuDataPtr->gfxLoadState++;
         break;
     }
@@ -1139,6 +1145,44 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         return TRUE;
     }
     return FALSE;
+}
+
+static void PlaceStartMenuScrollIndicatorArrows(void)
+{
+    if (TOTAL_MENU_OPTIONS <= VISIBLE_BUTTONS)
+    {
+        if (sStartMenuDataPtr->scrollIndicatorArrowPairId != SPRITE_NONE)
+        {
+            RemoveScrollIndicatorArrowPair(sStartMenuDataPtr->scrollIndicatorArrowPairId);
+            sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
+        }
+        return;
+    }
+
+    u8 hiddenOptions = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+
+    if (sStartMenuDataPtr->scrollIndicatorArrowPairId == SPRITE_NONE)
+    {
+        sStartMenuDataPtr->scrollIndicatorArrowPairId = AddScrollIndicatorArrowPairParameterized(
+            2,
+            171,
+            20,
+            140,
+            hiddenOptions,
+            110,
+            110,
+            &sStartMenuDataPtr->scrollOffset
+        );
+    }
+}
+
+static void RemoveStartMenuScrollIndicatorArrows(void)
+{
+    if (sStartMenuDataPtr->scrollIndicatorArrowPairId != SPRITE_NONE)
+    {
+        RemoveScrollIndicatorArrowPair(sStartMenuDataPtr->scrollIndicatorArrowPairId);
+        sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
+    }
 }
 
 static void StartMenu_CreateButtons(void)
