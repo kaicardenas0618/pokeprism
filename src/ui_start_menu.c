@@ -63,6 +63,7 @@ static bool8 StartMenu_InitBgs(void);
 static void StartMenu_FadeAndBail(void);
 static bool8 StartMenu_LoadGraphics(void);
 static void StartMenu_CreateButtons(void);
+static void StartMenu_UpdateVisibleButtons(void);
 static void StartMenu_InitWindows(void);
 static void Task_StartMenu_WaitFadeIn(u8 taskId);
 static void Task_StartMenu_Main(u8 taskId);
@@ -894,7 +895,10 @@ void StartMenu_Init(MainCallback callback)
         //sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
         sStartMenuDataPtr->iconMonSpriteIds[i] = SPRITE_NONE;
     }
+
     InitCursorInPlace();
+    sStartMenuDataPtr->scrollOffset = 0;
+    sStartMenuDataPtr->selector_y  = 0;
 
     gFieldCallback = NULL;
     
@@ -974,7 +978,6 @@ static bool8 StartMenu_DoGfxSetup(void)
     case 5:
         PrintMapNameAndTime(); // print all sprites
         //CreateIconBox();
-        CreateCursor();
         CreatePartyMonIcons();
         StartMenu_DisplayHP();
         CreatePartyMonStatuses();
@@ -1112,6 +1115,9 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         LoadSpritePalette(&sSpritePalette_MenuButton);
 
         StartMenu_CreateButtons();
+        StartMenu_UpdateVisibleButtons();  
+        InitCursorInPlace();
+        CreateCursor();
 
         sStartMenuDataPtr->gfxLoadState++;
         break;
@@ -1125,37 +1131,37 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
 
 static void StartMenu_CreateButtons(void)
 {
-    sStartMenuDataPtr->MenuButtonSpriteIds[0] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START, 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[0] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[0]], START_MENU_BUTTON_POKEDEX1);
+    u8 i;
+    for (i = 0; i < VISIBLE_BUTTONS; i++)
+    {
+        sStartMenuDataPtr->MenuButtonSpriteIds[i*2    ] =
+            CreateSprite(&sSpriteTemplate_MenuButton,
+                         START_MENU_BUTTON_X_1,
+                         START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING,
+                         0);
+        sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1] =
+            CreateSprite(&sSpriteTemplate_MenuButton,
+                         START_MENU_BUTTON_X_2,
+                         START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING,
+                         0);
+    }
+}
 
-    sStartMenuDataPtr->MenuButtonSpriteIds[1] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START, 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[1] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[1]], START_MENU_BUTTON_POKEDEX2);
-
-    sStartMenuDataPtr->MenuButtonSpriteIds[2] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START + START_MENU_BUTTON_Y_SPACING, 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[2] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[2]], START_MENU_BUTTON_POKEMON1);
-
-    sStartMenuDataPtr->MenuButtonSpriteIds[3] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START + START_MENU_BUTTON_Y_SPACING, 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[3] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[3]], START_MENU_BUTTON_POKEMON2);
-
-    sStartMenuDataPtr->MenuButtonSpriteIds[4] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 2), 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[4] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[4]], START_MENU_BUTTON_BAG1);
-
-    sStartMenuDataPtr->MenuButtonSpriteIds[5] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 2), 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[5] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[5]], START_MENU_BUTTON_BAG2);
-
-    sStartMenuDataPtr->MenuButtonSpriteIds[6] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 3), 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[6] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[6]], START_MENU_BUTTON_CARD1);
-
-    sStartMenuDataPtr->MenuButtonSpriteIds[7] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 3), 0);
-    if (sStartMenuDataPtr->MenuButtonSpriteIds[7] != MAX_SPRITES)
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[7]], START_MENU_BUTTON_CARD2);
+static void StartMenu_UpdateVisibleButtons(void)
+{
+    u8 i, menuIndex;
+    for (i = 0; i < VISIBLE_BUTTONS; i++)
+    {
+        menuIndex = (sStartMenuDataPtr->scrollOffset + i) % TOTAL_MENU_OPTIONS;
+        gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2    ]].y =
+            START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING;
+        gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]].y =
+            START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING;
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2    ]],
+                        sButtonAnimIndices[menuIndex][0]);
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]],
+                        sButtonAnimIndices[menuIndex][1]);
+    }
 }
 
 static void StartMenu_InitWindows(void)
@@ -1437,20 +1443,27 @@ static void Task_StartMenu_Main(u8 taskId)
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
         gTasks[taskId].func = Task_StartMenu_TurnOff;
     }
+
     if (JOY_NEW(DPAD_UP))
     {
         if (sStartMenuDataPtr->selector_y == 0)
-            sStartMenuDataPtr->selector_y = 3;
+            sStartMenuDataPtr->scrollOffset = (sStartMenuDataPtr->scrollOffset + TOTAL_MENU_OPTIONS - 1) % TOTAL_MENU_OPTIONS;
         else
             sStartMenuDataPtr->selector_y--;
     }
-    if (JOY_NEW(DPAD_DOWN))
+
+    else if (JOY_NEW(DPAD_DOWN))
     {
-        if (sStartMenuDataPtr->selector_y == 3)
-            sStartMenuDataPtr->selector_y = 0;
+        if (sStartMenuDataPtr->selector_y == VISIBLE_BUTTONS - 1)
+            sStartMenuDataPtr->scrollOffset = (sStartMenuDataPtr->scrollOffset + 1) % TOTAL_MENU_OPTIONS;
         else
             sStartMenuDataPtr->selector_y++;
     }
+
+    gSelectedMenu = (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y) % TOTAL_MENU_OPTIONS;
+
+    StartMenu_UpdateVisibleButtons();
+    
     if (JOY_NEW(A_BUTTON))
     {
         switch(gSelectedMenu)
