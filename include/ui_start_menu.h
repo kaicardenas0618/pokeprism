@@ -39,6 +39,9 @@ enum StartMenuBoxes
 #define START_MENU_BUTTON_Y_START   32
 #define START_MENU_BUTTON_Y_SPACING 32
 
+#define TOTAL_MENU_OPTIONS  7
+#define VISIBLE_BUTTONS     4
+
 enum MenuButtons
 {
     START_MENU_BUTTON_POKEDEX1,

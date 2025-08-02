@@ -501,6 +501,17 @@ static const struct SpriteTemplate sSpriteTemplate_MenuButton =
     .callback = SpriteCallbackDummy,
 };
 
+static const u8 sButtonAnimIndices[TOTAL_MENU_OPTIONS][2] =
+{
+    {START_MENU_BUTTON_POKEDEX1,  START_MENU_BUTTON_POKEDEX2},
+    {START_MENU_BUTTON_POKEMON1,  START_MENU_BUTTON_POKEMON2},
+    {START_MENU_BUTTON_BAG1,      START_MENU_BUTTON_BAG2},
+    {START_MENU_BUTTON_CARD1,     START_MENU_BUTTON_CARD2},
+    {START_MENU_BUTTON_QUESTS1,   START_MENU_BUTTON_QUESTS2},
+    {START_MENU_BUTTON_OPTIONS1,  START_MENU_BUTTON_OPTIONS2},
+    {START_MENU_BUTTON_DEXNAV1,   START_MENU_BUTTON_DEXNAV2},
+};
+
 #define CURSOR_LEFT_COL_X    START_MENU_BUTTON_X_1
 #define CURSOR_RIGHT_COL_X   START_MENU_BUTTON_X_2
 #define CURSOR_TOP_ROW_Y     START_MENU_BUTTON_Y_START
@@ -880,7 +891,7 @@ void StartMenu_Init(MainCallback callback)
 
     for(i= 0; i < 6; i++)
     {
-        sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
+        //sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
         sStartMenuDataPtr->iconMonSpriteIds[i] = SPRITE_NONE;
     }
     InitCursorInPlace();
