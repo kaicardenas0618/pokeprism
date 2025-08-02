@@ -1743,7 +1743,7 @@ static u8 SaveConfirmSaveCallback(void) {
   //RemoveStartMenuWindow();
   //ShowSaveInfoWindow();
 
-  if (InBattlePyramid()) {
+  if (CurrentBattlePyramidLocation()) {
     ShowSaveMessage(gText_BattlePyramidConfirmRest, SaveYesNoCallback);
   } else {
     ShowSaveMessage(gText_ConfirmSave, SaveYesNoCallback);
