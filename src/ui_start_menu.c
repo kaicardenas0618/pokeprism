@@ -60,6 +60,7 @@ static bool8 StartMenu_DoGfxSetup(void);
 static bool8 StartMenu_InitBgs(void);
 static void StartMenu_FadeAndBail(void);
 static bool8 StartMenu_LoadGraphics(void);
+static void StartMenu_CreateButtons(void);
 static void StartMenu_InitWindows(void);
 static void Task_StartMenu_WaitFadeIn(u8 taskId);
 static void Task_StartMenu_Main(u8 taskId);
@@ -153,14 +154,16 @@ static const u8 sHPBar_10_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_ba
 static const u8 sHPBar_0_Percent_Gfx[]    = INCBIN_U8("graphics/start_menu/hp_bar/0_percent.4bpp");
 static const u16 sHPBar_Pal[] = INCBIN_U16("graphics/start_menu/hp_bar/hpbar.gbapal");
 
-static const u32 sMenuButtons_Gfx[] = INCBIN_U32("graphics/start_menu/menu_sprites/menu_buttons.4bpp");
-static const u16 sMenuButtons_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons.gbapal");
+static const u8 sMenuButton_Gfx[] = INCBIN_U8("graphics/start_menu/menu_sprites/menu_buttons.4bpp");
+static const u16 sMenuButton_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons.gbapal");
 
 #define TAG_CURSOR       30004
 //#define TAG_ICON_BOX     30006
 #define TAG_HPBAR        30008
-#define TAG_STATUS_ICONS 30009
+#define TAG_STATUS_ICON  30009
+#define TAG_BUTTON_ICON  30020
 
+// Cursor
 static const struct OamData sOamData_Cursor =
 {
     .size = SPRITE_SIZE(64x32),
@@ -181,15 +184,22 @@ static const struct SpritePalette sSpritePal_Cursor =
     .tag = TAG_CURSOR
 };
 
-static const union AnimCmd sSpriteAnim_Cursor[] =
+static const union AnimCmd sSpriteAnim_Cursor1[] =
 {
     ANIMCMD_FRAME(0, 32),
     ANIMCMD_JUMP(0),
 };
 
+static const union AnimCmd sSpriteAnim_Cursor2[] =
+{
+    ANIMCMD_FRAME(32, 32),
+    ANIMCMD_JUMP(0),
+};
+
 static const union AnimCmd *const sSpriteAnimTable_Cursor[] =
 {
-    sSpriteAnim_Cursor,
+    sSpriteAnim_Cursor1,
+    sSpriteAnim_Cursor2,
 };
 
 static const struct SpriteTemplate sSpriteTemplate_Cursor =
@@ -204,6 +214,7 @@ static const struct SpriteTemplate sSpriteTemplate_Cursor =
 };
 
 /*
+// Icon Box
 static const struct OamData sOamData_IconBox =
 {
     .size = SPRITE_SIZE(32x32),
@@ -247,6 +258,7 @@ static const struct SpriteTemplate sSpriteTemplate_IconBox =
 };
 */
 
+// Status Icons
 static const struct OamData sOamData_StatusCondition =
 {
     .y = 0,
@@ -333,18 +345,18 @@ static const union AnimCmd *const sSpriteTemplate_StatusCondition[] =
 
 static const struct CompressedSpriteSheet sSpriteSheet_StatusIcons =
 {
-    gStatusGfx_Icons, 0x400, TAG_STATUS_ICONS
+    gStatusGfx_Icons, 0x400, TAG_STATUS_ICON
 };
 
 static const struct SpritePalette sSpritePalette_StatusIcons =
 {
-    gStatusPal_Icons, TAG_STATUS_ICONS
+    gStatusPal_Icons, TAG_STATUS_ICON
 };
 
 static const struct SpriteTemplate sSpriteTemplate_StatusIcons =
 {
-    .tileTag = TAG_STATUS_ICONS,
-    .paletteTag = TAG_STATUS_ICONS,
+    .tileTag = TAG_STATUS_ICON,
+    .paletteTag = TAG_STATUS_ICON,
     .oam = &sOamData_StatusCondition,
     .anims = sSpriteTemplate_StatusCondition,
     .images = NULL,
@@ -352,29 +364,173 @@ static const struct SpriteTemplate sSpriteTemplate_StatusIcons =
     .callback = SpriteCallbackDummy,
 };
 
-#define CURSOR_LEFT_COL_X 128
-#define CURSOR_RIGHT_COL_X 128 + 64 + 8
-#define CURSOR_TOP_ROW_Y 40
-#define CURSOR_MID_ROW_Y 40 + 40
-#define CURSOR_BTM_ROW_Y 40 + 80
+// Menu Buttons
+static const struct SpriteSheet sSpriteSheet_MenuButton =
+{
+    .data = sMenuButton_Gfx,
+    .size = 64 * 32 * START_MENU_BUTTON_COUNT / 2,
+    .tag = TAG_BUTTON_ICON,
+};
+
+static const struct SpritePalette sSpritePalette_MenuButton =
+{
+    .data = sMenuButton_Pal,
+    .tag = TAG_BUTTON_ICON,
+};
+
+static const struct OamData sOam_MenuButton =
+{
+    .shape = SPRITE_SHAPE(64x32),
+    .size = SPRITE_SIZE(64x32),
+    .priority = 1,
+    .paletteNum = 5,
+};
+
+static const union AnimCmd sAnim_MenuButton_Pokedex1[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Pokedex2[] =
+{
+    ANIMCMD_FRAME(32, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Pokemon1[] =
+{
+    ANIMCMD_FRAME(64, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Pokemon2[] =
+{
+    ANIMCMD_FRAME(96, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Bag1[] =
+{
+    ANIMCMD_FRAME(128, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Bag2[] =
+{
+    ANIMCMD_FRAME(160, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Card1[] =
+{
+    ANIMCMD_FRAME(192, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Card2[] =
+{
+    ANIMCMD_FRAME(224, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Quests1[] =
+{
+    ANIMCMD_FRAME(256, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Quests2[] =
+{
+    ANIMCMD_FRAME(288, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Options1[] =
+{
+    ANIMCMD_FRAME(320, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_Options2[] =
+{
+    ANIMCMD_FRAME(352, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_DexNav1[] =
+{
+    ANIMCMD_FRAME(384, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButton_DexNav2[] =
+{
+    ANIMCMD_FRAME(416, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd *const sAnimTable_MenuButton[] =
+{
+    sAnim_MenuButton_Pokedex1,
+    sAnim_MenuButton_Pokedex2,
+    sAnim_MenuButton_Pokemon1,
+    sAnim_MenuButton_Pokemon2,
+    sAnim_MenuButton_Bag1,
+    sAnim_MenuButton_Bag2,
+    sAnim_MenuButton_Card1,
+    sAnim_MenuButton_Card2,
+    sAnim_MenuButton_Quests1,
+    sAnim_MenuButton_Quests2,
+    sAnim_MenuButton_Options1,
+    sAnim_MenuButton_Options2,
+    sAnim_MenuButton_DexNav1,
+    sAnim_MenuButton_DexNav2,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_MenuButton =
+{
+    .tileTag = TAG_BUTTON_ICON,
+    .paletteTag = TAG_BUTTON_ICON,
+    .oam = &sOam_MenuButton,
+    .anims = sAnimTable_MenuButton,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
+#define CURSOR_LEFT_COL_X    START_MENU_BUTTON_X_1
+#define CURSOR_RIGHT_COL_X   START_MENU_BUTTON_X_2
+#define CURSOR_TOP_ROW_Y     START_MENU_BUTTON_Y_START
+#define CURSOR_MID1_ROW_Y    START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 1)
+#define CURSOR_MID2_ROW_Y    START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 2)
+#define CURSOR_BTM_ROW_Y     START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 3)
 
 static void CreateCursor(void)
 {
-    if (sStartMenuDataPtr->cursorSpriteId == SPRITE_NONE)
-        sStartMenuDataPtr->cursorSpriteId = CreateSprite(&sSpriteTemplate_Cursor, CURSOR_LEFT_COL_X, CURSOR_TOP_ROW_Y, 0);
+    if (sStartMenuDataPtr->cursorSpriteIds[0] == SPRITE_NONE && sStartMenuDataPtr->cursorSpriteIds[1] == SPRITE_NONE)
+    {
+        sStartMenuDataPtr->cursorSpriteIds[0] = CreateSprite(&sSpriteTemplate_Cursor, CURSOR_LEFT_COL_X, CURSOR_TOP_ROW_Y, 0);
+        sStartMenuDataPtr->cursorSpriteIds[1] = CreateSprite(&sSpriteTemplate_Cursor, CURSOR_LEFT_COL_X + 64, CURSOR_TOP_ROW_Y, 0);
 
-    CursorCallback(&gSprites[sStartMenuDataPtr->cursorSpriteId]);
-    
-    gSprites[sStartMenuDataPtr->cursorSpriteId].invisible = FALSE;
-    StartSpriteAnim(&gSprites[sStartMenuDataPtr->cursorSpriteId], 0);
-    return;
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->cursorSpriteIds[0]], 0);
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->cursorSpriteIds[1]], 1);
+
+        gSprites[sStartMenuDataPtr->cursorSpriteIds[0]].invisible = FALSE;
+        gSprites[sStartMenuDataPtr->cursorSpriteIds[1]].invisible = FALSE;
+    }
 }
 
 static void DestroyCursor(void)
 {
-    if (sStartMenuDataPtr->cursorSpriteId != SPRITE_NONE)
-        DestroySprite(&gSprites[sStartMenuDataPtr->cursorSpriteId]);
-    sStartMenuDataPtr->cursorSpriteId = SPRITE_NONE;
+    for (int i = 0; i < 2; i++)
+    {
+        if (sStartMenuDataPtr->cursorSpriteIds[i] != SPRITE_NONE)
+        {
+            DestroySprite(&gSprites[sStartMenuDataPtr->cursorSpriteIds[i]]);
+            sStartMenuDataPtr->cursorSpriteIds[i] = SPRITE_NONE;
+        }
+    }
 }
 
 struct SpriteCordsStruct {
@@ -382,35 +538,45 @@ struct SpriteCordsStruct {
     u8 y;
 };
 
-static void CursorCallback(struct Sprite *sprite) // Sprite callback for the cursor that updates the position every frame when the input control code updates
+static void CursorCallback(struct Sprite *sprite)
 {
-    struct SpriteCordsStruct spriteCords[3][2] = {
-        {{CURSOR_LEFT_COL_X, CURSOR_TOP_ROW_Y}, {CURSOR_RIGHT_COL_X, CURSOR_TOP_ROW_Y}},
-        {{CURSOR_LEFT_COL_X, CURSOR_MID_ROW_Y}, {CURSOR_RIGHT_COL_X, CURSOR_MID_ROW_Y}},
-        {{CURSOR_LEFT_COL_X, CURSOR_BTM_ROW_Y}, {CURSOR_RIGHT_COL_X, CURSOR_BTM_ROW_Y}},
+    struct SpriteCordsStruct spriteCords[4][2] =
+    {
+        {{CURSOR_LEFT_COL_X,  CURSOR_TOP_ROW_Y},    {CURSOR_LEFT_COL_X + 64, CURSOR_TOP_ROW_Y}},
+        {{CURSOR_LEFT_COL_X,  CURSOR_MID1_ROW_Y},   {CURSOR_LEFT_COL_X + 64, CURSOR_MID1_ROW_Y}},
+        {{CURSOR_LEFT_COL_X,  CURSOR_MID2_ROW_Y},   {CURSOR_LEFT_COL_X + 64, CURSOR_MID2_ROW_Y}},
+        {{CURSOR_LEFT_COL_X,  CURSOR_BTM_ROW_Y},    {CURSOR_LEFT_COL_X + 64, CURSOR_BTM_ROW_Y}},
     };
 
-    gSelectedMenu = sStartMenuDataPtr->selector_x + (sStartMenuDataPtr->selector_y * 2);
+    u8 x = sStartMenuDataPtr->selector_x;
+    u8 y = sStartMenuDataPtr->selector_y;
 
-    sprite->x = spriteCords[sStartMenuDataPtr->selector_y][sStartMenuDataPtr->selector_x].x;
-    sprite->y = spriteCords[sStartMenuDataPtr->selector_y][sStartMenuDataPtr->selector_x].y;
+    gSelectedMenu = x + (y * 2);
 
-
+    if (sprite == &gSprites[sStartMenuDataPtr->cursorSpriteIds[0]])
+    {
+        sprite->x = spriteCords[y][0].x;
+        sprite->y = spriteCords[y][0].y;
+    }
+    else if (sprite == &gSprites[sStartMenuDataPtr->cursorSpriteIds[1]])
+    {
+        sprite->x = spriteCords[y][1].x;
+        sprite->y = spriteCords[y][1].y;
+    }
 }
 
 static void InitCursorInPlace(void)
 {
-    if(gSelectedMenu % 2)
-        sStartMenuDataPtr->selector_x = 1;
-    else
-        sStartMenuDataPtr->selector_x = 0;
+    sStartMenuDataPtr->selector_x = (gSelectedMenu % 2) ? 1 : 0;
 
-    if(gSelectedMenu <= 1)
+    if (gSelectedMenu <= 1)
         sStartMenuDataPtr->selector_y = 0;
-    else if (gSelectedMenu > 1 && gSelectedMenu <= 3)
+    else if (gSelectedMenu <= 3)
         sStartMenuDataPtr->selector_y = 1;
-    else
+    else if (gSelectedMenu <= 5)
         sStartMenuDataPtr->selector_y = 2;
+    else
+        sStartMenuDataPtr->selector_y = 3;
 }
 
 #define ICON_BOX_1_START_X          24
@@ -708,7 +874,8 @@ void StartMenu_Init(MainCallback callback)
     // Make Sure Sprites are Empty on Reload
     sStartMenuDataPtr->gfxLoadState = 0;
     sStartMenuDataPtr->savedCallback = callback;
-    sStartMenuDataPtr->cursorSpriteId = SPRITE_NONE;
+    sStartMenuDataPtr->cursorSpriteIds[0] = SPRITE_NONE;
+    sStartMenuDataPtr->cursorSpriteIds[1] = SPRITE_NONE;
 
     for(i= 0; i < 6; i++)
     {
@@ -929,6 +1096,10 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         LoadSpritePalette(&cursorPal);
         LoadCompressedSpriteSheet(&sSpriteSheet_StatusIcons);
         LoadSpritePalette(&sSpritePalette_StatusIcons);
+        LoadSpriteSheet(&sSpriteSheet_MenuButton);
+        LoadSpritePalette(&sSpritePalette_MenuButton);
+
+        StartMenu_CreateButtons();
 
         sStartMenuDataPtr->gfxLoadState++;
         break;
@@ -938,6 +1109,41 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         return TRUE;
     }
     return FALSE;
+}
+
+static void StartMenu_CreateButtons(void)
+{
+    sStartMenuDataPtr->MenuButtonSpriteIds[0] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START, 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[0] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[0]], START_MENU_BUTTON_POKEDEX1);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[1] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START, 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[1] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[1]], START_MENU_BUTTON_POKEDEX2);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[2] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START + START_MENU_BUTTON_Y_SPACING, 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[2] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[2]], START_MENU_BUTTON_POKEMON1);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[3] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START + START_MENU_BUTTON_Y_SPACING, 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[3] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[3]], START_MENU_BUTTON_POKEMON2);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[4] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 2), 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[4] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[4]], START_MENU_BUTTON_BAG1);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[5] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 2), 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[5] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[5]], START_MENU_BUTTON_BAG2);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[6] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_1, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 3), 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[6] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[6]], START_MENU_BUTTON_CARD1);
+
+    sStartMenuDataPtr->MenuButtonSpriteIds[7] = CreateSprite(&sSpriteTemplate_MenuButton, START_MENU_BUTTON_X_2, START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 3), 0);
+    if (sStartMenuDataPtr->MenuButtonSpriteIds[7] != MAX_SPRITES)
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[7]], START_MENU_BUTTON_CARD2);
 }
 
 static void StartMenu_InitWindows(void)
