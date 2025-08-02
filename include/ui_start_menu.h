@@ -41,6 +41,7 @@ enum StartMenuBoxes
 
 #define TOTAL_MENU_OPTIONS  7
 #define VISIBLE_BUTTONS     4
+#define MAX_SCROLL_OFFSET   (TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
 
 enum MenuButtons
 {

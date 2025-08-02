@@ -1447,23 +1447,56 @@ static void Task_StartMenu_Main(u8 taskId)
     if (JOY_NEW(DPAD_UP))
     {
         if (sStartMenuDataPtr->selector_y == 0)
-            sStartMenuDataPtr->scrollOffset = (sStartMenuDataPtr->scrollOffset + TOTAL_MENU_OPTIONS - 1) % TOTAL_MENU_OPTIONS;
+        {
+            if (sStartMenuDataPtr->scrollOffset == 0)
+            {
+                sStartMenuDataPtr->scrollOffset = MAX_SCROLL_OFFSET;
+                sStartMenuDataPtr->selector_y = VISIBLE_BUTTONS - 1;
+            }
+            else
+            {
+                sStartMenuDataPtr->scrollOffset--;
+            }
+        }
         else
+        {
             sStartMenuDataPtr->selector_y--;
+        }
     }
-
-    else if (JOY_NEW(DPAD_DOWN))
+    
+    if (JOY_NEW(DPAD_DOWN))
     {
         if (sStartMenuDataPtr->selector_y == VISIBLE_BUTTONS - 1)
-            sStartMenuDataPtr->scrollOffset = (sStartMenuDataPtr->scrollOffset + 1) % TOTAL_MENU_OPTIONS;
+        {
+            if (sStartMenuDataPtr->scrollOffset + VISIBLE_BUTTONS >= TOTAL_MENU_OPTIONS)
+            {
+                // Wrap to top
+                sStartMenuDataPtr->scrollOffset = 0;
+                sStartMenuDataPtr->selector_y = 0;
+            }
+            else
+            {
+                sStartMenuDataPtr->scrollOffset++;
+            }
+        }
         else
-            sStartMenuDataPtr->selector_y++;
+        {
+            if (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y + 1 >= TOTAL_MENU_OPTIONS)
+            {
+                sStartMenuDataPtr->scrollOffset = 0;
+                sStartMenuDataPtr->selector_y = 0;
+            }
+            else
+            {
+                sStartMenuDataPtr->selector_y++;
+            }
+        }
     }
 
     gSelectedMenu = (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y) % TOTAL_MENU_OPTIONS;
 
     StartMenu_UpdateVisibleButtons();
-    
+
     if (JOY_NEW(A_BUTTON))
     {
         switch(gSelectedMenu)
