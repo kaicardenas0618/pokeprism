@@ -917,12 +917,12 @@ static void CB2_ReturnFromRecord(void)
     sPassData->cursorX = sSavedPassData.cursorX;
     sPassData->cursorY = sSavedPassData.cursorY;
     memset(&sSavedPassData, 0, sizeof(sSavedPassData));
-    switch (CurrentBattlePyramidLocation())
+    switch (InBattlePyramid())
     {
-    case PYRAMID_LOCATION_FLOOR:
+    case 1:
         PlayBGM(MUS_B_PYRAMID);
         break;
-    case PYRAMID_LOCATION_TOP:
+    case 2:
         PlayBGM(MUS_B_PYRAMID_TOP);
         break;
     default:

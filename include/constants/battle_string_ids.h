@@ -1167,7 +1167,8 @@ enum StartingStatusStringID
 };
 
 // gWrappedStringIds
-enum __attribute__((packed)) WrappedStringID
+// These correspond in order to sTrappingMoves!
+enum WrappedStringID
 {
     B_MSG_WRAPPED_BIND,
     B_MSG_WRAPPED_WRAP,
