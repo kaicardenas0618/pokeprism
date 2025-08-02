@@ -2868,3 +2868,8 @@ void QuestMenu_ResetMenuSaveData(void)
 	memset(&gSaveBlock4Ptr->subQuests, 0,
 	       sizeof(gSaveBlock4Ptr->subQuests));
 }
+
+void CB2_OpenQuestMenuFromStartMenu(void)
+{
+    QuestMenu_Init(0, CB2_ReturnToStartMenu);
+}

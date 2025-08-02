@@ -21,6 +21,7 @@
 #include "menu_helpers.h"
 #include "palette.h"
 #include "party_menu.h"
+#include "quests.h"
 #include "scanline_effect.h"
 #include "script.h"
 #include "sound.h"
@@ -1340,14 +1341,14 @@ void Task_OpenTrainerCardFromStartMenu(u8 taskId)
     }
 }
 
-void Task_OpenPokenavStartMenu(u8 taskId)
+void Task_OpenQuestsStartMenu(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
         StartMenu_FreeResources();
 		PlayRainStoppingSoundEffect();
 		CleanupOverworldWindowsAndTilemaps();
-        SetMainCallback2(CB2_InitPokeNav);
+        SetMainCallback2(CB2_OpenQuestMenuFromStartMenu);
     }
 }
 
@@ -1439,11 +1440,6 @@ static void Task_StartMenu_Main(u8 taskId)
     {
         switch(gSelectedMenu)
         {
-            case START_MENU_BAG:
-                PlaySE(SE_SELECT);
-                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-                gTasks[taskId].func = Task_OpenBagFromStartMenu;
-                break;
             case START_MENU_POKEDEX:
                 if(FlagGet(FLAG_SYS_POKEDEX_GET))
                 {
@@ -1456,7 +1452,7 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
-            case START_MENU_PARTY:
+            case START_MENU_POKEMON:
                 if(FlagGet(FLAG_SYS_POKEMON_GET))
                 {
                     PlaySE(SE_SELECT);
@@ -1468,21 +1464,26 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
-            case START_MENU_MAP:
-                if(FlagGet(FLAG_SYS_POKENAV_GET))
-                {
-                    PlaySE(SE_SELECT);
-                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-                    gTasks[taskId].func = Task_OpenPokenavStartMenu;
-                }
-                else{
-                    PlaySE(SE_BOO);
-                }
+            case START_MENU_BAG:
+                PlaySE(SE_SELECT);
+                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                gTasks[taskId].func = Task_OpenBagFromStartMenu;
                 break;
             case START_MENU_CARD:
                 PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenTrainerCardFromStartMenu;
+                break;
+            case START_MENU_QUESTS:
+                if(FlagGet(FLAG_SYS_QUEST_MENU_GET))
+                {
+                    PlaySE(SE_SELECT);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_OpenQuestsStartMenu;
+                }
+                else{
+                    PlaySE(SE_BOO);
+                }
                 break;
             case START_MENU_OPTIONS:
                 PlaySE(SE_SELECT);
