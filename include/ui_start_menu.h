@@ -9,12 +9,11 @@ struct StartMenuResources
     u8 gfxLoadState;
     u8 MenuButtonSpriteIds[14];
     u16 cursorSpriteIds[2];
-    u16 iconBoxSpriteIds[6];
+    //u16 iconBoxSpriteIds[6];
     u16 iconMonSpriteIds[6];
     u16 iconStatusSpriteIds[6];
-    u16 selector_x;
     u16 selector_y;
-    u16 selectedMenu;
+    u8 scrollOffset;
 };
 
 enum StartMenuWindowIds

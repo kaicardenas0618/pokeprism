@@ -577,7 +577,6 @@ static void CursorCallback(struct Sprite *sprite)
 
 static void InitCursorInPlace(void)
 {
-    sStartMenuDataPtr->selector_x = 0;
     sStartMenuDataPtr->selector_y = gSelectedMenu;
 }
 
