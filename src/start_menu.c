@@ -94,7 +94,6 @@ EWRAM_DATA static s8 sInitStartMenuData[2] = {0};
 EWRAM_DATA static u8 (*sSaveDialogCallback)(void) = NULL;
 EWRAM_DATA static u8 sSaveDialogTimer = 0;
 EWRAM_DATA static bool8 sSavingComplete = FALSE;
-EWRAM_DATA static u8 sSaveInfoWindowId = 0;
 
 // Menu action callbacks
 static bool8 StartMenuPokedexCallback(void);
@@ -236,16 +235,6 @@ static const struct WindowTemplate sWindowTemplates_LinkBattleSave[] =
     DUMMY_WIN_TEMPLATE
 };
 
-static const struct WindowTemplate sSaveInfoWindowTemplate = {
-    .bg = 0,
-    .tilemapLeft = 1,
-    .tilemapTop = 1,
-    .width = 14,
-    .height = 10,
-    .paletteNum = 15,
-    .baseBlock = 8
-};
-
 // Local functions
 static void BuildStartMenuActions(void);
 static void AddStartMenuAction(u8 action);
@@ -268,7 +257,6 @@ static void InitSave(void);
 static u8 RunSaveCallback(void);
 static void ShowSaveMessage(const u8 *message, u8 (*saveCallback)(void));
 static void HideSaveMessageWindow(void);
-static void HideSaveInfoWindow(void);
 static void SaveStartTimer(void);
 static bool8 SaveSuccesTimer(void);
 static bool8 SaveErrorTimer(void);
@@ -276,8 +264,6 @@ static void InitBattlePyramidRetire(void);
 static void VBlankCB_LinkBattleSave(void);
 static bool32 InitSaveWindowAfterLinkBattle(u8 *par1);
 static void CB2_SaveAfterLinkBattle(void);
-static void ShowSaveInfoWindow(void);
-static void RemoveSaveInfoWindow(void);
 static void HideStartMenuWindow(void);
 static void HideStartMenuDebug(void);
 
@@ -900,7 +886,6 @@ static void Task_StartMenu_Save(u8 taskId)
         switch (*state)
         {
             case 0:
-                ShowSaveInfoWindow();
                 *state = 1;
                 break;
             case 1:
@@ -1043,11 +1028,6 @@ static void HideSaveMessageWindow(void)
     ClearDialogWindowAndFrame(0, TRUE);
 }
 
-static void HideSaveInfoWindow(void)
-{
-    RemoveSaveInfoWindow();
-}
-
 static void SaveStartTimer(void)
 {
     sSaveDialogTimer = 60;
@@ -1088,7 +1068,6 @@ static u8 SaveConfirmSaveCallback(void)
 {
     ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
     RemoveStartMenuWindow();
-    ShowSaveInfoWindow();
 
     if (CurrentBattlePyramidLocation() != PYRAMID_LOCATION_NONE)
     {
@@ -1132,7 +1111,6 @@ static u8 SaveConfirmInputCallback(void)
         }
     case MENU_B_PRESSED:
     case 1: // No
-        HideSaveInfoWindow();
         HideSaveMessageWindow();
         return SAVE_CANCELED;
     }
@@ -1178,7 +1156,6 @@ static u8 SaveOverwriteInputCallback(void)
         return SAVE_IN_PROGRESS;
     case MENU_B_PRESSED:
     case 1: // No
-        HideSaveInfoWindow();
         HideSaveMessageWindow();
         return SAVE_CANCELED;
     }
@@ -1233,7 +1210,6 @@ static u8 SaveReturnSuccessCallback(void)
 {
     if (!IsSEPlaying() && SaveSuccesTimer())
     {
-        HideSaveInfoWindow();
         return SAVE_SUCCESS;
     }
     else
@@ -1261,7 +1237,6 @@ static u8 SaveReturnErrorCallback(void)
     }
     else
     {
-        HideSaveInfoWindow();
         return SAVE_ERROR;
     }
 }
@@ -1438,75 +1413,6 @@ static void Task_SaveAfterLinkBattle(u8 taskId)
     }
 }
 
-static void ShowSaveInfoWindow(void)
-{
-    struct WindowTemplate saveInfoWindow = sSaveInfoWindowTemplate;
-    u8 gender;
-    u8 color;
-    u32 xOffset;
-    u32 yOffset;
-
-    if (!FlagGet(FLAG_SYS_POKEDEX_GET))
-    {
-        saveInfoWindow.height -= 2;
-    }
-
-    sSaveInfoWindowId = AddWindow(&saveInfoWindow);
-    DrawStdWindowFrame(sSaveInfoWindowId, FALSE);
-
-    gender = gSaveBlock2Ptr->playerGender;
-    color = TEXT_COLOR_RED;  // Red when female, blue when male.
-
-    if (gender == MALE)
-    {
-        color = TEXT_COLOR_BLUE;
-    }
-
-    // Print region name
-    yOffset = 1;
-    BufferSaveMenuText(SAVE_MENU_LOCATION, gStringVar4, TEXT_COLOR_GREEN);
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-
-    // Print player name
-    yOffset += 16;
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingPlayer, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-    BufferSaveMenuText(SAVE_MENU_NAME, gStringVar4, color);
-    xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-    PrintPlayerNameOnWindow(sSaveInfoWindowId, gStringVar4, xOffset, yOffset);
-
-    // Print badge count
-    yOffset += 16;
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingBadges, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-    BufferSaveMenuText(SAVE_MENU_BADGES, gStringVar4, color);
-    xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
-
-    if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
-    {
-        // Print Pokédex count
-        yOffset += 16;
-        AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingPokedex, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-        BufferSaveMenuText(SAVE_MENU_CAUGHT, gStringVar4, color);
-        xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-        AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
-    }
-
-    // Print play time
-    yOffset += 16;
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingTime, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-    BufferSaveMenuText(SAVE_MENU_PLAY_TIME, gStringVar4, color);
-    xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
-
-    CopyWindowToVram(sSaveInfoWindowId, COPYWIN_GFX);
-}
-
-static void RemoveSaveInfoWindow(void)
-{
-    ClearStdWindowAndFrame(sSaveInfoWindowId, FALSE);
-    RemoveWindow(sSaveInfoWindowId);
-}
-
 static void Task_WaitForBattleTowerLinkSave(u8 taskId)
 {
     if (!FuncIsActiveTask(Task_LinkFullSave))
@@ -1556,7 +1462,6 @@ static bool8 StartMenuDexNavCallback(void)
 void Script_ForceSaveGame(struct ScriptContext *ctx)
 {
     SaveGame();
-    ShowSaveInfoWindow();
     gMenuCallback = SaveCallback;
     sSaveDialogCallback = SaveSavingMessageCallback;
 }

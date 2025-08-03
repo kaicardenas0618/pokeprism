@@ -1368,19 +1368,25 @@ static void StartMenu_InitWindows(void)
     ScheduleBgCopyTilemapToVram(2);
 }
 
-static const u8 sText_ConfirmSave[] = _("Confirm Save and Return to Overworld?");
-static const u8 sA_ButtonGfx[]         = INCBIN_U8("graphics/start_menu/a_button.4bpp");
+static const u8 sText_ConfirmSave[] = _("Confirm Save");
+static const u8 sText_CancelSave[] = _("Cancel");
+static const u8 sA_ButtonGfx[] = INCBIN_U8("graphics/start_menu/a_button.4bpp");
+static const u8 sB_ButtonGfx[] = INCBIN_U8("graphics/start_menu/b_button.4bpp");
 
 static void PrintSaveConfirmToWindow()
 {
     const u8 *str = sText_ConfirmSave;
+    const u8 *str2 = sText_CancelSave;
     u8 sConfirmTextColors[] = {TEXT_COLOR_TRANSPARENT, 2, 9};
-    u8 x = 24;
+    u8 x = 63;
+    u8 x2 = x + 100;
     u8 y = 0;
     
     FillWindowPixelBuffer(WINDOW_BOTTOM_BAR, PIXEL_FILL(5));
-    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sA_ButtonGfx, 12, 5, 8, 8);
+    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sA_ButtonGfx, x - 12, 4, 8, 8);
     AddTextPrinterParameterized4(WINDOW_BOTTOM_BAR, 1, x, y, 0, 0, sConfirmTextColors, 0xFF, str);
+    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sB_ButtonGfx, x2 - 12, 4, 8, 8);
+    AddTextPrinterParameterized4(WINDOW_BOTTOM_BAR, 1, x2, y, 0, 0, sConfirmTextColors, 0xFF, str2);
     PutWindowTilemap(WINDOW_BOTTOM_BAR);
     CopyWindowToVram(WINDOW_BOTTOM_BAR, COPYWIN_FULL);
 }
