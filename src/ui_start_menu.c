@@ -638,20 +638,44 @@ static void CursorCallback(struct Sprite *sprite)
 
 static void InitCursorInPlace(void)
 {
-    if (gSelectedMenu >= TOTAL_MENU_OPTIONS)
+    if (gSelectedMenu >= sStartMenuDataPtr->numVisibleMenuItems)
         gSelectedMenu = 0;
 
-    if (gSavedSelectorY >= VISIBLE_BUTTONS)
+    if (gSavedSelectorY >= min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems))
         gSavedSelectorY = 0;
 
-    int scrollOffsetCandidate = gSelectedMenu - gSavedSelectorY;
+    int visibleIndex = 0;
+    bool8 found = FALSE;
+    for (int i = 0; i < sStartMenuDataPtr->numVisibleMenuItems; i++)
+    {
+        if (sStartMenuDataPtr->visibleMenuIndices[i] == gSelectedMenu)
+        {
+            visibleIndex = i;
+            found = TRUE;
+            break;
+        }
+    }
+    if (!found)
+        visibleIndex = 0;
+
+    int scrollOffsetCandidate = visibleIndex - gSavedSelectorY;
     if (scrollOffsetCandidate < 0)
         scrollOffsetCandidate = 0;
-    if (scrollOffsetCandidate > TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
-        scrollOffsetCandidate = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+
+    int maxScroll = sStartMenuDataPtr->numVisibleMenuItems - VISIBLE_BUTTONS;
+    if (maxScroll < 0)
+        maxScroll = 0;
+
+    if (scrollOffsetCandidate > maxScroll)
+        scrollOffsetCandidate = maxScroll;
 
     sStartMenuDataPtr->scrollOffset = scrollOffsetCandidate;
-    sStartMenuDataPtr->selector_y = gSelectedMenu - scrollOffsetCandidate;
+    sStartMenuDataPtr->selector_y = visibleIndex - scrollOffsetCandidate;
+
+    if (sStartMenuDataPtr->selector_y < 0)
+        sStartMenuDataPtr->selector_y = 0;
+    else if (sStartMenuDataPtr->selector_y >= VISIBLE_BUTTONS)
+        sStartMenuDataPtr->selector_y = VISIBLE_BUTTONS - 1;
 }
 
 #define ICON_BOX_1_START_X          24
@@ -1700,6 +1724,7 @@ static void Task_StartMenu_Main(u8 taskId)
             sStartMenuDataPtr->selector_y--;
         }
 
+        gSavedSelectorY = sStartMenuDataPtr->selector_y;
         PlaySE(SE_SELECT);
     }
 
@@ -1734,6 +1759,7 @@ static void Task_StartMenu_Main(u8 taskId)
             }
         }
 
+        gSavedSelectorY = sStartMenuDataPtr->selector_y;
         PlaySE(SE_SELECT);
     }
 
