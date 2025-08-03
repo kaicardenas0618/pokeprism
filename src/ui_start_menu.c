@@ -65,6 +65,7 @@ static void StartMenu_FadeAndBail(void);
 static bool8 StartMenu_LoadGraphics(void);
 static void PlaceStartMenuScrollIndicatorArrows(void);
 static void RemoveStartMenuScrollIndicatorArrows(void);
+static void StartMenu_GenerateVisibleMenuIndices(void);
 static void StartMenu_CreateButtons(void);
 static void StartMenu_UpdateVisibleButtons(void);
 static void DestroyAllMenuButtons(void);
@@ -637,17 +638,24 @@ static void CursorCallback(struct Sprite *sprite)
 
 static void InitCursorInPlace(void)
 {
-    if (gSelectedMenu >= TOTAL_MENU_OPTIONS)
-        gSelectedMenu = 0;
+    if (gSelectedMenu >= sStartMenuDataPtr->numVisibleMenuItems)
+        gSelectedMenu = sStartMenuDataPtr->numVisibleMenuItems - 1;
 
-    if (gSavedSelectorY >= VISIBLE_BUTTONS)
-        gSavedSelectorY = 0;
+    u8 maxVisible = sStartMenuDataPtr->numVisibleMenuItems;
+    if (maxVisible > VISIBLE_BUTTONS)
+        maxVisible = VISIBLE_BUTTONS;
+
+    if (gSavedSelectorY >= maxVisible)
+        gSavedSelectorY = maxVisible - 1;
 
     int scrollOffsetCandidate = gSelectedMenu - gSavedSelectorY;
     if (scrollOffsetCandidate < 0)
         scrollOffsetCandidate = 0;
-    if (scrollOffsetCandidate > TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
-        scrollOffsetCandidate = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+    if (scrollOffsetCandidate > (sStartMenuDataPtr->numVisibleMenuItems - maxVisible))
+        scrollOffsetCandidate = sStartMenuDataPtr->numVisibleMenuItems - maxVisible;
+
+    if (scrollOffsetCandidate < 0)
+        scrollOffsetCandidate = 0;
 
     sStartMenuDataPtr->scrollOffset = scrollOffsetCandidate;
     sStartMenuDataPtr->selector_y = gSelectedMenu - scrollOffsetCandidate;
@@ -952,6 +960,8 @@ void StartMenu_Init(MainCallback callback)
     sStartMenuDataPtr->cursorSpriteIds[1] = SPRITE_NONE;
     sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
 
+    StartMenu_GenerateVisibleMenuIndices();
+
     for(i= 0; i < 6; i++)
     {
         //sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
@@ -1197,7 +1207,7 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
 
 static void PlaceStartMenuScrollIndicatorArrows(void)
 {
-    if (TOTAL_MENU_OPTIONS <= VISIBLE_BUTTONS)
+    if (sStartMenuDataPtr->numVisibleMenuItems <= VISIBLE_BUTTONS)
     {
         if (sStartMenuDataPtr->scrollIndicatorArrowPairId != SPRITE_NONE)
         {
@@ -1207,7 +1217,7 @@ static void PlaceStartMenuScrollIndicatorArrows(void)
         return;
     }
 
-    u8 hiddenOptions = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+    u8 hiddenOptions = sStartMenuDataPtr->numVisibleMenuItems - VISIBLE_BUTTONS;
 
     if (sStartMenuDataPtr->scrollIndicatorArrowPairId == SPRITE_NONE)
     {
@@ -1233,12 +1243,49 @@ static void RemoveStartMenuScrollIndicatorArrows(void)
     }
 }
 
+static void StartMenu_GenerateVisibleMenuIndices(void)
+{
+    u8 i, count = 0;
+
+    for (i = 0; i < TOTAL_MENU_OPTIONS; i++)
+    {
+        switch (i)
+        {
+        case START_MENU_POKEDEX:
+            if (!FlagGet(FLAG_SYS_POKEDEX_GET))
+                continue;
+            break;
+        case START_MENU_POKEMON:
+            if (!FlagGet(FLAG_SYS_POKEMON_GET))
+                continue;
+            break;
+        case START_MENU_QUESTS:
+            if (!FlagGet(FLAG_SYS_QUEST_MENU_GET))
+                continue;
+            break;
+        case START_MENU_DEXNAV:
+            if (!FlagGet(FLAG_SYS_DEXNAV_GET))
+                continue;
+            break;
+        default:
+            break;
+        }
+
+        sStartMenuDataPtr->visibleMenuIndices[count++] = i;
+    }
+
+    sStartMenuDataPtr->numVisibleMenuItems = count;
+}
+
 static void StartMenu_CreateButtons(void)
 {
     u8 i;
     for (i = 0; i < VISIBLE_BUTTONS; i++)
     {
-        u8 menuIndex = sStartMenuDataPtr->scrollOffset + i;
+        if (i + sStartMenuDataPtr->scrollOffset >= sStartMenuDataPtr->numVisibleMenuItems)
+            break;
+
+        u8 menuIndex = sStartMenuDataPtr->visibleMenuIndices[sStartMenuDataPtr->scrollOffset + i];
         const struct SpriteTemplate *template;
 
         if (menuIndex < START_MENU_GROUP_B_START)
@@ -1265,7 +1312,10 @@ static void StartMenu_UpdateVisibleButtons(void)
     u8 i, menuIndex;
     for (i = 0; i < VISIBLE_BUTTONS; i++)
     {
-        menuIndex = sStartMenuDataPtr->scrollOffset + i;
+        if (i + sStartMenuDataPtr->scrollOffset >= sStartMenuDataPtr->numVisibleMenuItems)
+            break;
+
+        menuIndex = sStartMenuDataPtr->visibleMenuIndices[sStartMenuDataPtr->scrollOffset + i];
 
         u8 leftId = sStartMenuDataPtr->MenuButtonSpriteIds[i * 2];
         u8 rightId = sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1];
@@ -1639,8 +1689,13 @@ static void Task_StartMenu_Main(u8 taskId)
         {
             if (sStartMenuDataPtr->scrollOffset == 0)
             {
-                sStartMenuDataPtr->scrollOffset = MAX_SCROLL_OFFSET;
-                sStartMenuDataPtr->selector_y = VISIBLE_BUTTONS - 1;
+                // Wrap to bottom
+                if (sStartMenuDataPtr->numVisibleMenuItems > VISIBLE_BUTTONS)
+                    sStartMenuDataPtr->scrollOffset = sStartMenuDataPtr->numVisibleMenuItems - VISIBLE_BUTTONS;
+                else
+                    sStartMenuDataPtr->scrollOffset = 0;
+
+                sStartMenuDataPtr->selector_y = min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems) - 1;
             }
             else
             {
@@ -1657,9 +1712,12 @@ static void Task_StartMenu_Main(u8 taskId)
 
     if (JOY_NEW(DPAD_DOWN))
     {
-        if (sStartMenuDataPtr->selector_y == VISIBLE_BUTTONS - 1)
+        u8 lastSelectableIndex = sStartMenuDataPtr->numVisibleMenuItems - 1;
+        u8 visibleCount = min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems);
+
+        if (sStartMenuDataPtr->selector_y == visibleCount - 1)
         {
-            if (sStartMenuDataPtr->scrollOffset + VISIBLE_BUTTONS >= TOTAL_MENU_OPTIONS)
+            if (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y >= lastSelectableIndex)
             {
                 // Wrap to top
                 sStartMenuDataPtr->scrollOffset = 0;
@@ -1672,7 +1730,7 @@ static void Task_StartMenu_Main(u8 taskId)
         }
         else
         {
-            if (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y + 1 >= TOTAL_MENU_OPTIONS)
+            if (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y + 1 > lastSelectableIndex)
             {
                 sStartMenuDataPtr->scrollOffset = 0;
                 sStartMenuDataPtr->selector_y = 0;
@@ -1686,19 +1744,23 @@ static void Task_StartMenu_Main(u8 taskId)
         PlaySE(SE_SELECT);
     }
 
-    gSelectedMenu = sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y;
-    gSavedSelectorY = sStartMenuDataPtr->selector_y;
+    if (gSelectedMenu >= sStartMenuDataPtr->numVisibleMenuItems)
+    gSelectedMenu = sStartMenuDataPtr->numVisibleMenuItems - 1;
+
+    if (gSavedSelectorY >= min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems))
+        gSavedSelectorY = min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems) - 1;
 
     StartMenu_UpdateVisibleButtons();
 
     if (JOY_NEW(A_BUTTON))
     {
-        switch(gSelectedMenu)
+        PlaySE(SE_SELECT); // Default sound
+
+        switch (sStartMenuDataPtr->visibleMenuIndices[sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y])
         {
             case START_MENU_POKEDEX:
-                if(FlagGet(FLAG_SYS_POKEDEX_GET))
+                if (FlagGet(FLAG_SYS_POKEDEX_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenPokedexFromStartMenu;
                 }
@@ -1707,10 +1769,10 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
+
             case START_MENU_POKEMON:
-                if(FlagGet(FLAG_SYS_POKEMON_GET))
+                if (FlagGet(FLAG_SYS_POKEMON_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenPokemonPartyFromStartMenu;
                 }
@@ -1719,20 +1781,20 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
+
             case START_MENU_BAG:
-                PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenBagFromStartMenu;
                 break;
+
             case START_MENU_CARD:
-                PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenTrainerCardFromStartMenu;
                 break;
+
             case START_MENU_QUESTS:
-                if(FlagGet(FLAG_SYS_QUEST_MENU_GET))
+                if (FlagGet(FLAG_SYS_QUEST_MENU_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenQuestsStartMenu;
                 }
@@ -1741,15 +1803,15 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
+
             case START_MENU_OPTIONS:
-                PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenOptionsMenuStartMenu;
                 break;
+
             case START_MENU_DEXNAV:
-                if(FlagGet(FLAG_SYS_DEXNAV_GET))
+                if (FlagGet(FLAG_SYS_DEXNAV_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenDexNavStartMenu;
                 }
