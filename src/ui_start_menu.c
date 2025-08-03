@@ -1754,12 +1754,13 @@ static void Task_StartMenu_Main(u8 taskId)
 
     if (JOY_NEW(A_BUTTON))
     {
-        switch(gSelectedMenu)
+        PlaySE(SE_SELECT); // Default sound
+
+        switch (sStartMenuDataPtr->visibleMenuIndices[sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y])
         {
             case START_MENU_POKEDEX:
-                if(FlagGet(FLAG_SYS_POKEDEX_GET))
+                if (FlagGet(FLAG_SYS_POKEDEX_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenPokedexFromStartMenu;
                 }
@@ -1768,10 +1769,10 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
+
             case START_MENU_POKEMON:
-                if(FlagGet(FLAG_SYS_POKEMON_GET))
+                if (FlagGet(FLAG_SYS_POKEMON_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenPokemonPartyFromStartMenu;
                 }
@@ -1780,20 +1781,20 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
+
             case START_MENU_BAG:
-                PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenBagFromStartMenu;
                 break;
+
             case START_MENU_CARD:
-                PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenTrainerCardFromStartMenu;
                 break;
+
             case START_MENU_QUESTS:
-                if(FlagGet(FLAG_SYS_QUEST_MENU_GET))
+                if (FlagGet(FLAG_SYS_QUEST_MENU_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenQuestsStartMenu;
                 }
@@ -1802,15 +1803,15 @@ static void Task_StartMenu_Main(u8 taskId)
                     PlaySE(SE_BOO);
                 }
                 break;
+
             case START_MENU_OPTIONS:
-                PlaySE(SE_SELECT);
                 BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                 gTasks[taskId].func = Task_OpenOptionsMenuStartMenu;
                 break;
+
             case START_MENU_DEXNAV:
-                if(FlagGet(FLAG_SYS_DEXNAV_GET))
+                if (FlagGet(FLAG_SYS_DEXNAV_GET))
                 {
-                    PlaySE(SE_SELECT);
                     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
                     gTasks[taskId].func = Task_OpenDexNavStartMenu;
                 }
