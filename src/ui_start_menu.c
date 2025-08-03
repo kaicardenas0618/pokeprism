@@ -638,24 +638,17 @@ static void CursorCallback(struct Sprite *sprite)
 
 static void InitCursorInPlace(void)
 {
-    if (gSelectedMenu >= sStartMenuDataPtr->numVisibleMenuItems)
-        gSelectedMenu = sStartMenuDataPtr->numVisibleMenuItems - 1;
+    if (gSelectedMenu >= TOTAL_MENU_OPTIONS)
+        gSelectedMenu = 0;
 
-    u8 maxVisible = sStartMenuDataPtr->numVisibleMenuItems;
-    if (maxVisible > VISIBLE_BUTTONS)
-        maxVisible = VISIBLE_BUTTONS;
-
-    if (gSavedSelectorY >= maxVisible)
-        gSavedSelectorY = maxVisible - 1;
+    if (gSavedSelectorY >= VISIBLE_BUTTONS)
+        gSavedSelectorY = 0;
 
     int scrollOffsetCandidate = gSelectedMenu - gSavedSelectorY;
     if (scrollOffsetCandidate < 0)
         scrollOffsetCandidate = 0;
-    if (scrollOffsetCandidate > (sStartMenuDataPtr->numVisibleMenuItems - maxVisible))
-        scrollOffsetCandidate = sStartMenuDataPtr->numVisibleMenuItems - maxVisible;
-
-    if (scrollOffsetCandidate < 0)
-        scrollOffsetCandidate = 0;
+    if (scrollOffsetCandidate > TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
+        scrollOffsetCandidate = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
 
     sStartMenuDataPtr->scrollOffset = scrollOffsetCandidate;
     sStartMenuDataPtr->selector_y = gSelectedMenu - scrollOffsetCandidate;
