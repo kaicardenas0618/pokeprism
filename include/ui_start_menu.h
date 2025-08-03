@@ -3,6 +3,10 @@
 
 #include "main.h"
 
+#define TOTAL_MENU_OPTIONS  7
+#define VISIBLE_BUTTONS     4
+#define MAX_SCROLL_OFFSET   (TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
+
 struct StartMenuResources
 {
     MainCallback savedCallback;
@@ -15,6 +19,8 @@ struct StartMenuResources
     u16 selector_y;
     u16 scrollOffset;
     u8 scrollIndicatorArrowPairId;
+    u8 visibleMenuIndices[TOTAL_MENU_OPTIONS];
+    u8 numVisibleMenuItems;
 };
 
 enum
@@ -41,10 +47,6 @@ enum
 #define START_MENU_BUTTON_Y_SPACING 32
 
 #define START_MENU_GROUP_B_START  START_MENU_OPTIONS
-
-#define TOTAL_MENU_OPTIONS  7
-#define VISIBLE_BUTTONS     4
-#define MAX_SCROLL_OFFSET   (TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
 
 enum
 {
