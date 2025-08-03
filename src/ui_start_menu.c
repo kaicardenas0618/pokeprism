@@ -1378,14 +1378,14 @@ static void PrintSaveConfirmToWindow()
     const u8 *str = sText_ConfirmSave;
     const u8 *str2 = sText_CancelSave;
     u8 sConfirmTextColors[] = {TEXT_COLOR_TRANSPARENT, 2, 9};
-    u8 x = 63;
-    u8 x2 = x + 100;
+    u8 x = 62;
+    u8 x2 = x + 101;
     u8 y = 0;
     
     FillWindowPixelBuffer(WINDOW_BOTTOM_BAR, PIXEL_FILL(5));
-    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sA_ButtonGfx, x - 12, 4, 8, 8);
+    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sA_ButtonGfx, x - 11, 4, 8, 8);
     AddTextPrinterParameterized4(WINDOW_BOTTOM_BAR, 1, x, y, 0, 0, sConfirmTextColors, 0xFF, str);
-    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sB_ButtonGfx, x2 - 12, 4, 8, 8);
+    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sB_ButtonGfx, x2 - 11, 4, 8, 8);
     AddTextPrinterParameterized4(WINDOW_BOTTOM_BAR, 1, x2, y, 0, 0, sConfirmTextColors, 0xFF, str2);
     PutWindowTilemap(WINDOW_BOTTOM_BAR);
     CopyWindowToVram(WINDOW_BOTTOM_BAR, COPYWIN_FULL);
