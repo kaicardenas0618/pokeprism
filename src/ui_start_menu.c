@@ -161,14 +161,17 @@ static const u8 sHPBar_10_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_ba
 static const u8 sHPBar_0_Percent_Gfx[]    = INCBIN_U8("graphics/start_menu/hp_bar/0_percent.4bpp");
 static const u16 sHPBar_Pal[] = INCBIN_U16("graphics/start_menu/hp_bar/hpbar.gbapal");
 
-static const u8 sMenuButton_Gfx[] = INCBIN_U8("graphics/start_menu/menu_sprites/menu_buttons.4bpp");
-static const u16 sMenuButton_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons.gbapal");
+static const u8 sMenuButtonA_Gfx[] = INCBIN_U8("graphics/start_menu/menu_sprites/menu_buttons_a.4bpp");
+static const u16 sMenuButtonA_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons_a.gbapal");
+static const u8 sMenuButtonB_Gfx[] = INCBIN_U8("graphics/start_menu/menu_sprites/menu_buttons_b.4bpp");
+static const u16 sMenuButtonB_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons_b.gbapal");
 
-#define TAG_CURSOR       30004
-//#define TAG_ICON_BOX     30006
-#define TAG_HPBAR        30008
-#define TAG_STATUS_ICON  30009
-#define TAG_BUTTON_ICON  30020
+#define TAG_CURSOR         30004
+//#define TAG_ICON_BOX       30006
+#define TAG_HPBAR          30008
+#define TAG_STATUS_ICON    30009
+#define TAG_BUTTON_ICON_A  30020
+#define TAG_BUTTON_ICON_B  30021
 
 // Cursor
 static const struct OamData sOamData_Cursor =
@@ -371,21 +374,21 @@ static const struct SpriteTemplate sSpriteTemplate_StatusIcons =
     .callback = SpriteCallbackDummy,
 };
 
-// Menu Buttons
-static const struct SpriteSheet sSpriteSheet_MenuButton =
+// Menu Button A
+static const struct SpriteSheet sSpriteSheet_MenuButtonA =
 {
-    .data = sMenuButton_Gfx,
-    .size = 64 * 32 * START_MENU_BUTTON_COUNT / 2,
-    .tag = TAG_BUTTON_ICON,
+    .data = sMenuButtonA_Gfx,
+    .size = 64 * 32 * START_MENU_BUTTON_A_COUNT / 2,
+    .tag = TAG_BUTTON_ICON_A,
 };
 
-static const struct SpritePalette sSpritePalette_MenuButton =
+static const struct SpritePalette sSpritePalette_MenuButtonA =
 {
-    .data = sMenuButton_Pal,
-    .tag = TAG_BUTTON_ICON,
+    .data = sMenuButtonA_Pal,
+    .tag = TAG_BUTTON_ICON_A,
 };
 
-static const struct OamData sOam_MenuButton =
+static const struct OamData sOam_MenuButtonA =
 {
     .shape = SPRITE_SHAPE(64x32),
     .size = SPRITE_SIZE(64x32),
@@ -393,126 +396,167 @@ static const struct OamData sOam_MenuButton =
     .paletteNum = 5,
 };
 
-static const union AnimCmd sAnim_MenuButton_Pokedex1[] =
+static const union AnimCmd sAnim_MenuButtonA_Pokedex1[] =
 {
     ANIMCMD_FRAME(0, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Pokedex2[] =
+static const union AnimCmd sAnim_MenuButtonA_Pokedex2[] =
 {
     ANIMCMD_FRAME(32, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Pokemon1[] =
+static const union AnimCmd sAnim_MenuButtonA_Pokemon1[] =
 {
     ANIMCMD_FRAME(64, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Pokemon2[] =
+static const union AnimCmd sAnim_MenuButtonA_Pokemon2[] =
 {
     ANIMCMD_FRAME(96, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Bag1[] =
+static const union AnimCmd sAnim_MenuButtonA_Bag1[] =
 {
     ANIMCMD_FRAME(128, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Bag2[] =
+static const union AnimCmd sAnim_MenuButtonA_Bag2[] =
 {
     ANIMCMD_FRAME(160, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Card1[] =
+static const union AnimCmd sAnim_MenuButtonA_Card1[] =
 {
     ANIMCMD_FRAME(192, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Card2[] =
+static const union AnimCmd sAnim_MenuButtonA_Card2[] =
 {
     ANIMCMD_FRAME(224, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Quests1[] =
+static const union AnimCmd sAnim_MenuButtonA_Quests1[] =
 {
     ANIMCMD_FRAME(256, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Quests2[] =
+static const union AnimCmd sAnim_MenuButtonA_Quests2[] =
 {
     ANIMCMD_FRAME(288, 0),
     ANIMCMD_END
 };
 
-static const union AnimCmd sAnim_MenuButton_Options1[] =
+static const union AnimCmd *const sAnimTable_MenuButtonA[] =
 {
-    ANIMCMD_FRAME(320, 0),
-    ANIMCMD_END
+    sAnim_MenuButtonA_Pokedex1,
+    sAnim_MenuButtonA_Pokedex2,
+    sAnim_MenuButtonA_Pokemon1,
+    sAnim_MenuButtonA_Pokemon2,
+    sAnim_MenuButtonA_Bag1,
+    sAnim_MenuButtonA_Bag2,
+    sAnim_MenuButtonA_Card1,
+    sAnim_MenuButtonA_Card2,
+    sAnim_MenuButtonA_Quests1,
+    sAnim_MenuButtonA_Quests2,
 };
 
-static const union AnimCmd sAnim_MenuButton_Options2[] =
+static const struct SpriteTemplate sSpriteTemplate_MenuButtonA =
 {
-    ANIMCMD_FRAME(352, 0),
-    ANIMCMD_END
-};
-
-static const union AnimCmd sAnim_MenuButton_DexNav1[] =
-{
-    ANIMCMD_FRAME(384, 0),
-    ANIMCMD_END
-};
-
-static const union AnimCmd sAnim_MenuButton_DexNav2[] =
-{
-    ANIMCMD_FRAME(416, 0),
-    ANIMCMD_END
-};
-
-static const union AnimCmd *const sAnimTable_MenuButton[] =
-{
-    sAnim_MenuButton_Pokedex1,
-    sAnim_MenuButton_Pokedex2,
-    sAnim_MenuButton_Pokemon1,
-    sAnim_MenuButton_Pokemon2,
-    sAnim_MenuButton_Bag1,
-    sAnim_MenuButton_Bag2,
-    sAnim_MenuButton_Card1,
-    sAnim_MenuButton_Card2,
-    sAnim_MenuButton_Quests1,
-    sAnim_MenuButton_Quests2,
-    sAnim_MenuButton_Options1,
-    sAnim_MenuButton_Options2,
-    sAnim_MenuButton_DexNav1,
-    sAnim_MenuButton_DexNav2,
-};
-
-static const struct SpriteTemplate sSpriteTemplate_MenuButton =
-{
-    .tileTag = TAG_BUTTON_ICON,
-    .paletteTag = TAG_BUTTON_ICON,
-    .oam = &sOam_MenuButton,
-    .anims = sAnimTable_MenuButton,
+    .tileTag = TAG_BUTTON_ICON_A,
+    .paletteTag = TAG_BUTTON_ICON_A,
+    .oam = &sOam_MenuButtonA,
+    .anims = sAnimTable_MenuButtonA,
     .images = NULL,
     .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy,
 };
 
-static const u8 sButtonAnimIndices[TOTAL_MENU_OPTIONS][2] =
+static const u8 sButtonAnimIndicesA[START_MENU_BUTTON_A_COUNT / 2][2] =
 {
     {START_MENU_BUTTON_POKEDEX1,  START_MENU_BUTTON_POKEDEX2},
     {START_MENU_BUTTON_POKEMON1,  START_MENU_BUTTON_POKEMON2},
     {START_MENU_BUTTON_BAG1,      START_MENU_BUTTON_BAG2},
     {START_MENU_BUTTON_CARD1,     START_MENU_BUTTON_CARD2},
     {START_MENU_BUTTON_QUESTS1,   START_MENU_BUTTON_QUESTS2},
+};
+
+// Menu Button B
+static const struct SpriteSheet sSpriteSheet_MenuButtonB =
+{
+    .data = sMenuButtonB_Gfx,
+    .size = 64 * 32 * START_MENU_BUTTON_B_COUNT / 2,
+    .tag = TAG_BUTTON_ICON_B,
+};
+
+static const struct SpritePalette sSpritePalette_MenuButtonB =
+{
+    .data = sMenuButtonB_Pal,
+    .tag = TAG_BUTTON_ICON_B,
+};
+
+static const struct OamData sOam_MenuButtonB =
+{
+    .shape = SPRITE_SHAPE(64x32),
+    .size = SPRITE_SIZE(64x32),
+    .priority = 2,
+    .paletteNum = 6,
+};
+
+static const union AnimCmd sAnim_MenuButtonB_Options1[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonB_Options2[] =
+{
+    ANIMCMD_FRAME(32, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonB_DexNav1[] =
+{
+    ANIMCMD_FRAME(64, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonB_DexNav2[] =
+{
+    ANIMCMD_FRAME(96, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd *const sAnimTable_MenuButtonB[] =
+{
+    sAnim_MenuButtonB_Options1,
+    sAnim_MenuButtonB_Options2,
+    sAnim_MenuButtonB_DexNav1,
+    sAnim_MenuButtonB_DexNav2,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_MenuButtonB =
+{
+    .tileTag = TAG_BUTTON_ICON_B,
+    .paletteTag = TAG_BUTTON_ICON_B,
+    .oam = &sOam_MenuButtonB,
+    .anims = sAnimTable_MenuButtonB,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy,
+};
+
+static const u8 sButtonAnimIndicesB[START_MENU_BUTTON_B_COUNT / 2][2] =
+{
     {START_MENU_BUTTON_OPTIONS1,  START_MENU_BUTTON_OPTIONS2},
     {START_MENU_BUTTON_DEXNAV1,   START_MENU_BUTTON_DEXNAV2},
 };
@@ -1129,8 +1173,10 @@ static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Sprite
         LoadSpritePalette(&cursorPal);
         LoadCompressedSpriteSheet(&sSpriteSheet_StatusIcons);
         LoadSpritePalette(&sSpritePalette_StatusIcons);
-        LoadSpriteSheet(&sSpriteSheet_MenuButton);
-        LoadSpritePalette(&sSpritePalette_MenuButton);
+        LoadSpriteSheet(&sSpriteSheet_MenuButtonA);
+        LoadSpritePalette(&sSpritePalette_MenuButtonA);
+        LoadSpriteSheet(&sSpriteSheet_MenuButtonB);
+        LoadSpritePalette(&sSpritePalette_MenuButtonB);
 
         StartMenu_CreateButtons();
         StartMenu_UpdateVisibleButtons();  
@@ -1192,15 +1238,24 @@ static void StartMenu_CreateButtons(void)
     u8 i;
     for (i = 0; i < VISIBLE_BUTTONS; i++)
     {
-        sStartMenuDataPtr->MenuButtonSpriteIds[i*2    ] =
-            CreateSprite(&sSpriteTemplate_MenuButton,
+        u8 menuIndex = sStartMenuDataPtr->scrollOffset + i;
+        const struct SpriteTemplate *template;
+
+        if (menuIndex < START_MENU_GROUP_B_START)
+            template = &sSpriteTemplate_MenuButtonA;
+        else
+            template = &sSpriteTemplate_MenuButtonB;
+
+        sStartMenuDataPtr->MenuButtonSpriteIds[i * 2] =
+            CreateSprite(template,
                          START_MENU_BUTTON_X_1,
-                         START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING,
+                         START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
                          0);
-        sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1] =
-            CreateSprite(&sSpriteTemplate_MenuButton,
+
+        sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1] =
+            CreateSprite(template,
                          START_MENU_BUTTON_X_2,
-                         START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING,
+                         START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
                          0);
     }
 }
@@ -1210,21 +1265,79 @@ static void StartMenu_UpdateVisibleButtons(void)
     u8 i, menuIndex;
     for (i = 0; i < VISIBLE_BUTTONS; i++)
     {
-        menuIndex = (sStartMenuDataPtr->scrollOffset + i) % TOTAL_MENU_OPTIONS;
-        gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2]].y =
-            START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING;
-        gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]].y =
-            START_MENU_BUTTON_Y_START + i*START_MENU_BUTTON_Y_SPACING;
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2]],
-                        sButtonAnimIndices[menuIndex][0]);
-        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i*2 + 1]],
-                        sButtonAnimIndices[menuIndex][1]);
+        menuIndex = sStartMenuDataPtr->scrollOffset + i;
+
+        u8 leftId = sStartMenuDataPtr->MenuButtonSpriteIds[i * 2];
+        u8 rightId = sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1];
+
+        const struct SpriteTemplate *expectedTemplate =
+            (menuIndex < START_MENU_GROUP_B_START)
+                ? &sSpriteTemplate_MenuButtonA
+                : &sSpriteTemplate_MenuButtonB;
+
+        bool8 recreateLeft = (leftId == SPRITE_NONE || gSprites[leftId].template != expectedTemplate);
+        bool8 recreateRight = (rightId == SPRITE_NONE || gSprites[rightId].template != expectedTemplate);
+
+        if (recreateLeft)
+        {
+            if (leftId != SPRITE_NONE)
+                DestroySprite(&gSprites[leftId]);
+
+            sStartMenuDataPtr->MenuButtonSpriteIds[i * 2] =
+                CreateSprite(expectedTemplate,
+                             START_MENU_BUTTON_X_1,
+                             START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
+                             0);
+        }
+        else
+        {
+            gSprites[leftId].y = START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING;
+        }
+
+        if (recreateRight)
+        {
+            if (rightId != SPRITE_NONE)
+                DestroySprite(&gSprites[rightId]);
+
+            sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1] =
+                CreateSprite(expectedTemplate,
+                             START_MENU_BUTTON_X_2,
+                             START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
+                             0);
+        }
+        else
+        {
+            gSprites[rightId].y = START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING;
+        }
+
+        u8 animIdx = (menuIndex < START_MENU_GROUP_B_START)
+            ? menuIndex
+            : menuIndex - START_MENU_GROUP_B_START;
+
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i * 2]],
+                        (menuIndex < START_MENU_GROUP_B_START)
+                            ? sButtonAnimIndicesA[animIdx][0]
+                            : sButtonAnimIndicesB[animIdx][0]);
+
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1]],
+                        (menuIndex < START_MENU_GROUP_B_START)
+                            ? sButtonAnimIndicesA[animIdx][1]
+                            : sButtonAnimIndicesB[animIdx][1]);
     }
 }
 
 static void DestroyAllMenuButtons(void)
 {
-    for (int i = 0; i < START_MENU_BUTTON_COUNT; i++)
+    for (int i = 0; i < START_MENU_BUTTON_A_COUNT; i++)
+    {
+        if (sStartMenuDataPtr->MenuButtonSpriteIds[i] != SPRITE_NONE)
+        {
+            DestroySprite(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i]]);
+            sStartMenuDataPtr->MenuButtonSpriteIds[i] = SPRITE_NONE;
+        }
+    }
+    
+    for (int i = 0; i < START_MENU_BUTTON_B_COUNT; i++)
     {
         if (sStartMenuDataPtr->MenuButtonSpriteIds[i] != SPRITE_NONE)
         {
