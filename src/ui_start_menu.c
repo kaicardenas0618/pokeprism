@@ -1651,6 +1651,8 @@ static void Task_StartMenu_Main(u8 taskId)
         {
             sStartMenuDataPtr->selector_y--;
         }
+
+        PlaySE(SE_SELECT);
     }
 
     if (JOY_NEW(DPAD_DOWN))
@@ -1680,6 +1682,8 @@ static void Task_StartMenu_Main(u8 taskId)
                 sStartMenuDataPtr->selector_y++;
             }
         }
+
+        PlaySE(SE_SELECT);
     }
 
     gSelectedMenu = sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y;
