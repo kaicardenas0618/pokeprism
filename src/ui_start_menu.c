@@ -1738,7 +1738,7 @@ static void Task_StartMenu_Main(u8 taskId)
     }
 
     if (gSelectedMenu >= sStartMenuDataPtr->numVisibleMenuItems)
-    gSelectedMenu = sStartMenuDataPtr->numVisibleMenuItems - 1;
+        gSelectedMenu = sStartMenuDataPtr->numVisibleMenuItems - 1;
 
     if (gSavedSelectorY >= min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems))
         gSavedSelectorY = min(VISIBLE_BUTTONS, sStartMenuDataPtr->numVisibleMenuItems) - 1;
