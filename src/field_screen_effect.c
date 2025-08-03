@@ -1,4 +1,7 @@
 #include "global.h"
+#include "battle_pike.h"
+#include "battle_pyramid.h"
+#include "battle_pyramid_bag.h"
 #include "cable_club.h"
 #include "event_data.h"
 #include "fieldmap.h"
@@ -11,6 +14,7 @@
 #include "field_player_avatar.h"
 #include "field_screen_effect.h"
 #include "field_special_scene.h"
+#include "field_specials.h"
 #include "field_weather.h"
 #include "follower_npc.h"
 #include "gpu_regs.h"
@@ -25,6 +29,7 @@
 #include "metatile_behavior.h"
 #include "palette.h"
 #include "overworld.h"
+#include "safari_zone.h"
 #include "scanline_effect.h"
 #include "script.h"
 #include "sound.h"
@@ -33,6 +38,7 @@
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "ui_start_menu.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/heal_locations.h"
@@ -451,21 +457,22 @@ static void Task_ExitNonDoor(u8 taskId)
     }
 }
 
-/*
 static void Task_WaitForFadeShowStartMenu(u8 taskId)
 {
     if (WaitForWeatherFadeIn() == TRUE)
     {
         DestroyTask(taskId);
-        CreateTask(Task_ShowStartMenu, 80);
+        if (GetSafariZoneFlag() || CurrentBattlePyramidLocation() || InBattlePike() || InUnionRoom() || InMultiPartnerRoom())
+            CreateTask(Task_ShowStartMenu, 80);
+        else        
+            CreateTask(Task_StartMenu_Open, 80);
     }
 }
-*/
 
 void ReturnToFieldOpenStartMenu(void)
 {
     FadeInFromBlack();
-    //CreateTask(Task_WaitForFadeShowStartMenu, 0x50);
+    CreateTask(Task_WaitForFadeShowStartMenu, 0x50);
     LockPlayerFieldControls();
 }
 

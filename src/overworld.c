@@ -1,5 +1,7 @@
 #include "global.h"
 #include "overworld.h"
+#include "battle_pike.h"
+#include "battle_pyramid_bag.h"
 #include "battle_pyramid.h"
 #include "battle_setup.h"
 #include "berry.h"
@@ -64,6 +66,7 @@
 #include "trainer_hill.h"
 #include "trainer_pokemon_sprites.h"
 #include "tv.h"
+#include "ui_start_menu.h"
 #include "scanline_effect.h"
 #include "wild_encounter.h"
 #include "vs_seeker.h"
@@ -3714,4 +3717,17 @@ bool8 ScrFunc_settimeofday(struct ScriptContext *ctx)
 {
     SetTimeOfDay(ScriptReadByte(ctx));
     return FALSE;
+}
+
+void CB2_ReturnToStartMenu(void)
+{
+    FieldClearVBlankHBlankCallbacks();
+
+    if (GetSafariZoneFlag() || CurrentBattlePyramidLocation() || InBattlePike() || InUnionRoom() || InMultiPartnerRoom())
+    {
+        SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
+        return;
+    }
+
+	StartMenu_Init(CB2_ReturnToField);
 }

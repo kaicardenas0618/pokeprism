@@ -35,6 +35,7 @@ static u8 Sound_ProcessInput(u8 selection);
 static u8 FrameType_ProcessInput(u8 selection);
 static u8 ButtonMode_ProcessInput(u8 selection);
 static u8 ScrollBgs_ProcessInput(u8 selection);
+static u8 ClockMode_ProcessInput(u8 selection);
 
 static void TextSpeed_DrawChoices(u8 selection, u8 y);
 static void BattleScene_DrawChoices(u8 selection, u8 y);
@@ -43,6 +44,7 @@ static void Sound_DrawChoices(u8 selection, u8 y);
 static void FrameType_DrawChoices(u8 selection, u8 y);
 static void ButtonMode_DrawChoices(u8 selection, u8 y);
 static void ScrollBgs_DrawChoices(u8 selection, u8 y);
+static void ClockMode_DrawChoices(u8 selection, u8 y);
 
 static void DrawHeaderText(u8 page);
 static void DrawOptionMenuTexts(u8 page);
@@ -64,10 +66,33 @@ static const u8 sText_Sound[] = _("Sound Mode");
 static const u8 sText_ButtonMode[] = _("Button Mode");
 static const u8 sText_Frame[] = _("Frame Type");
 static const u8 sText_ScrollBgs[] = _("Scrolling BGs");
+static const u8 sText_ClockMode[] = _("Clock Mode");
+
+// Option Selection Strings
+static const u8 sText_TextSpeedSlow[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Slow");
+static const u8 sText_TextSpeedMid[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Medium");
+static const u8 sText_TextSpeedFast[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Fast");
+static const u8 sText_BattleSceneOn[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}On");
+static const u8 sText_BattleSceneOff[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Off");
+static const u8 sText_BattleStyleShift[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Shift");
+static const u8 sText_BattleStyleSet[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Set");
+static const u8 sText_SoundMono[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Mono");
+static const u8 sText_SoundStereo[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Stereo");
+static const u8 sText_FrameTypeRed[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Red");
+static const u8 sText_FrameTypeAqua[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Aqua");
+static const u8 sText_FrameTypeWhite[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}White");
+static const u8 sText_FrameTypeYellow[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Yellow");
+static const u8 sText_ButtonTypeNormal[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Normal");
+static const u8 sText_ButtonTypeLR[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}L+R");
+static const u8 sText_ButtonTypeLEqualsA[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}L=A");
+static const u8 sText_ScrollBgsOn[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}On");
+static const u8 sText_ScrollBgsOff[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}Off");
+static const u8 sText_ClockMode12Hr[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}12-Hour");
+static const u8 sText_ClockMode24Hr[] = _("{COLOR GREEN}{SHADOW LIGHT_GREEN}24-Hour");
 
 // D-Pad Strings
-const u8 sText_DPadLeft[] = _("{DPAD_LEFT} ");
-const u8 sText_DPadRight[] = _(" {DPAD_RIGHT}");
+static const u8 sText_DPadLeft[] = _("{DPAD_LEFT} ");
+static const u8 sText_DPadRight[] = _(" {DPAD_RIGHT}");
 
 static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
 {
@@ -78,6 +103,7 @@ static const u8 *const sOptionMenuItemsNames[MENUITEM_COUNT] =
     [MENUITEM_BUTTONMODE]  = sText_ButtonMode,
     [MENUITEM_FRAMETYPE]   = sText_Frame,
     [MENUITEM_SCROLLBGS]   = sText_ScrollBgs,
+    [MENUITEM_CLOCKMODE]   = sText_ClockMode,
 };
 
 static const u8 sPageTitles[PAGE_COUNT][32] = {
@@ -88,57 +114,63 @@ static const u8 sPageTitles[PAGE_COUNT][32] = {
 
 
 // Option Texts
-const u8 *const gTextSpeedOptions[] = {
-    gText_TextSpeedSlow,
-    gText_TextSpeedMid,
-    gText_TextSpeedFast,
+static const u8 *const sTextSpeedOptions[] = {
+    sText_TextSpeedSlow,
+    sText_TextSpeedMid,
+    sText_TextSpeedFast,
 };
 
 static const u8 *const sBattleSceneOptions[] = {
-    gText_BattleSceneOn,
-    gText_BattleSceneOff,
+    sText_BattleSceneOn,
+    sText_BattleSceneOff,
 };
 
 static const u8 *const sBattleStyleOptions[] = {
-    gText_BattleStyleShift,
-    gText_BattleStyleSet,
+    sText_BattleStyleShift,
+    sText_BattleStyleSet,
 };
 
 static const u8 *const sSoundOptions[] = {
-    gText_SoundMono,
-    gText_SoundStereo,
+    sText_SoundMono,
+    sText_SoundStereo,
 };
 
 static const u8 *const sButtonModeOptions[] = {
-    gText_ButtonTypeNormal,
-    gText_ButtonTypeLR,
-    gText_ButtonTypeLEqualsA,
+    sText_ButtonTypeNormal,
+    sText_ButtonTypeLR,
+    sText_ButtonTypeLEqualsA,
 };
 
 static const u8 *const sFrameTypeOptions[] = {
-    gText_FrameTypeRed,     // Previously Type 1
-    gText_FrameTypeAqua,    // Previously Type 2
-    gText_FrameTypeWhite,   // Previously Type 3
-    gText_FrameTypeYellow,  // Previously Type 4
+    sText_FrameTypeRed,     // Previously Type 1
+    sText_FrameTypeAqua,    // Previously Type 2
+    sText_FrameTypeWhite,   // Previously Type 3
+    sText_FrameTypeYellow,  // Previously Type 4
 };
 
 static const u8 *const sScrollBgsOptions[] = {
-    gText_ScrollBgsOn,
-    gText_ScrollBgsOff,
+    sText_ScrollBgsOn,
+    sText_ScrollBgsOff,
 };
 
-#define TEXT_SPEED_OPTIONS_COUNT       ARRAY_COUNT(gTextSpeedOptions)
+static const u8 *const sClockModeOptions[] = {
+    sText_ClockMode12Hr,
+    sText_ClockMode24Hr,
+};
+
+#define TEXT_SPEED_OPTIONS_COUNT       ARRAY_COUNT(sTextSpeedOptions)
 #define BATTLE_SCENE_OPTIONS_COUNT     ARRAY_COUNT(sBattleSceneOptions)
 #define BATTLE_STYLE_OPTIONS_COUNT     ARRAY_COUNT(sBattleStyleOptions)
 #define SOUND_OPTIONS_COUNT            ARRAY_COUNT(sSoundOptions)
 #define BUTTON_MODE_OPTIONS_COUNT      ARRAY_COUNT(sButtonModeOptions)
 #define FRAME_TYPE_OPTIONS_COUNT       ARRAY_COUNT(sFrameTypeOptions)
 #define SCROLL_BGS_OPTIONS_COUNT       ARRAY_COUNT(sScrollBgsOptions)
+#define CLOCK_MODE_OPTIONS_COUNT       ARRAY_COUNT(sClockModeOptions)
 
 
 static const u8 sGeneralOptions[] = { MENUITEM_SOUND, MENUITEM_BUTTONMODE, MENUITEM_TEXTSPEED };
 static const u8 sBattleOptions[] = { MENUITEM_BATTLESCENE, MENUITEM_BATTLESTYLE };
-static const u8 sUIOptions[] = { MENUITEM_FRAMETYPE, MENUITEM_SCROLLBGS };
+static const u8 sUIOptions[] = { MENUITEM_FRAMETYPE, MENUITEM_CLOCKMODE, MENUITEM_SCROLLBGS };
 static const u8 *const sPageOptions[PAGE_COUNT] = { sGeneralOptions, sBattleOptions, sUIOptions };
 static const u8 sPageOptionCounts[PAGE_COUNT] = { ARRAY_COUNT(sGeneralOptions), ARRAY_COUNT(sBattleOptions), ARRAY_COUNT(sUIOptions) };
 
@@ -318,12 +350,13 @@ void CB2_InitOptionMenu(void)
         gTasks[taskId].tCurrentPage = PAGE_GENERAL;
         gTasks[taskId].tPageSelection = 0;
         gTasks[taskId].tTextSpeed = gSaveBlock4Ptr->optionsTextSpeed;
-        gTasks[taskId].tBattleSceneOff = gSaveBlock4Ptr->optionsBattleSceneOff;
+        gTasks[taskId].tBattleScene = gSaveBlock4Ptr->optionsBattleSceneOff;
         gTasks[taskId].tBattleStyle = gSaveBlock4Ptr->optionsBattleStyle;
         gTasks[taskId].tSound = gSaveBlock4Ptr->optionsSound;
         gTasks[taskId].tButtonMode = gSaveBlock4Ptr->optionsButtonMode;
         gTasks[taskId].tWindowFrameType = gSaveBlock4Ptr->optionsWindowFrameType;
         gTasks[taskId].tScrollBgs = gSaveBlock4Ptr->optionsScrollBgs;
+        gTasks[taskId].tClockMode = gSaveBlock4Ptr->optionsClockMode;
 
         DrawOptionMenuTexts(gTasks[taskId].tCurrentPage);
         DrawOptionMenuValues(gTasks[taskId].tCurrentPage, taskId);
@@ -424,16 +457,16 @@ static void Task_OptionMenuProcessInput(u8 taskId)
                 }
                 break;
             case MENUITEM_BATTLESCENE:
-                previousOption = gTasks[taskId].tBattleSceneOff;
-                gTasks[taskId].tBattleSceneOff = BattleScene_ProcessInput(gTasks[taskId].tBattleSceneOff);
-                if (previousOption != gTasks[taskId].tBattleSceneOff)
+                previousOption = gTasks[taskId].tBattleScene;
+                gTasks[taskId].tBattleScene = BattleScene_ProcessInput(gTasks[taskId].tBattleScene);
+                if (previousOption != gTasks[taskId].tBattleScene)
                 {
                     u8 idx;
                     for (idx = 0; idx < sPageOptionCounts[gTasks[taskId].tCurrentPage]; idx++)
                     {
                         if (sPageOptions[gTasks[taskId].tCurrentPage][idx] == MENUITEM_BATTLESCENE)
                         {
-                            BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff, idx * 16 + 1);
+                            BattleScene_DrawChoices(gTasks[taskId].tBattleScene, idx * 16 + 1);
                             break;
                         }
                     }
@@ -525,6 +558,23 @@ static void Task_OptionMenuProcessInput(u8 taskId)
                     PlaySE(SE_SELECT);
                 }
                 break;
+            case MENUITEM_CLOCKMODE:
+                previousOption = gTasks[taskId].tClockMode;
+                gTasks[taskId].tClockMode = ClockMode_ProcessInput(gTasks[taskId].tClockMode);
+                if (previousOption != gTasks[taskId].tClockMode)
+                {
+                    u8 idx;
+                    for (idx = 0; idx < sPageOptionCounts[gTasks[taskId].tCurrentPage]; idx++)
+                    {
+                        if (sPageOptions[gTasks[taskId].tCurrentPage][idx] == MENUITEM_CLOCKMODE)
+                        {
+                            ClockMode_DrawChoices(gTasks[taskId].tClockMode, idx * 16 + 1);
+                            break;
+                        }
+                    }
+                    PlaySE(SE_SELECT);
+                }
+                break;
             default:
                 return;
         }
@@ -565,7 +615,7 @@ static void DrawOptionMenuValues(u8 page, u8 taskId)
                 TextSpeed_DrawChoices(gTasks[taskId].tTextSpeed, y);
                 break;
             case MENUITEM_BATTLESCENE:
-                BattleScene_DrawChoices(gTasks[taskId].tBattleSceneOff, y);
+                BattleScene_DrawChoices(gTasks[taskId].tBattleScene, y);
                 break;
             case MENUITEM_BATTLESTYLE:
                 BattleStyle_DrawChoices(gTasks[taskId].tBattleStyle, y);
@@ -582,6 +632,9 @@ static void DrawOptionMenuValues(u8 page, u8 taskId)
             case MENUITEM_SCROLLBGS:
                 ScrollBgs_DrawChoices(gTasks[taskId].tScrollBgs, y);
                 break;
+            case MENUITEM_CLOCKMODE:
+                ClockMode_DrawChoices(gTasks[taskId].tClockMode, y);
+                break;
         }
     }
 }
@@ -589,12 +642,13 @@ static void DrawOptionMenuValues(u8 page, u8 taskId)
 static void Task_OptionMenuSave(u8 taskId)
 {
     gSaveBlock4Ptr->optionsTextSpeed = gTasks[taskId].tTextSpeed;
-    gSaveBlock4Ptr->optionsBattleSceneOff = gTasks[taskId].tBattleSceneOff;
+    gSaveBlock4Ptr->optionsBattleSceneOff = gTasks[taskId].tBattleScene;
     gSaveBlock4Ptr->optionsBattleStyle = gTasks[taskId].tBattleStyle;
     gSaveBlock4Ptr->optionsSound = gTasks[taskId].tSound;
     gSaveBlock4Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
     gSaveBlock4Ptr->optionsWindowFrameType = gTasks[taskId].tWindowFrameType;
     gSaveBlock4Ptr->optionsScrollBgs = gTasks[taskId].tScrollBgs;
+    gSaveBlock4Ptr->optionsClockMode = gTasks[taskId].tClockMode;
 
     SetGpuReg(REG_OFFSET_WIN0H, 0);
     SetGpuReg(REG_OFFSET_WIN0V, 0);
@@ -684,7 +738,7 @@ static void TextSpeed_DrawChoices(u8 selection, u8 y)
     if (selection >= TEXT_SPEED_OPTIONS_COUNT)
         selection = 0;
 
-    choiceText = gTextSpeedOptions[selection % TEXT_SPEED_OPTIONS_COUNT];
+    choiceText = sTextSpeedOptions[selection % TEXT_SPEED_OPTIONS_COUNT];
 
     FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
 
@@ -934,6 +988,43 @@ static void ScrollBgs_DrawChoices(u8 selection, u8 y)
     if (selection < SCROLL_BGS_OPTIONS_COUNT - 1)
         AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
+
+// Clock Mode //
+
+static u8 ClockMode_ProcessInput(u8 selection)
+{
+    if (JOY_NEW(DPAD_RIGHT) && selection < CLOCK_MODE_OPTIONS_COUNT - 1)
+    {
+        selection++;
+        sArrowPressed = TRUE;
+    }
+    else if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+        sArrowPressed = TRUE;
+    }
+    return selection;
+}
+
+static void ClockMode_DrawChoices(u8 selection, u8 y)
+{
+    const u8 *choiceText = sClockModeOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, sText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
+
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1);
+
+    if (selection < CLOCK_MODE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, sText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
+}
+
 
 
 static void DrawHeaderText(u8 page)

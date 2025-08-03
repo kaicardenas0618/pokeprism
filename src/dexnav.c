@@ -227,8 +227,8 @@ static const struct WindowTemplate sDexNavGuiWindowTemplates[] =
 };
 
 //gui font
-static const u8 sDexNavFontColor[3] = {0, 10, 11};
-static const u8 sDexNavFontColorNoShadow[3] = {0, 10, 0};
+static const u8 sDexNavFontColor[3] = {0, 2, 11};
+static const u8 sDexNavFontColorNoShadow[3] = {0, 2, 0};
 
 //search window font
 static const u8 sSearchFontColor[3] = {0, 15, 13};
@@ -2756,4 +2756,9 @@ void IncrementDexNavChain(void)
 {
     if (gSaveBlock3Ptr->dexNavChain < DEXNAV_CHAIN_MAX)
         gSaveBlock3Ptr->dexNavChain++;
+}
+
+void CB2_OpenDexNavFromStartMenu(void)
+{
+    DexNavGuiInit(CB2_ReturnToStartMenu);
 }

@@ -1,2164 +1,1774 @@
-#include "option_menu.h"
-#include "ui_start_menu.h"
 #include "global.h"
-#include "battle_pike.h"
-#include "battle_pyramid.h"
-#include "battle_pyramid_bag.h"
+#include "ui_start_menu.h"
+#include "strings.h"
 #include "bg.h"
+#include "data.h"
 #include "decompress.h"
 #include "dexnav.h"
 #include "event_data.h"
-#include "event_object_movement.h"
-#include "event_object_lock.h"
-#include "event_scripts.h"
-#include "fieldmap.h"
-#include "field_effect.h"
-#include "field_player_avatar.h"
-#include "field_specials.h"
 #include "field_weather.h"
-#include "field_screen_effect.h"
-#include "frontier_pass.h"
-#include "frontier_util.h"
 #include "gpu_regs.h"
-#include "international_string_util.h"
+#include "graphics.h"
+#include "item.h"
 #include "item_menu.h"
-#include "link.h"
-#include "load_save.h"
+#include "item_menu_icons.h"
+#include "list_menu.h"
+#include "item_icon.h"
+#include "item_use.h"
+#include "international_string_util.h"
 #include "main.h"
 #include "malloc.h"
 #include "menu.h"
-#include "new_game.h"
-#include "option_menu.h"
-#include "overworld.h"
+#include "menu_helpers.h"
 #include "palette.h"
 #include "party_menu.h"
-#include "pokedex.h"
-#include "pokemon_icon.h"
-#include "pokenav.h"
 #include "quests.h"
-#include "region_map.h"
-#include "safari_zone.h"
-#include "save.h"
 #include "scanline_effect.h"
 #include "script.h"
-#include "sprite.h"
 #include "sound.h"
-#include "start_menu.h"
-#include "strings.h"
 #include "string_util.h"
+#include "strings.h"
 #include "task.h"
-#include "text.h"
 #include "text_window.h"
-#include "trainer_card.h"
-#include "window.h"
-#include "union_room.h"
-#include "constants/battle_frontier.h"
-#include "constants/rgb.h"
+#include "overworld.h"
+#include "event_data.h"
+#include "constants/items.h"
+#include "constants/field_weather.h"
 #include "constants/songs.h"
+#include "constants/rgb.h"
+#include "pokemon_icon.h"
+#include "battle_pyramid.h"
+#include "region_map.h"
+#include "constants/battle_frontier.h"
+#include "constants/layouts.h"
 #include "rtc.h"
-#include "event_object_movement.h"
-#include "gba/isagbprint.h"
+#include "pokedex.h"
+#include "trainer_card.h"
+#include "pokenav.h"
+#include "option_menu.h"
+#include "link.h"
+#include "frontier_pass.h"
+#include "start_menu.h"
 
-/* CALLBACKS */
-static void SpriteCB_IconDexNav(struct Sprite* sprite);
-static void SpriteCB_IconPokedex(struct Sprite* sprite);
-static void SpriteCB_IconParty(struct Sprite* sprite);
-static void SpriteCB_IconBag(struct Sprite* sprite);
-static void SpriteCB_IconQuests(struct Sprite* sprite);
-static void SpriteCB_IconTrainerCard(struct Sprite* sprite);
-static void SpriteCB_IconSave(struct Sprite* sprite);
-static void SpriteCB_IconOptions(struct Sprite* sprite);
-static void SpriteCB_IconFlag(struct Sprite* sprite);
+//==========EWRAM==========//
+static EWRAM_DATA struct StartMenuResources *sStartMenuDataPtr = NULL;
+static EWRAM_DATA u8 *sBg1TilemapBuffer = NULL;
+static EWRAM_DATA u8 *sBg2TilemapBuffer = NULL;
+static EWRAM_DATA u8 gSelectedMenu = 0;
+static EWRAM_DATA u8 gSavedSelectorY = 0;
 
-/* TASKs */
-static void Task_StartMenu_HandleMainInput(u8 taskId);
-static void Task_StartMenu_SafariZone_HandleMainInput(u8 taskId);
-static void Task_HandleSave(u8 taskId);
+//==========STATIC=DEFINES==========//
+static void StartMenu_RunSetup(void);
+static bool8 StartMenu_DoGfxSetup(void);
+static bool8 StartMenu_InitBgs(void);
+static void StartMenu_FadeAndBail(void);
+static bool8 StartMenu_LoadGraphics(void);
+static void PlaceStartMenuScrollIndicatorArrows(void);
+static void RemoveStartMenuScrollIndicatorArrows(void);
+static void StartMenu_CreateButtons(void);
+static void StartMenu_UpdateVisibleButtons(void);
+static void DestroyAllMenuButtons(void);
+static void StartMenu_InitWindows(void);
+static void Task_StartMenu_WaitFadeIn(u8 taskId);
+static void Task_StartMenu_Main(u8 taskId);
+static u32 GetHPEggCyclePercent(u32 partyIndex);
+static void PrintMapNameAndTime(void);
+static void CursorCallback(struct Sprite *sprite);
 
-/* OTHER FUNCTIONS */
-static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount);
-static void StartMenu_UpdateAllSpriteAnimations(void);
-static void StartMenu_LoadSprites(void);
-static void StartMenu_CreateSprites(void);
-static void StartMenu_DestroySprites(void);
-static void StartMenu_CreateLRButtons(u8 currentPage, u8 totalPages);
-static void StartMenu_DestroyLRButtons(void);
-static void StartMenu_CreatePartyMiniIcons(void);
-static void StartMenu_DestroyPartyMiniIcons(void);
-static void StartMenu_SafariZone_CreateSprites(void);
-static void StartMenu_LoadBgGfx(void);
-//static void StartMenu_ShowTimeWindow(void);
-//static void StartMenu_UpdateClockDisplay(void);
-static void StartMenu_ShowMapNameWindow(void);
-static void StartMenu_UpdateMenuName(void);
-static u8 RunSaveCallback(void);
-static u8 SaveDoSaveCallback(void);
-//static void HideSaveInfoWindow(void);
-static void HideSaveMessageWindow(void);
-static u8 SaveOverwriteInputCallback(void);
-static u8 SaveConfirmOverwriteDefaultNoCallback(void);
-//static u8 SaveConfirmOverwriteCallback(void);
-static void ShowSaveMessage(const u8 *message, u8 (*saveCallback)(void));
-static u8 SaveFileExistsCallback(void);
-static u8 SaveSavingMessageCallback(void);
-static u8 SaveConfirmInputCallback(void);
-static u8 SaveYesNoCallback(void);
-//static void ShowSaveInfoWindow(void);
-static u8 SaveConfirmSaveCallback(void);
-static void InitSave(void);
-static u8 GetTotalPageCount(void);
-static void CB2_OpenQuestMenuFromStartMenu(void);
-
-static const u8 sTextColors[3] = {10, 11, 12}; // background, text, shadow
-
-/* ENUMs */
-enum MENU {
-  MENU_POKEDEX,
-  MENU_PARTY,
-  MENU_BAG,
-  MENU_DEXNAV,
-  MENU_QUESTS,
-  MENU_TRAINER_CARD,
-  MENU_SAVE,
-  MENU_OPTIONS,
-  MENU_FLAG,
-};
-
-enum FLAG_VALUES {
-  FLAG_VALUE_NOT_SET,
-  FLAG_VALUE_SET,
-};
-
-enum SAVE_STATES {
-  SAVE_IN_PROGRESS,
-  SAVE_SUCCESS,
-  SAVE_CANCELED,
-  SAVE_ERROR
-};
-
-/* STRUCTs */
-struct StartMenu {
-    MainCallback savedCallback;
-    u32 loadState;
-    //u32 sStartClockWindowId;
-    u32 sMapNameWindowId;
-    u32 sMenuNameWindowId;
-    u32 sSafariBallsWindowId;
-    u32 flag; // some u32 holding values for controlling the sprite anims and lifetime
-    
-    u32 spriteIdDexNav;
-    u32 spriteIdPokedex;
-    u32 spriteIdParty;
-    u32 spriteIdBag;
-    u32 spriteIdQuests;
-    u32 spriteIdTrainerCard;
-    u32 spriteIdSave;
-    u32 spriteIdOptions;
-    u32 spriteIdFlag;
-    u32 spriteIdLButton;
-    u32 spriteIdRButton;
-
-    u8 partySpriteIds[PARTY_SIZE];
-
-    u8 page;
-    u8 totalPages;
-};
-
-extern const u16 gFieldEffectObjectPalette0[];
-
-static EWRAM_DATA struct StartMenu *sStartMenu = NULL;
-static EWRAM_DATA u8 menuSelected = 0;
-static EWRAM_DATA u8 sLastMenuSelected = 0;
-static EWRAM_DATA u8 sLastMenuPage = 0;
-static EWRAM_DATA u8 sLastVisibleOptionsCount = 0;
-static EWRAM_DATA u8 (*sSaveDialogCallback)(void) = NULL;
-static EWRAM_DATA u8 sSaveDialogTimer = 0;
-static EWRAM_DATA u8 sSaveInfoWindowId = 0;
-
-// --BG-GFX--
-static const u32 sStartMenuTiles[] = INCBIN_U32("graphics/start_menu/bg.4bpp.lz");
-static const u32 sStartMenuTilemap[] = INCBIN_U32("graphics/start_menu/bg.bin.lz");
-static const u32 sStartMenuTilemapSafari[] = INCBIN_U32("graphics/start_menu/bg_safari.bin.lz");
-static const u16 sStartMenuPalette[] = INCBIN_U16("graphics/start_menu/bg.gbapal");
-
-//--SPRITE-GFX--
-#define TAG_ICON_GFX 1234
-#define TAG_BUTTON_GFX 1235
-#define TAG_ICON_PAL 0x4654
-#define TAG_BUTTON_PAL 0x4655
-
-static const u32 sIconGfx[] = INCBIN_U32("graphics/start_menu/icons.4bpp.lz");
-static const u32 sButtonGfx[] = INCBIN_U32("graphics/start_menu/buttons.4bpp");
-static const u16 sIconPal[] = INCBIN_U16("graphics/start_menu/icons.gbapal");
-static const u16 sButtonPal[] = INCBIN_U16("graphics/start_menu/buttons.gbapal");
-
-// --PAGE-LOGIC---
-#define MAX_ICONS_PER_PAGE 5
-
-static const struct WindowTemplate sSaveInfoWindowTemplate = {
-    .bg = 0,
-    .tilemapLeft = 1,
-    .tilemapTop = 1,
-    .width = 14,
-    .height = 10,
-    .paletteNum = 15,
-    .baseBlock = 8
-};
-
-static const struct WindowTemplate sWindowTemplate_MapName = {
-  .bg = 0, 
-  .tilemapLeft = 2, 
-  .tilemapTop = 17, 
-  .width = 12, // If you want to shorten the dates to Sat., Sun., etc., change this to 9
-  .height = 2, 
-  .paletteNum = 15,
-  .baseBlock = 0x30
-};
-
-static const struct WindowTemplate sWindowTemplate_MenuName = {
-  .bg = 0, 
-  .tilemapLeft = 16, 
-  .tilemapTop = 17, 
-  .width = 7, 
-  .height = 2, 
-  .paletteNum = 15,
-  .baseBlock = 0x30 + (12*2)
-};
-
-static const struct WindowTemplate sWindowTemplate_SafariBalls = {
-    .bg = 0,
-    .tilemapLeft = 2,
-    .tilemapTop = 1,
-    .width = 7,
-    .height = 4,
-    .paletteNum = 15,
-    .baseBlock = (0x30 + (12*2)) + (7*2)
-};
-
-static const struct SpritePalette sSpritePal_Icon[] =
+//==========CONST=DATA==========//
+static const struct BgTemplate sStartMenuBgTemplates[] =
 {
-  {sIconPal, TAG_ICON_PAL},
-  {NULL},
+    {
+        .bg = 0,    // windows used for text loading and hp bar blitting
+        .charBaseIndex = 0,
+        .mapBaseIndex = 31,
+        .priority = 0
+    },
+    {
+        .bg = 1,    // this bg loads the main tilemap with the header, footer, and menu options
+        .charBaseIndex = 1,
+        .mapBaseIndex = 30,
+        .priority = 1
+    },
+    {
+        .bg = 2,    // this bg loads the scrolling bg
+        .charBaseIndex = 2,
+        .mapBaseIndex = 28,
+        .priority = 2
+    }
 };
 
-static const struct SpritePalette sSpritePal_Button[] =
+static const struct WindowTemplate sStartMenuWindowTemplates[] =
 {
-  {sButtonPal, TAG_BUTTON_PAL},
-  {NULL},
+    [WINDOW_HP_BARS] =      // Window ID the HP bars are blitted to
+    {
+        .bg = 0,            // which bg to print text on
+        .tilemapLeft = 1,   // position from left (per 8 pixels)
+        .tilemapTop = 3,    // position from top (per 8 pixels)
+        .width = 9,         // width (per 8 pixels)
+        .height = 15,       // height (per 8 pixels)
+        .paletteNum = 1,    // palette index to use for text
+        .baseBlock = 1,     // tile start in VRAM
+    },
+
+    [WINDOW_TOP_BAR] =                 // Window ID for the Time and Map name
+    {
+        .bg = 0,                       // which bg to print text on
+        .tilemapLeft = 0,              // position from left (per 8 pixels)
+        .tilemapTop = 0,               // position from top (per 8 pixels)
+        .width = 30,                   // width (per 8 pixels)
+        .height = 2,                   // height (per 8 pixels)
+        .paletteNum = 0,               // palette index to use for text
+        .baseBlock = 1 + (9 * 15),     // tile start in VRAM
+    },
+
+    [WINDOW_BOTTOM_BAR] =                         // Window ID for the save confirmation box
+    {
+        .bg = 0,                                  // which bg to print text on
+        .tilemapLeft = 0,                         // position from left (per 8 pixels)
+        .tilemapTop = 18,                         // position from top (per 8 pixels)
+        .width = 30,                              // width (per 8 pixels)
+        .height = 2,                              // height (per 8 pixels)
+        .paletteNum = 0,                          // palette index to use for text
+        .baseBlock = 1 + (9 * 15) + (30 * 2),     // tile start in VRAM
+    },
+    DUMMY_WIN_TEMPLATE
 };
 
-static const struct CompressedSpriteSheet sSpriteSheet_Icon[] = 
+static const u32 sStartMenuTiles[] = INCBIN_U32("graphics/start_menu/menu.4bpp.lz");
+static const u16 sStartMenuPalette[] = INCBIN_U16("graphics/start_menu/menu.gbapal");
+static const u32 sStartMenuTilemap[] = INCBIN_U32("graphics/start_menu/menu_tilemap.bin.lz");
+
+static const u32 sScrollBgTiles[] = INCBIN_U32("graphics/start_menu/scroll_bg/tiles.4bpp.lz");
+static const u32 sScrollBgTilemap[] = INCBIN_U32("graphics/start_menu/scroll_bg/tilemap.bin.lz");
+
+static const u16 sCursor_Pal[] = INCBIN_U16("graphics/start_menu/cursor.gbapal");
+static const u32 sCursor_Gfx[] = INCBIN_U32("graphics/start_menu/cursor.4bpp.lz");
+
+//static const u16 sIconBox_Pal[] = INCBIN_U16("graphics/start_menu/icon_box.gbapal");
+//static const u32 sIconBox_Gfx[] = INCBIN_U32("graphics/start_menu/icon_box.4bpp.lz");
+
+static const u8 sHPBar_100_Percent_Gfx[]  = INCBIN_U8("graphics/start_menu/hp_bar/100_percent.4bpp");
+static const u8 sHPBar_90_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/90_percent.4bpp");
+static const u8 sHPBar_80_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/80_percent.4bpp");
+static const u8 sHPBar_70_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/70_percent.4bpp");
+static const u8 sHPBar_60_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/60_percent.4bpp");
+static const u8 sHPBar_50_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/50_percent.4bpp");
+static const u8 sHPBar_40_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/40_percent.4bpp");
+static const u8 sHPBar_30_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/30_percent.4bpp");
+static const u8 sHPBar_20_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/20_percent.4bpp");
+static const u8 sHPBar_10_Percent_Gfx[]   = INCBIN_U8("graphics/start_menu/hp_bar/10_percent.4bpp");
+static const u8 sHPBar_0_Percent_Gfx[]    = INCBIN_U8("graphics/start_menu/hp_bar/0_percent.4bpp");
+static const u16 sHPBar_Pal[] = INCBIN_U16("graphics/start_menu/hp_bar/hpbar.gbapal");
+
+static const u8 sMenuButtonA_Gfx[] = INCBIN_U8("graphics/start_menu/menu_sprites/menu_buttons_a.4bpp");
+static const u16 sMenuButtonA_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons_a.gbapal");
+static const u8 sMenuButtonB_Gfx[] = INCBIN_U8("graphics/start_menu/menu_sprites/menu_buttons_b.4bpp");
+static const u16 sMenuButtonB_Pal[] = INCBIN_U16("graphics/start_menu/menu_sprites/menu_buttons_b.gbapal");
+
+#define TAG_CURSOR         30004
+//#define TAG_ICON_BOX       30006
+#define TAG_HPBAR          30008
+#define TAG_STATUS_ICON    30009
+#define TAG_BUTTON_ICON_A  30020
+#define TAG_BUTTON_ICON_B  30021
+
+// Cursor
+static const struct OamData sOamData_Cursor =
 {
-  {sIconGfx, 32*576/2 , TAG_ICON_GFX},
-  {NULL},
+    .size = SPRITE_SIZE(64x32),
+    .shape = SPRITE_SHAPE(64x32),
+    .priority = 1,
 };
 
-static const struct SpriteSheet sSpriteSheet_Button[] = 
+static const struct CompressedSpriteSheet sSpriteSheet_Cursor =
 {
-  {sButtonGfx, 32*8/2 , TAG_BUTTON_GFX},
-  {NULL},
+    .data = sCursor_Gfx,
+    .size = 64*32*4/2,
+    .tag = TAG_CURSOR,
 };
 
-static const struct OamData gOamIcon = {
-    .y = 0,
-    .affineMode = ST_OAM_AFFINE_DOUBLE,
-    .objMode = 0,
-    .bpp = ST_OAM_4BPP,
-    .shape = SPRITE_SHAPE(32x32),
-    .x = 0,
-    .matrixNum = 0,
+static const struct SpritePalette sSpritePal_Cursor =
+{
+    .data = sCursor_Pal,
+    .tag = TAG_CURSOR
+};
+
+static const union AnimCmd sSpriteAnim_Cursor1[] =
+{
+    ANIMCMD_FRAME(0, 32),
+    ANIMCMD_JUMP(0),
+};
+
+static const union AnimCmd sSpriteAnim_Cursor2[] =
+{
+    ANIMCMD_FRAME(32, 32),
+    ANIMCMD_JUMP(0),
+};
+
+static const union AnimCmd *const sSpriteAnimTable_Cursor[] =
+{
+    sSpriteAnim_Cursor1,
+    sSpriteAnim_Cursor2,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_Cursor =
+{
+    .tileTag = TAG_CURSOR,
+    .paletteTag = TAG_CURSOR,
+    .oam = &sOamData_Cursor,
+    .anims = sSpriteAnimTable_Cursor,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = CursorCallback
+};
+
+/*
+// Icon Box
+static const struct OamData sOamData_IconBox =
+{
     .size = SPRITE_SIZE(32x32),
-    .tileNum = 0,
-    .priority = 0,
-    .paletteNum = 0,
+    .shape = SPRITE_SHAPE(32x32),
+    .priority = 2,
 };
 
-static const struct OamData gOamButton = {
+static const struct CompressedSpriteSheet sSpriteSheet_IconBox =
+{
+    .data = sIconBox_Gfx,
+    .size = 32*32*4/2,
+    .tag = TAG_ICON_BOX,
+};
+
+static const struct SpritePalette sSpritePal_IconBox =
+{
+    .data = sIconBox_Pal,
+    .tag = TAG_ICON_BOX
+};
+
+static const union AnimCmd sSpriteAnim_IconBox[] =
+{
+    ANIMCMD_FRAME(0, 32),
+    ANIMCMD_JUMP(0),
+};
+
+static const union AnimCmd *const sSpriteAnimTable_IconBox[] =
+{
+    sSpriteAnim_IconBox,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_IconBox =
+{
+    .tileTag = TAG_ICON_BOX,
+    .paletteTag = TAG_ICON_BOX,
+    .oam = &sOamData_IconBox,
+    .anims = sSpriteAnimTable_IconBox,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy
+};
+*/
+
+// Status Icons
+static const struct OamData sOamData_StatusCondition =
+{
     .y = 0,
     .affineMode = ST_OAM_AFFINE_OFF,
-    .objMode = 0,
+    .objMode = ST_OAM_OBJ_NORMAL,
+    .mosaic = FALSE,
     .bpp = ST_OAM_4BPP,
-    .shape = SPRITE_SHAPE(16x8),
+    .shape = SPRITE_SHAPE(32x8),
     .x = 0,
     .matrixNum = 0,
-    .size = SPRITE_SIZE(16x8),
+    .size = SPRITE_SIZE(32x8),
     .tileNum = 0,
-    .priority = 0,
+    .priority = 1,
     .paletteNum = 0,
+    .affineParam = 0
 };
 
-static const union AnimCmd gAnimCmdDexNav_NotSelected[] = {
-    ANIMCMD_FRAME(112, 0),
-    ANIMCMD_JUMP(0),
-};
-
-static const union AnimCmd gAnimCmdDexNav_Selected[] = {
+static const union AnimCmd sSpriteAnim_StatusPoison[] =
+{
     ANIMCMD_FRAME(0, 0),
-    ANIMCMD_JUMP(0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd *const gIconDexNavAnim[] = {
-    gAnimCmdDexNav_NotSelected,
-    gAnimCmdDexNav_Selected,
+static const union AnimCmd sSpriteAnim_StatusParalyzed[] =
+{
+    ANIMCMD_FRAME(4, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdPokedex_NotSelected[] = {
-    ANIMCMD_FRAME(128, 0),
-    ANIMCMD_JUMP(0),
+static const union AnimCmd sSpriteAnim_StatusSleep[] =
+{
+    ANIMCMD_FRAME(8, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdPokedex_Selected[] = {
+static const union AnimCmd sSpriteAnim_StatusFrozen[] =
+{
+    ANIMCMD_FRAME(12, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sSpriteAnim_StatusBurn[] =
+{
     ANIMCMD_FRAME(16, 0),
-    ANIMCMD_JUMP(0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd *const gIconPokedexAnim[] = {
-    gAnimCmdPokedex_NotSelected,
-    gAnimCmdPokedex_Selected,
+static const union AnimCmd sSpriteAnim_StatusPokerus[] =
+{
+    ANIMCMD_FRAME(20, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdParty_NotSelected[] = {
-    ANIMCMD_FRAME(144, 0),
-    ANIMCMD_JUMP(0),
+static const union AnimCmd sSpriteAnim_StatusFaint[] =
+{
+    ANIMCMD_FRAME(24, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdParty_Selected[] = {
+static const union AnimCmd sSpriteAnim_StatusFrostbite[] =
+{
+    ANIMCMD_FRAME(28, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sSpriteAnim_Blank[] =
+{
     ANIMCMD_FRAME(32, 0),
-    ANIMCMD_JUMP(0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd *const gIconPartyAnim[] = {
-    gAnimCmdParty_NotSelected,
-    gAnimCmdParty_Selected,
+static const union AnimCmd *const sSpriteTemplate_StatusCondition[] =
+{
+    sSpriteAnim_StatusPoison,
+    sSpriteAnim_StatusParalyzed,
+    sSpriteAnim_StatusSleep,
+    sSpriteAnim_StatusFrozen,
+    sSpriteAnim_StatusBurn,
+    sSpriteAnim_StatusPokerus,
+    sSpriteAnim_StatusFaint,
+    sSpriteAnim_StatusFrostbite,
+    sSpriteAnim_Blank
 };
 
-static const union AnimCmd gAnimCmdBag_NotSelected[] = {
-    ANIMCMD_FRAME(160, 0),
-    ANIMCMD_JUMP(0),
+static const struct CompressedSpriteSheet sSpriteSheet_StatusIcons =
+{
+    gStatusGfx_Icons, 0x400, TAG_STATUS_ICON
 };
 
-static const union AnimCmd gAnimCmdBag_Selected[] = {
-    ANIMCMD_FRAME(48, 0),
-    ANIMCMD_JUMP(0),
+static const struct SpritePalette sSpritePalette_StatusIcons =
+{
+    gStatusPal_Icons, TAG_STATUS_ICON
 };
 
-static const union AnimCmd *const gIconBagAnim[] = {
-    gAnimCmdBag_NotSelected,
-    gAnimCmdBag_Selected,
+static const struct SpriteTemplate sSpriteTemplate_StatusIcons =
+{
+    .tileTag = TAG_STATUS_ICON,
+    .paletteTag = TAG_STATUS_ICON,
+    .oam = &sOamData_StatusCondition,
+    .anims = sSpriteTemplate_StatusCondition,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy,
 };
 
-static const union AnimCmd gAnimCmdQuests_NotSelected[] = {
-    ANIMCMD_FRAME(272, 0),
-    ANIMCMD_JUMP(0),
+// Menu Button A
+static const struct SpriteSheet sSpriteSheet_MenuButtonA =
+{
+    .data = sMenuButtonA_Gfx,
+    .size = 64 * 32 * START_MENU_BUTTON_A_COUNT / 2,
+    .tag = TAG_BUTTON_ICON_A,
 };
 
-static const union AnimCmd gAnimCmdQuests_Selected[] = {
-    ANIMCMD_FRAME(256, 0),
-    ANIMCMD_JUMP(0),
+static const struct SpritePalette sSpritePalette_MenuButtonA =
+{
+    .data = sMenuButtonA_Pal,
+    .tag = TAG_BUTTON_ICON_A,
 };
 
-static const union AnimCmd *const gIconQuestsAnim[] = {
-    gAnimCmdQuests_NotSelected,
-    gAnimCmdQuests_Selected,
+static const struct OamData sOam_MenuButtonA =
+{
+    .shape = SPRITE_SHAPE(64x32),
+    .size = SPRITE_SIZE(64x32),
+    .priority = 2,
+    .paletteNum = 5,
 };
 
-static const union AnimCmd gAnimCmdTrainerCard_NotSelected[] = {
-    ANIMCMD_FRAME(176, 0),
-    ANIMCMD_JUMP(0),
+static const union AnimCmd sAnim_MenuButtonA_Pokedex1[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdTrainerCard_Selected[] = {
+static const union AnimCmd sAnim_MenuButtonA_Pokedex2[] =
+{
+    ANIMCMD_FRAME(32, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonA_Pokemon1[] =
+{
     ANIMCMD_FRAME(64, 0),
-    ANIMCMD_JUMP(0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd *const gIconTrainerCardAnim[] = {
-    gAnimCmdTrainerCard_NotSelected,
-    gAnimCmdTrainerCard_Selected,
-};
-
-static const union AnimCmd gAnimCmdSave_NotSelected[] = {
-    ANIMCMD_FRAME(192, 0),
-    ANIMCMD_JUMP(0),
-};
-
-static const union AnimCmd gAnimCmdSave_Selected[] = {
-    ANIMCMD_FRAME(80, 0),
-    ANIMCMD_JUMP(0),
-};
-
-static const union AnimCmd *const gIconSaveAnim[] = {
-    gAnimCmdSave_NotSelected,
-    gAnimCmdSave_Selected,
-};
-
-static const union AnimCmd gAnimCmdOptions_NotSelected[] = {
-    ANIMCMD_FRAME(208, 0),
-    ANIMCMD_JUMP(0),
-};
-
-static const union AnimCmd gAnimCmdOptions_Selected[] = {
+static const union AnimCmd sAnim_MenuButtonA_Pokemon2[] =
+{
     ANIMCMD_FRAME(96, 0),
-    ANIMCMD_JUMP(0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd *const gIconOptionsAnim[] = {
-    gAnimCmdOptions_NotSelected,
-    gAnimCmdOptions_Selected,
+static const union AnimCmd sAnim_MenuButtonA_Bag1[] =
+{
+    ANIMCMD_FRAME(128, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdFlag_NotSelected[] = {
-    ANIMCMD_FRAME(240, 0),
-    ANIMCMD_JUMP(0),
+static const union AnimCmd sAnim_MenuButtonA_Bag2[] =
+{
+    ANIMCMD_FRAME(160, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd gAnimCmdFlag_Selected[] = {
+static const union AnimCmd sAnim_MenuButtonA_Card1[] =
+{
+    ANIMCMD_FRAME(192, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonA_Card2[] =
+{
     ANIMCMD_FRAME(224, 0),
-    ANIMCMD_JUMP(0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd *const gIconFlagAnim[] = {
-    gAnimCmdFlag_NotSelected,
-    gAnimCmdFlag_Selected,
-};
-
-static const union AffineAnimCmd sAffineAnimIcon_NoAnim[] =
+static const union AnimCmd sAnim_MenuButtonA_Quests1[] =
 {
-  AFFINEANIMCMD_FRAME(0,0, 0, 60),
-  AFFINEANIMCMD_END,
+    ANIMCMD_FRAME(256, 0),
+    ANIMCMD_END
 };
 
-static const union AffineAnimCmd sAffineAnimIcon_Anim[] =
+static const union AnimCmd sAnim_MenuButtonA_Quests2[] =
 {
-  AFFINEANIMCMD_FRAME(20, 20, 0, 5),    // Scale big
-  AFFINEANIMCMD_FRAME(-10, -10, 0, 10), // Scale smol
-  AFFINEANIMCMD_FRAME(0, 0, 1, 4),      // Begin rotating
-
-  AFFINEANIMCMD_FRAME(0, 0, -1, 4),     // Loop starts from here ; Rotate/Tilt left 
-  AFFINEANIMCMD_FRAME(0, 0, 0, 2),
-  AFFINEANIMCMD_FRAME(0, 0, -1, 4),
-  AFFINEANIMCMD_FRAME(0, 0, 0, 2),
-  AFFINEANIMCMD_FRAME(0, 0, -1, 4),
-
-  AFFINEANIMCMD_FRAME(0, 0, 1, 4),      // Rotate/Tilt Right
-  AFFINEANIMCMD_FRAME(0, 0, 0, 2),
-  AFFINEANIMCMD_FRAME(0, 0, 1, 4),
-  AFFINEANIMCMD_FRAME(0, 0, 0, 2),
-  AFFINEANIMCMD_FRAME(0, 0, 1, 4),
-
-  AFFINEANIMCMD_JUMP(3),
+    ANIMCMD_FRAME(288, 0),
+    ANIMCMD_END
 };
 
-static const union AnimCmd sAnimCmd_L[] = {
-    ANIMCMD_FRAME(0, 0),   // Start at pixel 0 (left button)
-    ANIMCMD_END,
+static const union AnimCmd *const sAnimTable_MenuButtonA[] =
+{
+    sAnim_MenuButtonA_Pokedex1,
+    sAnim_MenuButtonA_Pokedex2,
+    sAnim_MenuButtonA_Pokemon1,
+    sAnim_MenuButtonA_Pokemon2,
+    sAnim_MenuButtonA_Bag1,
+    sAnim_MenuButtonA_Bag2,
+    sAnim_MenuButtonA_Card1,
+    sAnim_MenuButtonA_Card2,
+    sAnim_MenuButtonA_Quests1,
+    sAnim_MenuButtonA_Quests2,
 };
 
-static const union AnimCmd sAnimCmd_R[] = {
-    ANIMCMD_FRAME(2, 0),
-    ANIMCMD_END,
-};
-
-static const union AnimCmd *const sAnimCmds_L[] = { sAnimCmd_L };
-static const union AnimCmd *const sAnimCmds_R[] = { sAnimCmd_R };
-
-static const union AffineAnimCmd *const sAffineAnimsIcon[] =
-{   
-    sAffineAnimIcon_NoAnim,
-    sAffineAnimIcon_Anim,
-};
-
-static const struct SpriteTemplate gSpriteIconDexNav = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconDexNavAnim,
+static const struct SpriteTemplate sSpriteTemplate_MenuButtonA =
+{
+    .tileTag = TAG_BUTTON_ICON_A,
+    .paletteTag = TAG_BUTTON_ICON_A,
+    .oam = &sOam_MenuButtonA,
+    .anims = sAnimTable_MenuButtonA,
     .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconDexNav,
-};
-
-static const struct SpriteTemplate gSpriteIconPokedex = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconPokedexAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconPokedex,
-};
-
-static const struct SpriteTemplate gSpriteIconParty = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconPartyAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconParty,
-};
-
-static const struct SpriteTemplate gSpriteIconBag = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconBagAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconBag,
-};
-
-static const struct SpriteTemplate gSpriteIconQuests = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconQuestsAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconQuests,
-};
-
-static const struct SpriteTemplate gSpriteIconTrainerCard = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconTrainerCardAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconTrainerCard,
-};
-
-static const struct SpriteTemplate gSpriteIconSave = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconSaveAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconSave,
-};
-
-static const struct SpriteTemplate gSpriteIconOptions = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconOptionsAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconOptions,
-};
-
-static const struct SpriteTemplate gSpriteIconFlag = {
-    .tileTag = TAG_ICON_GFX,
-    .paletteTag = TAG_ICON_PAL,
-    .oam = &gOamIcon,
-    .anims = gIconFlagAnim,
-    .images = NULL,
-    .affineAnims = sAffineAnimsIcon,
-    .callback = SpriteCB_IconFlag,
-};
-
-static const struct SpriteTemplate gSpriteButtonL = {
-    .tileTag = TAG_BUTTON_GFX,
-    .paletteTag = TAG_BUTTON_PAL,
-    .oam = &gOamButton,
-    .anims = sAnimCmds_L,
-    .images = NULL,
-    .affineAnims = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy,
 };
 
-static const struct SpriteTemplate gSpriteButtonR = {
-    .tileTag = TAG_BUTTON_GFX,
-    .paletteTag = TAG_BUTTON_PAL,
-    .oam = &gOamButton,
-    .anims = sAnimCmds_R,
+static const u8 sButtonAnimIndicesA[START_MENU_BUTTON_A_COUNT / 2][2] =
+{
+    {START_MENU_BUTTON_POKEDEX1,  START_MENU_BUTTON_POKEDEX2},
+    {START_MENU_BUTTON_POKEMON1,  START_MENU_BUTTON_POKEMON2},
+    {START_MENU_BUTTON_BAG1,      START_MENU_BUTTON_BAG2},
+    {START_MENU_BUTTON_CARD1,     START_MENU_BUTTON_CARD2},
+    {START_MENU_BUTTON_QUESTS1,   START_MENU_BUTTON_QUESTS2},
+};
+
+// Menu Button B
+static const struct SpriteSheet sSpriteSheet_MenuButtonB =
+{
+    .data = sMenuButtonB_Gfx,
+    .size = 64 * 32 * START_MENU_BUTTON_B_COUNT / 2,
+    .tag = TAG_BUTTON_ICON_B,
+};
+
+static const struct SpritePalette sSpritePalette_MenuButtonB =
+{
+    .data = sMenuButtonB_Pal,
+    .tag = TAG_BUTTON_ICON_B,
+};
+
+static const struct OamData sOam_MenuButtonB =
+{
+    .shape = SPRITE_SHAPE(64x32),
+    .size = SPRITE_SIZE(64x32),
+    .priority = 2,
+    .paletteNum = 6,
+};
+
+static const union AnimCmd sAnim_MenuButtonB_Options1[] =
+{
+    ANIMCMD_FRAME(0, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonB_Options2[] =
+{
+    ANIMCMD_FRAME(32, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonB_DexNav1[] =
+{
+    ANIMCMD_FRAME(64, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd sAnim_MenuButtonB_DexNav2[] =
+{
+    ANIMCMD_FRAME(96, 0),
+    ANIMCMD_END
+};
+
+static const union AnimCmd *const sAnimTable_MenuButtonB[] =
+{
+    sAnim_MenuButtonB_Options1,
+    sAnim_MenuButtonB_Options2,
+    sAnim_MenuButtonB_DexNav1,
+    sAnim_MenuButtonB_DexNav2,
+};
+
+static const struct SpriteTemplate sSpriteTemplate_MenuButtonB =
+{
+    .tileTag = TAG_BUTTON_ICON_B,
+    .paletteTag = TAG_BUTTON_ICON_B,
+    .oam = &sOam_MenuButtonB,
+    .anims = sAnimTable_MenuButtonB,
     .images = NULL,
-    .affineAnims = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy,
 };
 
-static void SpriteCB_IconDexNav(struct Sprite* sprite) {
-    if (menuSelected == MENU_DEXNAV) {
-        if (sprite->data[0] == 0)  // just selected
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)  // just deselected
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconPokedex(struct Sprite* sprite) {
-    if (menuSelected == MENU_POKEDEX) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconParty(struct Sprite* sprite) {
-    if (menuSelected == MENU_PARTY) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconBag(struct Sprite* sprite) {
-    if (menuSelected == MENU_BAG) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconQuests(struct Sprite* sprite) {
-    if (menuSelected == MENU_QUESTS) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconTrainerCard(struct Sprite* sprite) {
-    if (menuSelected == MENU_TRAINER_CARD) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconSave(struct Sprite* sprite) {
-    if (menuSelected == MENU_SAVE) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconOptions(struct Sprite* sprite) {
-    if (menuSelected == MENU_OPTIONS) {
-        if (sprite->data[0] == 0)
-        {
-            sprite->data[0] = 1;
-            StartSpriteAnim(sprite, 1);
-            StartSpriteAffineAnim(sprite, 1);
-        }
-    } else {
-        if (sprite->data[0] == 1)
-        {
-            sprite->data[0] = 0;
-            StartSpriteAnim(sprite, 0);
-            StartSpriteAffineAnim(sprite, 0);
-        }
-    }
-}
-
-static void SpriteCB_IconFlag(struct Sprite* sprite) {
-  if (menuSelected == MENU_FLAG && sStartMenu->flag == FLAG_VALUE_NOT_SET) {
-    sStartMenu->flag = FLAG_VALUE_SET;
-    StartSpriteAnim(sprite, 1);
-    StartSpriteAffineAnim(sprite, 1);
-  } else if (menuSelected != MENU_FLAG) {
-    StartSpriteAnim(sprite, 0);
-    StartSpriteAffineAnim(sprite, 0);
-  } 
-}
-
-// If you want to shorten the dates to Sat., Sun., etc., change this to 70
-#define CLOCK_WINDOW_WIDTH 100
-
-static const u8 gText_Friday[]    = _("Fri,");
-static const u8 gText_Saturday[]  = _("Sat,");
-static const u8 gText_Sunday[]    = _("Sun,");
-static const u8 gText_Monday[]    = _("Mon,");
-static const u8 gText_Tuesday[]   = _("Tue,");
-static const u8 gText_Wednesday[] = _("Wed,");
-static const u8 gText_Thursday[]  = _("Thu,");
-
-static const u8 *const gDayNameStringsTable[] =
+static const u8 sButtonAnimIndicesB[START_MENU_BUTTON_B_COUNT / 2][2] =
 {
-    gText_Friday,
-    gText_Saturday,
-    gText_Sunday,
-    gText_Monday,
-    gText_Tuesday,
-    gText_Wednesday,
-    gText_Thursday
+    {START_MENU_BUTTON_OPTIONS1,  START_MENU_BUTTON_OPTIONS2},
+    {START_MENU_BUTTON_DEXNAV1,   START_MENU_BUTTON_DEXNAV2},
 };
 
-static const u8 gText_CurrentTime[]      = _("  {STR_VAR_3} {CLEAR_TO 64}{STR_VAR_1}:{STR_VAR_2}");
-static const u8 gText_CurrentTimeOff[]   = _("  {STR_VAR_3} {CLEAR_TO 64}{STR_VAR_1} {STR_VAR_2}");
-static const u8 gText_CurrentTimeAM[]    = _("  {STR_VAR_3} {CLEAR_TO 51}{STR_VAR_1}:{STR_VAR_2} AM");
-static const u8 gText_CurrentTimeAMOff[] = _("  {STR_VAR_3} {CLEAR_TO 51}{STR_VAR_1} {STR_VAR_2} AM");
-static const u8 gText_CurrentTimePM[]    = _("  {STR_VAR_3} {CLEAR_TO 51}{STR_VAR_1}:{STR_VAR_2} PM");
-static const u8 gText_CurrentTimePMOff[] = _("  {STR_VAR_3} {CLEAR_TO 51}{STR_VAR_1} {STR_VAR_2} PM");
+#define CURSOR_LEFT_COL_X    START_MENU_BUTTON_X_1
+#define CURSOR_RIGHT_COL_X   START_MENU_BUTTON_X_2
+#define CURSOR_TOP_ROW_Y     START_MENU_BUTTON_Y_START
+#define CURSOR_MID1_ROW_Y    START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 1)
+#define CURSOR_MID2_ROW_Y    START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 2)
+#define CURSOR_BTM_ROW_Y     START_MENU_BUTTON_Y_START + (START_MENU_BUTTON_Y_SPACING * 3)
 
-static void SetSelectedMenu(void) {
-    if (FlagGet(FLAG_SYS_DEXNAV_GET) == TRUE) {
-        menuSelected = MENU_DEXNAV;
-    } else if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE) {
-        menuSelected = MENU_POKEDEX;
-    } else if (FlagGet(FLAG_SYS_POKEMON_GET) == TRUE) {
-        menuSelected = MENU_PARTY;
-    } else if (FlagGet(FLAG_SYS_QUEST_MENU_GET) == TRUE) {
-        menuSelected = MENU_QUESTS;
-    } else {
-        menuSelected = MENU_BAG;
+static void CreateCursor(void)
+{
+    if (sStartMenuDataPtr->cursorSpriteIds[0] == SPRITE_NONE && sStartMenuDataPtr->cursorSpriteIds[1] == SPRITE_NONE)
+    {
+        sStartMenuDataPtr->cursorSpriteIds[0] = CreateSprite(&sSpriteTemplate_Cursor, CURSOR_LEFT_COL_X, CURSOR_TOP_ROW_Y, 0);
+        sStartMenuDataPtr->cursorSpriteIds[1] = CreateSprite(&sSpriteTemplate_Cursor, CURSOR_LEFT_COL_X + 64, CURSOR_TOP_ROW_Y, 0);
+
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->cursorSpriteIds[0]], 0);
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->cursorSpriteIds[1]], 1);
+
+        gSprites[sStartMenuDataPtr->cursorSpriteIds[0]].invisible = FALSE;
+        gSprites[sStartMenuDataPtr->cursorSpriteIds[1]].invisible = FALSE;
     }
 }
 
-static void ShowSafariBallsWindow(void)
+static void DestroyCursor(void)
 {
-    sStartMenu->sSafariBallsWindowId = AddWindow(&sWindowTemplate_SafariBalls);
-    FillWindowPixelBuffer(sStartMenu->sSafariBallsWindowId, PIXEL_FILL(TEXT_COLOR_WHITE));
-    PutWindowTilemap(sStartMenu->sSafariBallsWindowId);
-    ConvertIntToDecimalStringN(gStringVar1, gNumSafariBalls, STR_CONV_MODE_RIGHT_ALIGN, 2);
-    StringExpandPlaceholders(gStringVar4, gText_SafariBallStock);
-    AddTextPrinterParameterized(sStartMenu->sSafariBallsWindowId, FONT_NARROW, gStringVar4, 0, 1, TEXT_SKIP_DRAW, NULL);
-    CopyWindowToVram(sStartMenu->sSafariBallsWindowId, COPYWIN_GFX);
-}
-
-void StartMenu_Init(void)
-{
-    if (!IsOverworldLinkActive())
+    for (int i = 0; i < 2; i++)
     {
-        FreezeObjectEvents();
-        PlayerFreeze();
-        StopPlayerAvatar();
-    }
-
-    LockPlayerFieldControls();
-
-    if (sStartMenu == NULL)
-    {
-        sStartMenu = AllocZeroed(sizeof(struct StartMenu));
-        if (sStartMenu == NULL)
+        if (sStartMenuDataPtr->cursorSpriteIds[i] != SPRITE_NONE)
         {
-            SetMainCallback2(CB2_ReturnToFieldWithOpenMenu);
-            return;
+            DestroySprite(&gSprites[sStartMenuDataPtr->cursorSpriteIds[i]]);
+            sStartMenuDataPtr->cursorSpriteIds[i] = SPRITE_NONE;
         }
     }
+}
 
-    *sStartMenu = (struct StartMenu){
-        .savedCallback = CB2_ReturnToFieldWithOpenMenu,
-        .spriteIdPokedex = SPRITE_NONE,
-        .spriteIdParty = SPRITE_NONE,
-        .spriteIdBag = SPRITE_NONE,
-        .spriteIdDexNav = SPRITE_NONE,
-        .spriteIdQuests = SPRITE_NONE,
-        .spriteIdTrainerCard = SPRITE_NONE,
-        .spriteIdSave = SPRITE_NONE,
-        .spriteIdOptions = SPRITE_NONE,
-        .spriteIdFlag = SPRITE_NONE,
-        .spriteIdLButton = SPRITE_NONE,
-        .spriteIdRButton = SPRITE_NONE,
+struct SpriteCordsStruct {
+    u8 x;
+    u8 y;
+};
+
+static void CursorCallback(struct Sprite *sprite)
+{
+    static const u8 sCursorYCoords[4] = {
+        CURSOR_TOP_ROW_Y,
+        CURSOR_MID1_ROW_Y,
+        CURSOR_MID2_ROW_Y,
+        CURSOR_BTM_ROW_Y,
     };
 
-    for (u8 i = 0; i < PARTY_SIZE; i++)
-        sStartMenu->partySpriteIds[i] = SPRITE_NONE;
+    u8 y = sStartMenuDataPtr->selector_y;
 
-    // Compute total pages first so it's always valid
-    sStartMenu->totalPages = GetTotalPageCount();
-
-    // Determine visible entries
-    u8 firstVisibleOption, visibleCount;
-    GetVisibleMenuEntriesForPage(&firstVisibleOption, &visibleCount);
-
-    if (visibleCount > sLastVisibleOptionsCount)
+    if (sprite == &gSprites[sStartMenuDataPtr->cursorSpriteIds[0]])
     {
-        sStartMenu->page = 0;
-        menuSelected = firstVisibleOption;
+        sprite->x = CURSOR_LEFT_COL_X;
+        sprite->y = sCursorYCoords[y];
     }
-    else if (sLastMenuSelected != 255)
+    else if (sprite == &gSprites[sStartMenuDataPtr->cursorSpriteIds[1]])
     {
-        menuSelected = sLastMenuSelected;
+        sprite->x = CURSOR_LEFT_COL_X + 64;
+        sprite->y = sCursorYCoords[y];
+    }
 
-        const u8 menuOrder[] = {
-            MENU_POKEDEX, MENU_PARTY, MENU_BAG, MENU_DEXNAV, MENU_QUESTS,
-            MENU_TRAINER_CARD, MENU_SAVE, MENU_OPTIONS
-        };
+    for (int i = 0; i < VISIBLE_BUTTONS * 2; i += 2)
+    {
+        u8 buttonSpriteId = sStartMenuDataPtr->MenuButtonSpriteIds[i];
+        struct Sprite *buttonSprite = &gSprites[buttonSpriteId];
 
-        u8 visibleIndex = 0;
-        for (u8 i = 0; i < ARRAY_COUNT(menuOrder); i++)
+        if (abs(sprite->y - buttonSprite->y) < 4)
         {
-            bool32 visible = TRUE;
-            switch (menuOrder[i])
-            {
-                case MENU_POKEDEX: visible = FlagGet(FLAG_SYS_POKEDEX_GET); break;
-                case MENU_PARTY:   visible = FlagGet(FLAG_SYS_POKEMON_GET); break;
-                case MENU_DEXNAV: visible = FlagGet(FLAG_SYS_DEXNAV_GET); break;
-                case MENU_QUESTS: visible = FlagGet(FLAG_SYS_QUEST_MENU_GET); break;
-            }
-
-            if (!visible) continue;
-
-            if (menuOrder[i] == sLastMenuSelected)
-            {
-                sStartMenu->page = visibleIndex / MAX_ICONS_PER_PAGE;
-                break;
-            }
-
-            visibleIndex++;
-        }
-    }
-    else
-    {
-        sStartMenu->page = 0;
-        menuSelected = firstVisibleOption;
-    }
-
-    sLastVisibleOptionsCount = visibleCount;
-
-    StartMenu_LoadSprites();
-    StartMenu_LoadBgGfx();
-    //StartMenu_ShowTimeWindow();
-    StartMenu_ShowMapNameWindow();
-    StartMenu_DestroyPartyMiniIcons();
-
-    sStartMenu->sMenuNameWindowId = AddWindow(&sWindowTemplate_MenuName);
-    StartMenu_UpdateMenuName();
-
-    if (GetSafariZoneFlag())
-    {
-        if (menuSelected == 255 || menuSelected == MENU_DEXNAV || menuSelected == MENU_SAVE)
-            menuSelected = MENU_FLAG;
-
-        sStartMenu->page = 0;
-        StartMenu_SafariZone_CreateSprites();
-        StartMenu_CreatePartyMiniIcons();
-        ShowSafariBallsWindow();
-        CreateTask(Task_StartMenu_SafariZone_HandleMainInput, 0);
-    }
-    else
-    {
-        if (!FlagGet(FLAG_SYS_DEXNAV_GET) && menuSelected == 0)
-            menuSelected = 255;
-
-        if (menuSelected == MENU_FLAG)
-            menuSelected = MENU_POKEDEX;
-
-        if (menuSelected == 255)
-            SetSelectedMenu();
-
-        StartMenu_CreateSprites();
-        StartMenu_CreatePartyMiniIcons();
-        CreateTask(Task_StartMenu_HandleMainInput, 0);
-    }
-
-    StartMenu_CreateLRButtons(sStartMenu->page, sStartMenu->totalPages);
-}
-
-static void StartMenu_UpdateAllSpriteAnimations(void)
-{
-    if (!sStartMenu)
-        return;
-
-    u32 spriteIds[] = {
-        sStartMenu->spriteIdPokedex,
-        sStartMenu->spriteIdParty,
-        sStartMenu->spriteIdBag,
-        sStartMenu->spriteIdDexNav,
-        sStartMenu->spriteIdQuests,
-        sStartMenu->spriteIdTrainerCard,
-        sStartMenu->spriteIdSave,
-        sStartMenu->spriteIdOptions
-    };
-
-    for (u32 i = 0; i < ARRAY_COUNT(spriteIds); i++)
-    {
-        if (spriteIds[i] != SPRITE_NONE)
-        {
-            struct Sprite* sprite = &gSprites[spriteIds[i]];
-            if (sprite->callback)
-                sprite->callback(sprite);
-        }
-    }
-}
-
-static void StartMenu_LoadSprites(void) {
-    LoadSpriteSheet(sSpriteSheet_Button);
-    LoadSpritePalette(sSpritePal_Button);
-    u32 index;
-    LoadSpritePalette(sSpritePal_Icon);
-    index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
-    LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
-    LoadCompressedSpriteSheet(sSpriteSheet_Icon);
-}
-
-static void StartMenu_CreateSprites(void)
-{
-    const struct {
-        const struct SpriteTemplate *template;
-        u16 flag;
-        u32 *spriteId;
-        u8 menuId;
-    } iconEntries[] = {
-        {&gSpriteIconPokedex,     FLAG_SYS_POKEDEX_GET,     &sStartMenu->spriteIdPokedex,     MENU_POKEDEX},
-        {&gSpriteIconParty,       FLAG_SYS_POKEMON_GET,     &sStartMenu->spriteIdParty,       MENU_PARTY},
-        {&gSpriteIconBag,         0,                        &sStartMenu->spriteIdBag,         MENU_BAG},
-        {&gSpriteIconDexNav,      FLAG_SYS_DEXNAV_GET,      &sStartMenu->spriteIdDexNav,      MENU_DEXNAV},
-        {&gSpriteIconQuests,      FLAG_SYS_QUEST_MENU_GET,  &sStartMenu->spriteIdQuests,      MENU_QUESTS},
-        {&gSpriteIconTrainerCard, 0,                        &sStartMenu->spriteIdTrainerCard, MENU_TRAINER_CARD},
-        {&gSpriteIconSave,        0,                        &sStartMenu->spriteIdSave,        MENU_SAVE},
-        {&gSpriteIconOptions,     0,                        &sStartMenu->spriteIdOptions,     MENU_OPTIONS},
-    };
-
-    u32 x = 224;
-    u32 yBase = 17;
-    u32 ySpacing = 29;
-
-    u32 totalUnlocked = 0;
-    for (u32 i = 0; i < ARRAY_COUNT(iconEntries); i++) {
-        if (iconEntries[i].flag == 0 || FlagGet(iconEntries[i].flag))
-            totalUnlocked++;
-    }
-
-    sStartMenu->totalPages = (totalUnlocked + MAX_ICONS_PER_PAGE - 1) / MAX_ICONS_PER_PAGE;
-    if (sStartMenu->page >= sStartMenu->totalPages)
-        sStartMenu->page = 0;
-
-    u32 skip = sStartMenu->page * MAX_ICONS_PER_PAGE;
-    u32 shown = 0;
-
-    for (u32 i = 0; i < ARRAY_COUNT(iconEntries); i++) {
-        if (iconEntries[i].flag && !FlagGet(iconEntries[i].flag))
-            continue;
-
-        if (skip > 0) {
-            skip--;
-            continue;
-        }
-
-        if (shown >= MAX_ICONS_PER_PAGE)
+            gSelectedMenu = sStartMenuDataPtr->scrollOffset + (i / 2);
             break;
-
-        u32 y = yBase + shown * ySpacing;
-        
-        /*
-        if (iconEntries[i].template == &gSpriteIconDexNav)
-            y += 2;
-
-        if (iconEntries[i].template == &gSpriteIconTrainerCard)
-            y += 2;
-        */
-
-        u8 spriteId = CreateSprite(iconEntries[i].template, x, y, 0);
-        if (spriteId != MAX_SPRITES) {
-            *iconEntries[i].spriteId = spriteId;
-            struct Sprite *sprite = &gSprites[spriteId];
-            sprite->data[0] = (menuSelected == iconEntries[i].menuId) ? 1 : 0;
-            StartSpriteAnim(sprite, sprite->data[0]);
-            StartSpriteAffineAnim(sprite, sprite->data[0]);
-        }
-
-        shown++;
-    }
-}
-
-static void StartMenu_DestroySprites(void)
-{
-#define DESTROY_SPRITE_SAFE(id) \
-    do { \
-        if ((id) != SPRITE_NONE) { \
-            FreeSpriteOamMatrix(&gSprites[id]); \
-            DestroySprite(&gSprites[id]); \
-            (id) = SPRITE_NONE; \
-        } \
-    } while(0)
-
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdPokedex);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdParty);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdBag);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdDexNav);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdQuests);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdTrainerCard);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdSave);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdOptions);
-    DESTROY_SPRITE_SAFE(sStartMenu->spriteIdFlag);
-
-    StartMenu_DestroyLRButtons();
-
-#undef DESTROY_SPRITE_SAFE
-}
-
-static void StartMenu_CreateLRButtons(u8 currentPage, u8 totalPages)
-{
-    // Destroy old buttons if exist
-    if (sStartMenu->spriteIdLButton != SPRITE_NONE)
-    {
-        DestroySprite(&gSprites[sStartMenu->spriteIdLButton]);
-        sStartMenu->spriteIdLButton = SPRITE_NONE;
-    }
-    if (sStartMenu->spriteIdRButton != SPRITE_NONE)
-    {
-        DestroySprite(&gSprites[sStartMenu->spriteIdRButton]);
-        sStartMenu->spriteIdRButton = SPRITE_NONE;
-    }
-
-    // Load gfx and palette once
-    LoadSpriteSheet(sSpriteSheet_Button);
-    LoadSpritePalette(sSpritePal_Button);
-
-    if (currentPage > 0)
-    {
-        u8 spriteId = CreateSprite(&gSpriteButtonL, 216, 155, 0);
-        if (spriteId != MAX_SPRITES)
-        {
-            sStartMenu->spriteIdLButton = spriteId;
-            StartSpriteAnim(&gSprites[spriteId], 0);
-        }
-    }
-
-    if (currentPage < totalPages - 1)
-    {
-        u8 spriteId = CreateSprite(&gSpriteButtonR, 232, 155, 0);
-        if (spriteId != MAX_SPRITES)
-        {
-            sStartMenu->spriteIdRButton = spriteId;
-            StartSpriteAnim(&gSprites[spriteId], 0);
         }
     }
 }
 
-static void StartMenu_DestroyLRButtons(void)
+static void InitCursorInPlace(void)
 {
-    if (sStartMenu->spriteIdLButton != SPRITE_NONE)
-    {
-        DestroySprite(&gSprites[sStartMenu->spriteIdLButton]);
-        sStartMenu->spriteIdLButton = SPRITE_NONE;
-    }
+    if (gSelectedMenu >= TOTAL_MENU_OPTIONS)
+        gSelectedMenu = 0;
 
-    if (sStartMenu->spriteIdRButton != SPRITE_NONE)
-    {
-        DestroySprite(&gSprites[sStartMenu->spriteIdRButton]);
-        sStartMenu->spriteIdRButton = SPRITE_NONE;
-    }
+    if (gSavedSelectorY >= VISIBLE_BUTTONS)
+        gSavedSelectorY = 0;
 
-    FreeSpriteTilesByTag(TAG_BUTTON_GFX);
-    FreeSpritePaletteByTag(TAG_BUTTON_PAL);
+    int scrollOffsetCandidate = gSelectedMenu - gSavedSelectorY;
+    if (scrollOffsetCandidate < 0)
+        scrollOffsetCandidate = 0;
+    if (scrollOffsetCandidate > TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
+        scrollOffsetCandidate = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+
+    sStartMenuDataPtr->scrollOffset = scrollOffsetCandidate;
+    sStartMenuDataPtr->selector_y = gSelectedMenu - scrollOffsetCandidate;
 }
 
-static void StartMenu_CreatePartyMiniIcons(void)
+#define ICON_BOX_1_START_X          24
+#define ICON_BOX_1_START_Y          40
+#define ICON_BOX_X_DIFFERENCE       40
+#define ICON_BOX_Y_DIFFERENCE       40
+
+/*
+static void CreateIconBox(void)
 {
+    u8 i = 0;
+
+    sStartMenuDataPtr->iconBoxSpriteIds[0] = CreateSprite(&sSpriteTemplate_IconBox, ICON_BOX_1_START_X, ICON_BOX_1_START_Y, 2);
+    sStartMenuDataPtr->iconBoxSpriteIds[1] = CreateSprite(&sSpriteTemplate_IconBox, ICON_BOX_1_START_X + ICON_BOX_X_DIFFERENCE, ICON_BOX_1_START_Y, 2);
+
+    sStartMenuDataPtr->iconBoxSpriteIds[2] = CreateSprite(&sSpriteTemplate_IconBox, ICON_BOX_1_START_X, ICON_BOX_1_START_Y + (ICON_BOX_X_DIFFERENCE * 1), 2);
+    sStartMenuDataPtr->iconBoxSpriteIds[3] = CreateSprite(&sSpriteTemplate_IconBox, ICON_BOX_1_START_X + ICON_BOX_X_DIFFERENCE, ICON_BOX_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 1), 2);
+
+    sStartMenuDataPtr->iconBoxSpriteIds[4] = CreateSprite(&sSpriteTemplate_IconBox, ICON_BOX_1_START_X, ICON_BOX_1_START_Y + (ICON_BOX_X_DIFFERENCE * 2), 2);
+    sStartMenuDataPtr->iconBoxSpriteIds[5] = CreateSprite(&sSpriteTemplate_IconBox, ICON_BOX_1_START_X + ICON_BOX_X_DIFFERENCE, ICON_BOX_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 2), 2);
+
+    for(i = 0; i < 6; i++)
+    {
+        gSprites[sStartMenuDataPtr->iconBoxSpriteIds[i]].invisible = FALSE;
+        gSprites[sStartMenuDataPtr->iconBoxSpriteIds[i]].oam.objMode = ST_OAM_OBJ_BLEND;
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->iconBoxSpriteIds[i]], 0);
+        gSprites[sStartMenuDataPtr->iconBoxSpriteIds[i]].oam.priority = 2;
+    }
+
+    SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT2_ALL);
+    SetGpuReg(REG_OFFSET_BLDALPHA, BLDALPHA_BLEND(7, 11));
+
+    return;
+}
+
+static void DestroyIconBoxes(void)
+{
+    u8 i = 0;
+    for(i = 0; i < 6; i++)
+    {
+        DestroySprite(&gSprites[sStartMenuDataPtr->iconBoxSpriteIds[i]]);
+        sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
+    }
+}
+*/
+
+static void CreatePartyMonIcons(void)
+{
+    u8 i = 0;
+    s16 x = ICON_BOX_1_START_X;
+    s16 y = ICON_BOX_1_START_Y;
     LoadMonIconPalettes();
-
-    // Destroy old icons
-    for (u8 i = 0; i < PARTY_SIZE; i++)
-    {
-        u8 id = sStartMenu->partySpriteIds[i];
-        if (id != SPRITE_NONE)
+    for(i = 0; i < gPlayerPartyCount; i++)
+    {   
+        switch (i) // choose position for each icon
         {
-            FreeSpriteOamMatrix(&gSprites[id]);
-            FreeAndDestroyMonIconSprite(&gSprites[id]);
-            sStartMenu->partySpriteIds[i] = SPRITE_NONE;
+            case 0:
+                x = ICON_BOX_1_START_X;
+                y = ICON_BOX_1_START_Y;
+                break;
+            case 1:
+                x = ICON_BOX_1_START_X + ICON_BOX_X_DIFFERENCE;
+                y = ICON_BOX_1_START_Y;
+                break;
+            case 2:
+                x = ICON_BOX_1_START_X;
+                y = ICON_BOX_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 1);
+                break;
+            case 3:
+                x = ICON_BOX_1_START_X + ICON_BOX_X_DIFFERENCE;
+                y = ICON_BOX_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 1);
+                break;
+            case 4:
+                x = ICON_BOX_1_START_X;
+                y = ICON_BOX_1_START_Y + (ICON_BOX_X_DIFFERENCE * 2);
+                break;
+            case 5:
+                x = ICON_BOX_1_START_X + ICON_BOX_X_DIFFERENCE;
+                y = ICON_BOX_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 2);
+                break;
         }
-    }
 
-    // Create fresh icons
-    for (u8 i = 0; i < PARTY_SIZE; i++)
-    {
-        struct Pokemon *mon = &gPlayerParty[i];
-        u16 species = GetMonData(mon, MON_DATA_SPECIES);
-        u32 personality = GetMonData(mon, MON_DATA_PERSONALITY);
+        sStartMenuDataPtr->iconMonSpriteIds[i] = CreateMonIcon(GetMonData(&gPlayerParty[i], MON_DATA_SPECIES_OR_EGG), SpriteCB_MonIcon, x, y, 0, GetMonData(&gPlayerParty[i], MON_DATA_PERSONALITY));
 
-        if (species != SPECIES_NONE)
+        gSprites[sStartMenuDataPtr->iconMonSpriteIds[i]].oam.priority = 0;
+
+        if (GetHPEggCyclePercent(i) == 0)
         {
-            u8 spriteId = CreateMonIcon(
-                species,
-                SpriteCB_MonIcon,
-                PARTY_ICON_X_START + i * PARTY_ICON_SPACING,
-                PARTY_ICON_Y,
-                4,
-                personality
-            );
-            if (spriteId != SPRITE_NONE)
-            {
-                struct Sprite *spr = &gSprites[spriteId];
-                spr->oam.priority   = 0;
-                spr->subpriority    = 3;
-                StartSpriteAnim(spr, 0);
-                AnimateSprite(spr);
-                sStartMenu->partySpriteIds[i] = spriteId;
-            }
-            else
-            {
-                sStartMenu->partySpriteIds[i] = SPRITE_NONE;
-            }
+            gSprites[sStartMenuDataPtr->iconMonSpriteIds[i]].callback = SpriteCallbackDummy;
         }
-        else
-        {
-            sStartMenu->partySpriteIds[i] = SPRITE_NONE;
-        }
+
     }
 }
 
-static void StartMenu_DestroyPartyMiniIcons(void)
+static void DestroyMonIcons(void)
 {
-    for (u8 i = 0; i < PARTY_SIZE; i++)
+    u8 i = 0;
+    for(i = 0; i < 6; i++)
     {
-        u8 id = sStartMenu->partySpriteIds[i];
-        if (id != SPRITE_NONE)
-        {
-            FreeSpriteOamMatrix(&gSprites[id]);
-            FreeAndDestroyMonIconSprite(&gSprites[id]);
-            sStartMenu->partySpriteIds[i] = SPRITE_NONE;
-        }
+        DestroySprite(&gSprites[sStartMenuDataPtr->iconMonSpriteIds[i]]);
+        sStartMenuDataPtr->iconMonSpriteIds[i] = SPRITE_NONE;
     }
 }
 
-static void StartMenu_SafariZone_CreateSprites(void) {
-  u32 x = 224;
-  u32 y1 = 14;
-  u32 y2 = 38;
-  u32 y3 = 60;
-  u32 y4 = 84;
-  u32 y5 = 109;
-  u32 y6 = 130;
-
-  sStartMenu->spriteIdFlag = CreateSprite(&gSpriteIconFlag, x, y1, 0);
-  sStartMenu->spriteIdPokedex = CreateSprite(&gSpriteIconPokedex, x-1, y2, 0);
-  sStartMenu->spriteIdParty   = CreateSprite(&gSpriteIconParty, x, y3, 0);
-  sStartMenu->spriteIdBag     = CreateSprite(&gSpriteIconBag, x, y4, 0);
-  sStartMenu->spriteIdTrainerCard = CreateSprite(&gSpriteIconTrainerCard, x, y5, 0);
-  sStartMenu->spriteIdOptions = CreateSprite(&gSpriteIconOptions, x, y6, 0);
-}
-
-static void StartMenu_LoadBgGfx(void) {
-  u8* buf = GetBgTilemapBuffer(0); 
-  LoadBgTilemap(0, 0, 0, 0);
-  DecompressAndCopyTileDataToVram(0, sStartMenuTiles, 0, 0, 0);
-  if (GetSafariZoneFlag() == FALSE) {
-    DecompressDataWithHeaderWram(sStartMenuTilemap, buf);
-  } else {
-    DecompressDataWithHeaderWram(sStartMenuTilemapSafari, buf);
-  }
-  LoadPalette(gStandardMenuPalette, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
-  LoadPalette(sStartMenuPalette, BG_PLTT_ID(14), PLTT_SIZE_4BPP);
-  ScheduleBgCopyTilemapToVram(0);
-}
-
-static void StartMenu_ShowMapNameWindow(void)
+static const u8 *GetBarGfx(u32 percent)
 {
-    sStartMenu->sMapNameWindowId = AddWindow(&sWindowTemplate_MapName);
-    FillWindowPixelBuffer(sStartMenu->sMapNameWindowId, PIXEL_FILL(sTextColors[0]));
-    PutWindowTilemap(sStartMenu->sMapNameWindowId);
-
-    u8 mapName[MAP_NAME_LENGTH + 1];
-    GetMapName(mapName, gMapHeader.regionMapSectionId, 0);
-
-    s32 pixelWidth = GetStringWidth(FONT_NORMAL, mapName, 0);
-    s32 windowWidthPx = sWindowTemplate_MapName.width * 8;
-    s32 xOffset = ((windowWidthPx - pixelWidth) / 2) + 1;
-
-    if (xOffset < 3)
-        xOffset = 3;
-
-    AddTextPrinterParameterized3(sStartMenu->sMapNameWindowId, FONT_NORMAL, xOffset, 0, sTextColors, TEXT_SKIP_DRAW, mapName);
-    CopyWindowToVram(sStartMenu->sMapNameWindowId, COPYWIN_GFX);
-}
-
-/*
-static void StartMenu_ShowTimeWindow(void)
-{
-    u8 analogHour;
-
-	RtcCalcLocalTime();
-      // print window
-  sStartMenu->sStartClockWindowId = AddWindow(&sWindowTemplate_StartClock);
-  FillWindowPixelBuffer(sStartMenu->sStartClockWindowId, PIXEL_FILL(TEXT_COLOR_WHITE));
-  PutWindowTilemap(sStartMenu->sStartClockWindowId);
-	FlagSet(FLAG_TEMP_5);
-
-    analogHour = (gLocalTime.hours >= 13 && gLocalTime.hours <= 24) ? gLocalTime.hours - 12 : gLocalTime.hours;
-
-	StringCopy(gStringVar3, gDayNameStringsTable[(gLocalTime.days % 7)]);
-    ConvertIntToDecimalStringN(gStringVar1, gLocalTime.hours, STR_CONV_MODE_LEADING_ZEROS, 2);
-	ConvertIntToDecimalStringN(gStringVar2, gLocalTime.minutes, STR_CONV_MODE_LEADING_ZEROS, 2);
-	    ConvertIntToDecimalStringN(gStringVar1, analogHour, STR_CONV_MODE_LEADING_ZEROS, 2);
-    
-	StringExpandPlaceholders(gStringVar4, gText_CurrentTime);
-        if (gLocalTime.hours >= 13 && gLocalTime.hours <= 24)
-            StringExpandPlaceholders(gStringVar4, gText_CurrentTimePM); 
-        else
-            StringExpandPlaceholders(gStringVar4, gText_CurrentTimeAM);  
-    
-	AddTextPrinterParameterized(sStartMenu->sStartClockWindowId, 1, gStringVar4, 0, 1, 0xFF, NULL);
-	CopyWindowToVram(sStartMenu->sStartClockWindowId, COPYWIN_GFX);
-}
-*/
-
-/*
-static void StartMenu_UpdateClockDisplay(void)
-{
-    u8 analogHour;
-
-	if (!FlagGet(FLAG_TEMP_5))
-		return;
-	RtcCalcLocalTime();
-    analogHour = (gLocalTime.hours >= 13 && gLocalTime.hours <= 24) ? gLocalTime.hours - 12 : gLocalTime.hours;
-    
-	StringCopy(gStringVar3, gDayNameStringsTable[(gLocalTime.days % 7)]);
-    ConvertIntToDecimalStringN(gStringVar1, gLocalTime.hours, STR_CONV_MODE_LEADING_ZEROS, 2);
-	ConvertIntToDecimalStringN(gStringVar2, gLocalTime.minutes, STR_CONV_MODE_LEADING_ZEROS, 2);
-	    ConvertIntToDecimalStringN(gStringVar1, analogHour, STR_CONV_MODE_LEADING_ZEROS, 2);
-    if (gLocalTime.hours == 0)
-		ConvertIntToDecimalStringN(gStringVar1, 12, STR_CONV_MODE_LEADING_ZEROS, 2);
-    if (gLocalTime.hours == 12)
-		ConvertIntToDecimalStringN(gStringVar1, 12, STR_CONV_MODE_LEADING_ZEROS, 2);
-
-	if (gLocalTime.seconds % 2)
-	{
-        StringExpandPlaceholders(gStringVar4, gText_CurrentTime);
-            if (gLocalTime.hours >= 12 && gLocalTime.hours <= 24)
-                StringExpandPlaceholders(gStringVar4, gText_CurrentTimePM); 
-            else
-                StringExpandPlaceholders(gStringVar4, gText_CurrentTimeAM);  
-    }
-	else
-	{
-        StringExpandPlaceholders(gStringVar4, gText_CurrentTimeOff);
-            if (gLocalTime.hours >= 12 && gLocalTime.hours <= 24)
-                StringExpandPlaceholders(gStringVar4, gText_CurrentTimePMOff); 
-            else
-                StringExpandPlaceholders(gStringVar4, gText_CurrentTimeAMOff);  
-    }
-    
-	AddTextPrinterParameterized(sStartMenu->sStartClockWindowId, 1, gStringVar4, 0, 1, 0xFF, NULL);
-	CopyWindowToVram(sStartMenu->sStartClockWindowId, COPYWIN_GFX);
-}
-*/
-
-static const u8 gText_DexNav[] = _("   DexNav");
-static const u8 gText_Pokedex[] = _("  Pokédex");
-static const u8 gText_Party[]   = _("    Party ");
-static const u8 gText_Bag[]     = _("      Bag  ");
-static const u8 gText_Quests[]     = _("   Quests");
-static const u8 gText_Trainer[] = _("   Trainer");
-static const u8 gText_Save[]    = _("     Save  ");
-static const u8 gText_Options[] = _("   Options");
-static const u8 gText_Flag[]    = _("   Retire");
-
-static void StartMenu_UpdateMenuName(void)
-{
-    FillWindowPixelBuffer(sStartMenu->sMenuNameWindowId, PIXEL_FILL(sTextColors[0]));
-    PutWindowTilemap(sStartMenu->sMenuNameWindowId);
-
-    const u8 *text = NULL;
-    switch (menuSelected)
-    {
-        case MENU_DEXNAV:       text = gText_DexNav;       break;
-        case MENU_POKEDEX:      text = gText_Pokedex;      break;
-        case MENU_PARTY:        text = gText_Party;        break;
-        case MENU_BAG:          text = gText_Bag;          break;
-        case MENU_QUESTS:       text = gText_Quests;       break;
-        case MENU_TRAINER_CARD: text = gText_Trainer;      break;
-        case MENU_SAVE:         text = gText_Save;         break;
-        case MENU_OPTIONS:      text = gText_Options;      break;
-        case MENU_FLAG:         text = gText_Flag;         break;
-    }
-
-    if (text != NULL)
-        AddTextPrinterParameterized3(sStartMenu->sMenuNameWindowId, 1, 1, 0, sTextColors, 0xFF, text);
-
-    CopyWindowToVram(sStartMenu->sMenuNameWindowId, COPYWIN_GFX);
-}
-
-
-static void StartMenu_ExitAndClearTilemap(void)
-{
-    u8 *buf = GetBgTilemapBuffer(0);
-    u32 i;
-
-    // Clear and remove menu windows
-    FillWindowPixelBuffer(sStartMenu->sMenuNameWindowId, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-    FillWindowPixelBuffer(sStartMenu->sMapNameWindowId, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-    ClearWindowTilemap(sStartMenu->sMenuNameWindowId);
-    ClearWindowTilemap(sStartMenu->sMapNameWindowId);
-    CopyWindowToVram(sStartMenu->sMenuNameWindowId, COPYWIN_GFX);
-    CopyWindowToVram(sStartMenu->sMapNameWindowId, COPYWIN_GFX);
-    RemoveWindow(sStartMenu->sMapNameWindowId);
-    RemoveWindow(sStartMenu->sMenuNameWindowId);
-
-    if (GetSafariZoneFlag())
-    {
-        FillWindowPixelBuffer(sStartMenu->sSafariBallsWindowId, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
-        ClearWindowTilemap(sStartMenu->sSafariBallsWindowId);
-        CopyWindowToVram(sStartMenu->sSafariBallsWindowId, COPYWIN_GFX);
-        RemoveWindow(sStartMenu->sSafariBallsWindowId);
-    }
-
-    // Clear background tilemap
-    for (i = 0; i < 2048; i++)
-        buf[i] = 0;
-    ScheduleBgCopyTilemapToVram(0);
-
-    // Helper macro to safely free/destroy a sprite by sprite ID pointer
-    #define SAFE_DESTROY_SPRITE(spriteIdPtr)             \
-        do {                                             \
-            if (*(spriteIdPtr) != SPRITE_NONE)           \
-            {                                            \
-                FreeSpriteOamMatrix(&gSprites[*(spriteIdPtr)]); \
-                DestroySprite(&gSprites[*(spriteIdPtr)]); \
-                *(spriteIdPtr) = SPRITE_NONE;             \
-            }                                            \
-        } while (0)
-
-    // Destroy sprites, checking flags and only if sprite is valid
-    if (FlagGet(FLAG_SYS_POKEDEX_GET))
-        SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdPokedex);
-
-    if (FlagGet(FLAG_SYS_POKEMON_GET))
-        SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdParty);
-
-    SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdBag);
-    SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdTrainerCard);
-    SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdOptions);
-
-    if (FlagGet(FLAG_SYS_QUEST_MENU_GET))
-        SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdQuests);
-
-    if (!GetSafariZoneFlag())
-    {
-        SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdSave);
-        if (FlagGet(FLAG_SYS_DEXNAV_GET))
-            SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdDexNav);
-    }
-    else
-    {
-        SAFE_DESTROY_SPRITE(&sStartMenu->spriteIdFlag);
-    }
-
-    StartMenu_DestroyLRButtons();
-    StartMenu_DestroyPartyMiniIcons();
-
-    #undef SAFE_DESTROY_SPRITE
-
-    // Free sprite tiles after destroying sprites
-    FreeSpriteTilesByTag(TAG_ICON_GFX);
-
-    // Free menu data struct last
-    if (sStartMenu != NULL)
-    {
-        Free(sStartMenu);
-        sStartMenu = NULL;
-    }
-
-    ScriptUnfreezeObjectEvents();
-    UnlockPlayerFieldControls();
-}
-
-static void DoCleanUpAndChangeCallback(MainCallback callback) {
-  if (!gPaletteFade.active) {
-    DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
-    PlayRainStoppingSoundEffect();
-    StartMenu_ExitAndClearTilemap();
-    CleanupOverworldWindowsAndTilemaps();
-    SetMainCallback2(callback);
-    gMain.savedCallback = CB2_ReturnToFieldWithOpenMenu;
-  }
-}
-
-static void DoCleanUpAndOpenTrainerCard(void) {
-  if (!gPaletteFade.active) {
-    PlayRainStoppingSoundEffect();
-    StartMenu_ExitAndClearTilemap();
-    CleanupOverworldWindowsAndTilemaps();
-    if (IsOverworldLinkActive() || InUnionRoom()) {
-      ShowPlayerTrainerCard(CB2_ReturnToFieldWithOpenMenu); // Display trainer card
-      DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
-    } else if (FlagGet(FLAG_SYS_FRONTIER_PASS)) {
-      ShowFrontierPass(CB2_ReturnToFieldWithOpenMenu); // Display frontier pass
-      DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
-    } else {
-      ShowPlayerTrainerCard(CB2_ReturnToFieldWithOpenMenu); // Display trainer card
-      DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
-    }
-  }
-}
-
-static u8 RunSaveCallback(void)
-{
-    // True if text is still printing
-    if (RunTextPrintersAndIsPrinter0Active() == TRUE)
-    {
-        return SAVE_IN_PROGRESS;
-    }
-
-    return sSaveDialogCallback();
-}
-
-static void SaveStartTimer(void)
-{
-    sSaveDialogTimer = 60;
-}
-
-static bool8 SaveSuccesTimer(void)
-{
-    sSaveDialogTimer--;
-
-
-    if (JOY_HELD(A_BUTTON) || JOY_HELD(B_BUTTON))
-    {
-        PlaySE(SE_SELECT);
-        return TRUE;
-    }
-    if (sSaveDialogTimer == 0)
-    {
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
-static bool8 SaveErrorTimer(void)
-{
-    if (sSaveDialogTimer != 0)
-    {
-        sSaveDialogTimer--;
-    }
-    else if (JOY_HELD(A_BUTTON))
-    {
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
-static u8 SaveReturnSuccessCallback(void)
-{
-    if (!IsSEPlaying() && SaveSuccesTimer())
-    {
-        //HideSaveInfoWindow();
-        return SAVE_SUCCESS;
-    }
-    else
-    {
-        return SAVE_IN_PROGRESS;
-    }
-}
-
-static u8 SaveSuccessCallback(void)
-{
-    if (!IsTextPrinterActive(0))
-    {
-        PlaySE(SE_SAVE);
-        sSaveDialogCallback = SaveReturnSuccessCallback;
-    }
-
-    return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveReturnErrorCallback(void)
-{
-    if (!SaveErrorTimer())
-    {
-        return SAVE_IN_PROGRESS;
-    }
-    else
-    {
-        //HideSaveInfoWindow();
-        return SAVE_ERROR;
-    }
-}
-
-static u8 SaveErrorCallback(void)
-{
-    if (!IsTextPrinterActive(0))
-    {
-        PlaySE(SE_BOO);
-        sSaveDialogCallback = SaveReturnErrorCallback;
-    }
-
-    return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveDoSaveCallback(void)
-{
-    u8 saveStatus;
-
-    IncrementGameStat(GAME_STAT_SAVED_GAME);
-    PausePyramidChallenge();
-
-    if (gDifferentSaveFile == TRUE)
-    {
-        saveStatus = TrySavingData(SAVE_OVERWRITE_DIFFERENT_FILE);
-        gDifferentSaveFile = FALSE;
-    }
-    else
-    {
-        saveStatus = TrySavingData(SAVE_NORMAL);
-    }
-
-    if (saveStatus == SAVE_STATUS_OK)
-        ShowSaveMessage(gText_PlayerSavedGame, SaveSuccessCallback);
-    else
-        ShowSaveMessage(gText_SaveError, SaveErrorCallback);
-
-    SaveStartTimer();
-    return SAVE_IN_PROGRESS;
-}
-
-/*
-static void HideSaveInfoWindow(void) {
-  ClearStdWindowAndFrame(sSaveInfoWindowId, FALSE);
-  RemoveWindow(sSaveInfoWindowId);
-}
-*/
-
-static void HideSaveMessageWindow(void) {
-  ClearDialogWindowAndFrame(0, TRUE);
-}
-
-static u8 SaveOverwriteInputCallback(void)
-{
-    switch (Menu_ProcessInputNoWrapClearOnChoose())
-    {
-    case 0: // Yes
-        sSaveDialogCallback = SaveSavingMessageCallback;
-        return SAVE_IN_PROGRESS;
-    case MENU_B_PRESSED:
-    case 1: // No
-        //HideSaveInfoWindow();
-        HideSaveMessageWindow();
-        return SAVE_CANCELED;
-    }
-
-    return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveConfirmOverwriteDefaultNoCallback(void)
-{
-    DisplayYesNoMenuWithDefault(1); // Show Yes/No menu (No selected as default)
-    sSaveDialogCallback = SaveOverwriteInputCallback;
-    return SAVE_IN_PROGRESS;
-}
-
-/*static u8 SaveConfirmOverwriteCallback(void)
-{
-    DisplayYesNoMenuDefaultYes(); // Show Yes/No menu
-    sSaveDialogCallback = SaveOverwriteInputCallback;
-    return SAVE_IN_PROGRESS;
-}*/
-
-static void ShowSaveMessage(const u8 *message, u8 (*saveCallback)(void)) {
-    StringExpandPlaceholders(gStringVar4, message);
-    LoadMessageBoxAndFrameGfx(0, TRUE);
-    AddTextPrinterForMessage_2(TRUE);
-    sSaveDialogCallback = saveCallback;
-}
-
-static u8 SaveFileExistsCallback(void)
-{
-    if (gDifferentSaveFile == TRUE)
-    {
-        ShowSaveMessage(gText_DifferentSaveFile, SaveConfirmOverwriteDefaultNoCallback);
-    }
-    else
-    {
-        sSaveDialogCallback = SaveSavingMessageCallback;
-    }
-
-    return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveSavingMessageCallback(void) {
-  ShowSaveMessage(gText_SavingDontTurnOff, SaveDoSaveCallback);
-  return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveConfirmInputCallback(void)
-{
-    switch (Menu_ProcessInputNoWrapClearOnChoose())
-    {
-    case 0: // Yes
-        switch (gSaveFileStatus)
-        {
-        case SAVE_STATUS_EMPTY:
-        case SAVE_STATUS_CORRUPT:
-            if (gDifferentSaveFile == FALSE)
-            {
-                sSaveDialogCallback = SaveFileExistsCallback;
-                return SAVE_IN_PROGRESS;
-            }
-
-            sSaveDialogCallback = SaveSavingMessageCallback;
-            return SAVE_IN_PROGRESS;
-        default:
-            sSaveDialogCallback = SaveFileExistsCallback;
-            return SAVE_IN_PROGRESS;
-        }
-    case MENU_B_PRESSED: // No break, thats smart 
-    case 1: // No
-        //HideSaveInfoWindow();
-        HideSaveMessageWindow();
-        return SAVE_CANCELED;
-    }
-
-    return SAVE_IN_PROGRESS;
-}
-
-static u8 SaveYesNoCallback(void) {
-    DisplayYesNoMenuDefaultYes(); // Show Yes/No menu
-    sSaveDialogCallback = SaveConfirmInputCallback;
-    return SAVE_IN_PROGRESS;
-}
-
-/*
-static void ShowSaveInfoWindow(void) {
-    struct WindowTemplate saveInfoWindow = sSaveInfoWindowTemplate;
-    u8 gender;
-    u8 color;
-    u32 xOffset;
-    u32 yOffset;
-    //const u8 *suffix;
-    //u8 *alignedSuffix = gStringVar3;
-
-    if (!FlagGet(FLAG_SYS_POKEDEX_GET))
-    {
-        saveInfoWindow.height -= 2;
-    }
-    
-    sSaveInfoWindowId = AddWindow(&saveInfoWindow);
-    DrawStdWindowFrame(sSaveInfoWindowId, FALSE);
-
-    gender = gSaveBlock2Ptr->playerGender;
-    color = TEXT_COLOR_RED;  // Red when female, blue when male.
-
-    if (gender == MALE)
-    {
-        color = TEXT_COLOR_BLUE;
-    }
-
-    // Print region name
-    yOffset = 1;
-    BufferSaveMenuText(SAVE_MENU_LOCATION, gStringVar4, TEXT_COLOR_GREEN);
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-
-    // Print player name
-    yOffset += 16;
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingPlayer, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-    BufferSaveMenuText(SAVE_MENU_NAME, gStringVar4, color);
-    xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-    PrintPlayerNameOnWindow(sSaveInfoWindowId, gStringVar4, xOffset, yOffset);
-
-    // Print badge count
-    yOffset += 16;
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingBadges, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-    BufferSaveMenuText(SAVE_MENU_BADGES, gStringVar4, color);
-    xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
-
-    if (FlagGet(FLAG_SYS_POKEDEX_GET) == TRUE)
-    {
-        // Print pokedex count
-        yOffset += 16;
-        AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingPokedex, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-        BufferSaveMenuText(SAVE_MENU_CAUGHT, gStringVar4, color);
-        xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-        AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
-    }
-
-    // Print play time
-    yOffset += 16;
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gText_SavingTime, 0, yOffset, TEXT_SKIP_DRAW, NULL);
-    BufferSaveMenuText(SAVE_MENU_PLAY_TIME, gStringVar4, color);
-    xOffset = GetStringRightAlignXOffset(FONT_NORMAL, gStringVar4, 0x70);
-    AddTextPrinterParameterized(sSaveInfoWindowId, FONT_NORMAL, gStringVar4, xOffset, yOffset, TEXT_SKIP_DRAW, NULL);
-
-    CopyWindowToVram(sSaveInfoWindowId, COPYWIN_GFX);
-}
-*/
-
-static u8 SaveConfirmSaveCallback(void) {
-  ClearStdWindowAndFrame(GetStartMenuWindowId(), FALSE);
-  //RemoveStartMenuWindow();
-  //ShowSaveInfoWindow();
-
-  if (CurrentBattlePyramidLocation()) {
-    ShowSaveMessage(gText_BattlePyramidConfirmRest, SaveYesNoCallback);
-  } else {
-    ShowSaveMessage(gText_ConfirmSave, SaveYesNoCallback);
-  }
-  return SAVE_IN_PROGRESS;
-}
-
-static void InitSave(void)
-{
-    SaveMapView();
-    sSaveDialogCallback = SaveConfirmSaveCallback;
-}
-
-static void Task_HandleSave(u8 taskId) {
-  switch (RunSaveCallback()) {
-    case SAVE_IN_PROGRESS:
-      break;
-    case SAVE_SUCCESS:
-    case SAVE_CANCELED: // Back to start menu
-      ClearDialogWindowAndFrameToTransparent(0, TRUE);
-      ScriptUnfreezeObjectEvents();  
-      UnlockPlayerFieldControls();
-      DestroyTask(taskId);
-      break;
-    case SAVE_ERROR:    // Close start menu
-      ClearDialogWindowAndFrameToTransparent(0, TRUE);
-      ScriptUnfreezeObjectEvents();
-      UnlockPlayerFieldControls();
-      SoftResetInBattlePyramid();
-      DestroyTask(taskId);
-      break;
-  }
-}
-
-#define STD_WINDOW_BASE_TILE_NUM 0x214
-#define STD_WINDOW_PALETTE_NUM 14
-
-static void DoCleanUpAndStartSaveMenu(void) {
-  if (!gPaletteFade.active) {
-    StartMenu_ExitAndClearTilemap();
-    FreezeObjectEvents();
-    LoadUserWindowBorderGfx(sSaveInfoWindowId, STD_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(STD_WINDOW_PALETTE_NUM));
-    LockPlayerFieldControls();
-    DestroyTask(FindTaskIdByFunc(Task_StartMenu_HandleMainInput));
-    InitSave();
-    CreateTask(Task_HandleSave, 0x80);
-  }
-}
-
-static void DoCleanUpAndStartSafariZoneRetire(void) {
-  if (!gPaletteFade.active) {
-    StartMenu_ExitAndClearTilemap();
-    FreezeObjectEvents();
-    LockPlayerFieldControls();
-    DestroyTask(FindTaskIdByFunc(Task_StartMenu_SafariZone_HandleMainInput));
-    SafariZoneRetirePrompt();
-  }
-}
- 
-static void StartMenu_OpenMenu(void) {
-    switch (menuSelected) {
-        case MENU_DEXNAV:
-            PlaySE(SE_SELECT);
-            StartMenu_ExitAndClearTilemap();
-
-            LoadPalette(gFieldEffectObjectPalette0, OBJ_PLTT_ID(0), PLTT_SIZE_4BPP);
-
-            CreateTask(Task_OpenDexNavFromStartMenu, 0);
-        case MENU_POKEDEX:
-            DoCleanUpAndChangeCallback(CB2_OpenPokedex);
-            break;
-        case MENU_PARTY: 
-            DoCleanUpAndChangeCallback(CB2_PartyMenuFromStartMenu);
-            break;
-        case MENU_BAG: 
-            DoCleanUpAndChangeCallback(CB2_BagMenuFromStartMenu);
-            break;
-        case MENU_QUESTS: 
-            DoCleanUpAndChangeCallback(CB2_OpenQuestMenuFromStartMenu);
-            break;
-        case MENU_TRAINER_CARD:
-            DoCleanUpAndOpenTrainerCard();
-            break;
-        case MENU_OPTIONS:
-            FlagSet(FLAG_OPTIONS_FROM_START_MENU);
-            DoCleanUpAndChangeCallback(CB2_InitOptionMenu);
-            break;
-    }
-}
-
-void GoToHandleInput(void) {
-  CreateTask(Task_StartMenu_HandleMainInput, 80);
-}
-
-static void StartMenu_HandleInput_DPADDOWN(void)
-{
-    u8 entries[MAX_ICONS_PER_PAGE];
-    u8 count;
-    GetVisibleMenuEntriesForPage(entries, &count);
-
-    if (count == 0)
-        return;
-
-    u8 oldSelection = menuSelected;
-
-    for (u8 i = 0; i < count; i++) {
-        if (entries[i] == menuSelected) {
-            u8 newIndex = (i + 1) % count;
-            if (entries[newIndex] != oldSelection) {
-                menuSelected = entries[newIndex];
-                sStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset so animation triggers again
-                PlaySE(SE_SELECT);
-                StartMenu_UpdateMenuName();
-                StartMenu_UpdateAllSpriteAnimations();
-            }
-            return;
-        }
-    }
-
-    // fallback
-    if (menuSelected != entries[0]) {
-        menuSelected = entries[0];
-        sStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset here as well
-        PlaySE(SE_SELECT);
-        StartMenu_UpdateMenuName();
-        StartMenu_UpdateAllSpriteAnimations();
-    }
-}
-
-static void StartMenu_HandleInput_DPADUP(void)
-{
-    u8 entries[MAX_ICONS_PER_PAGE];
-    u8 count;
-    GetVisibleMenuEntriesForPage(entries, &count);
-
-    if (count == 0)
-        return;
-
-    u8 oldSelection = menuSelected;
-
-    for (u8 i = 0; i < count; i++) {
-        if (entries[i] == menuSelected) {
-            u8 newIndex = (i + count - 1) % count;
-            if (entries[newIndex] != oldSelection) {
-                menuSelected = entries[newIndex];
-                sStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset so animation triggers again
-                PlaySE(SE_SELECT);
-                StartMenu_UpdateMenuName();
-                StartMenu_UpdateAllSpriteAnimations();
-            }
-            return;
-        }
-    }
-
-    // fallback
-    if (menuSelected != entries[0]) {
-        menuSelected = entries[0];
-        sStartMenu->flag = FLAG_VALUE_NOT_SET;  // reset here as well
-        PlaySE(SE_SELECT);
-        StartMenu_UpdateMenuName();
-        StartMenu_UpdateAllSpriteAnimations();
-    }
-}
-
-static void GetVisibleMenuEntriesForPage(u8 *outEntries, u8 *outCount)
-{
-    u8 i, count = 0, skipped = 0;
-    u8 page = sStartMenu->page;
-    u8 start = page * MAX_ICONS_PER_PAGE;
-
-    const u8 menuOrder[] = {
-        MENU_POKEDEX,
-        MENU_PARTY,
-        MENU_BAG,
-        MENU_DEXNAV,
-        MENU_QUESTS,
-        MENU_TRAINER_CARD,
-        MENU_SAVE,
-        MENU_OPTIONS
+    u32 modifiedPercent = percent / 10;
+
+    const u8 *sHPBar_Fill_Gfx[] = {
+        sHPBar_0_Percent_Gfx,
+        sHPBar_10_Percent_Gfx,
+        sHPBar_20_Percent_Gfx,
+        sHPBar_30_Percent_Gfx,
+        sHPBar_40_Percent_Gfx,
+        sHPBar_50_Percent_Gfx,
+        sHPBar_60_Percent_Gfx,
+        sHPBar_70_Percent_Gfx,
+        sHPBar_80_Percent_Gfx,
+        sHPBar_90_Percent_Gfx,
+        sHPBar_100_Percent_Gfx,
     };
 
-    for (i = 0; i < ARRAY_COUNT(menuOrder); i++) {
-        bool32 visible = FALSE;
-        switch (menuOrder[i]) {
-            case MENU_POKEDEX:
-                visible = FlagGet(FLAG_SYS_POKEDEX_GET);
+    if (percent == 0)
+        return sHPBar_Fill_Gfx[percent];
+
+    if (modifiedPercent == 0)
+        return sHPBar_Fill_Gfx[1];
+
+    return sHPBar_Fill_Gfx[modifiedPercent];
+}
+
+static bool32 IsMonNotEmpty(u32 partyIndex)
+{
+    return (GetMonData(&gPlayerParty[partyIndex], MON_DATA_SPECIES_OR_EGG, NULL) != SPECIES_NONE);
+}
+
+static u32 GetHPEggCyclePercent(u32 partyIndex)
+{
+    struct Pokemon *mon = &gPlayerParty[partyIndex];
+    if (!GetMonData(mon, MON_DATA_IS_EGG))
+        return ((GetMonData(mon, MON_DATA_HP)) * 100 / (GetMonData(mon,MON_DATA_MAX_HP)));
+    else
+        return ((GetMonData(mon, MON_DATA_FRIENDSHIP)) * 100 / (gSpeciesInfo[GetMonData(mon,MON_DATA_SPECIES)].eggCycles));
+}
+
+#define HP_BAR_X_START  0
+#define HP_BAR_Y_START  30
+
+static void StartMenu_DisplayHP(void)
+{
+    u32 i;
+    u32 y = 1;
+    s32 x = -4;
+
+    FillWindowPixelBuffer(WINDOW_HP_BARS, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+
+    for(i = 0; i < PARTY_SIZE; i++) // choose position for each hp bar
+    {
+        switch (i)
+        {   
+            case 0:
+                x = HP_BAR_X_START;
+                y = HP_BAR_Y_START;
                 break;
-            case MENU_PARTY:
-                visible = FlagGet(FLAG_SYS_POKEMON_GET);
+            case 1:
+                x = HP_BAR_X_START + ICON_BOX_X_DIFFERENCE;
+                y = HP_BAR_Y_START;
                 break;
-            case MENU_DEXNAV:
-                visible = FlagGet(FLAG_SYS_DEXNAV_GET);
+            case 2:
+                x = HP_BAR_X_START;
+                y = HP_BAR_Y_START + (ICON_BOX_Y_DIFFERENCE * 1);
                 break;
-            case MENU_QUESTS:
-                visible = FlagGet(FLAG_SYS_QUEST_MENU_GET);
+            case 3:
+                x = HP_BAR_X_START + ICON_BOX_X_DIFFERENCE;
+                y = HP_BAR_Y_START + (ICON_BOX_Y_DIFFERENCE * 1);
+                break;
+            case 4:
+                x = HP_BAR_X_START;
+                y = HP_BAR_Y_START + (ICON_BOX_X_DIFFERENCE * 2);
+                break;
+            case 5:
+                x = HP_BAR_X_START + ICON_BOX_X_DIFFERENCE;
+                y = HP_BAR_Y_START + (ICON_BOX_Y_DIFFERENCE * 2);
+                break;
+        }
+
+        if(!IsMonNotEmpty(i))
+            continue;
+
+        BlitBitmapToWindow(WINDOW_HP_BARS, GetBarGfx(GetHPEggCyclePercent(i)), x, y, 32, 8);
+    }
+
+    CopyWindowToVram(WINDOW_HP_BARS, COPYWIN_GFX);
+}
+
+#define AILMENT_NONE  0
+#define AILMENT_PSN   1
+#define AILMENT_PRZ   2
+#define AILMENT_SLP   3
+#define AILMENT_FRZ   4
+#define AILMENT_BRN   5
+#define AILMENT_PKRS  6
+#define AILMENT_FNT   7
+#define AILMENT_FRB   8
+
+#define ICON_STATUS_1_START_X  24
+#define ICON_STATUS_1_START_Y  29
+
+static void CreatePartyMonStatuses(void)
+{
+    u8 i = 0;
+    s16 x = ICON_STATUS_1_START_X;
+    s16 y = ICON_STATUS_1_START_Y;
+    u8 status;
+
+    for(i = 0; i < gPlayerPartyCount; i++)
+    {   
+        switch (i)
+        {
+            case 0:
+                x = ICON_STATUS_1_START_X;
+                y = ICON_STATUS_1_START_Y;
+                break;
+            case 1:
+                x = ICON_STATUS_1_START_X + ICON_BOX_X_DIFFERENCE;
+                y = ICON_STATUS_1_START_Y;
+                break;
+            case 2:
+                x = ICON_STATUS_1_START_X;
+                y = ICON_STATUS_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 1);
+                break;
+            case 3:
+                x = ICON_STATUS_1_START_X + ICON_BOX_X_DIFFERENCE;
+                y = ICON_STATUS_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 1);
+                break;
+            case 4:
+                x = ICON_STATUS_1_START_X;
+                y = ICON_STATUS_1_START_Y + (ICON_BOX_X_DIFFERENCE * 2);
+                break;
+            case 5:
+                x = ICON_STATUS_1_START_X + ICON_BOX_X_DIFFERENCE;
+                y = ICON_STATUS_1_START_Y + (ICON_BOX_Y_DIFFERENCE * 2);
+                break;
+        }
+
+        sStartMenuDataPtr->iconStatusSpriteIds[i] = CreateSprite(&sSpriteTemplate_StatusIcons, x, y, 0);
+
+        status = GetMonAilment(&gPlayerParty[i]);
+        switch (status)
+        {
+            case AILMENT_NONE:
+            case AILMENT_PKRS:
+                gSprites[sStartMenuDataPtr->iconStatusSpriteIds[i]].invisible = TRUE;
                 break;
             default:
-                visible = TRUE;
+                StartSpriteAnim(&gSprites[sStartMenuDataPtr->iconStatusSpriteIds[i]], status - 1);
+                gSprites[sStartMenuDataPtr->iconStatusSpriteIds[i]].invisible = FALSE;
                 break;
         }
-
-        if (!visible)
-            continue;
-
-        if (skipped < start) {
-            skipped++;
-            continue;
-        }
-
-        if (count < MAX_ICONS_PER_PAGE) {
-            outEntries[count++] = menuOrder[i];
-        } else {
-            break;
-        }
+        gSprites[sStartMenuDataPtr->iconStatusSpriteIds[i]].oam.priority = 0;
     }
-
-    *outCount = count;
 }
 
-static void Task_StartMenu_HandleMainInput(u8 taskId)
+static void DestroyStatusSprites(void)
 {
-    // Safe palette reload if tag is valid
-    if (sStartMenu->loadState == 0 && !gPaletteFade.active)
+    u8 i = 0;
+    for(i = 0; i < 6; i++)
     {
-        u32 palIndexIcon = IndexOfSpritePaletteTag(TAG_ICON_PAL);
-        u32 palIndexButton = IndexOfSpritePaletteTag(TAG_BUTTON_PAL);
-
-        if (palIndexIcon != 0xFF)
-            LoadPalette(sIconPal, OBJ_PLTT_ID(palIndexIcon), PLTT_SIZE_4BPP);
-
-        if (palIndexButton != 0xFF)
-            LoadPalette(sButtonPal, OBJ_PLTT_ID(palIndexButton), PLTT_SIZE_4BPP);
+        DestroySprite(&gSprites[sStartMenuDataPtr->iconStatusSpriteIds[i]]);
+        sStartMenuDataPtr->iconStatusSpriteIds[i] = SPRITE_NONE;
     }
+}
 
-    // Confirm selection with A
-    if (JOY_NEW(A_BUTTON) && sStartMenu->loadState == 0)
+
+//==========FUNCTIONS==========//
+void Task_StartMenu_Open(u8 taskId)
+{
+    if (!gPaletteFade.active)
     {
-        sLastMenuSelected = menuSelected;
-        sLastMenuPage = sStartMenu->page;
-
-        if (menuSelected != MENU_DEXNAV)
-        {
-            PlaySE(SE_SELECT);
-        }
-
-        if (menuSelected != MENU_SAVE)
-            FadeScreen(FADE_TO_BLACK, 0);
-
-        sStartMenu->loadState = 1;
-    }
-
-    // Exit with B
-    else if (JOY_NEW(B_BUTTON) && sStartMenu->loadState == 0)
-    {
-        sLastMenuSelected = menuSelected;
-        sLastMenuPage = sStartMenu->page;
-
-        PlaySE(SE_SELECT);
-        StartMenu_ExitAndClearTilemap();
+        CleanupOverworldWindowsAndTilemaps();
+        StartMenu_Init(CB2_ReturnToField);
         DestroyTask(taskId);
     }
+}
 
-    // Navigation
-    else if (gMain.newKeys & DPAD_DOWN && sStartMenu->loadState == 0)
+void StartMenu_Init(MainCallback callback)
+{
+    u32 i = 0;
+    if ((sStartMenuDataPtr = AllocZeroed(sizeof(struct StartMenuResources))) == NULL)
     {
-        StartMenu_HandleInput_DPADDOWN();
+        SetMainCallback2(callback);
+        return;
     }
-    else if (gMain.newKeys & DPAD_UP && sStartMenu->loadState == 0)
+    
+    // Make Sure Sprites are Empty on Reload
+    sStartMenuDataPtr->gfxLoadState = 0;
+    sStartMenuDataPtr->savedCallback = callback;
+    sStartMenuDataPtr->cursorSpriteIds[0] = SPRITE_NONE;
+    sStartMenuDataPtr->cursorSpriteIds[1] = SPRITE_NONE;
+    sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
+
+    for(i= 0; i < 6; i++)
     {
-        StartMenu_HandleInput_DPADUP();
+        //sStartMenuDataPtr->iconBoxSpriteIds[i] = SPRITE_NONE;
+        sStartMenuDataPtr->iconMonSpriteIds[i] = SPRITE_NONE;
     }
 
-    // Page switch (L/R or DPAD)
-    else if ((gMain.newKeys & (R_BUTTON | L_BUTTON | DPAD_RIGHT | DPAD_LEFT))
-             && sStartMenu->loadState == 0)
+    InitCursorInPlace();
+
+    gFieldCallback = NULL;
+    
+    SetMainCallback2(StartMenu_RunSetup);
+}
+
+static void StartMenu_RunSetup(void)
+{
+    while (1)
     {
-        u32 oldPage = sStartMenu->page;
-        u8 oldSelection = menuSelected;
+        if (StartMenu_DoGfxSetup() == TRUE)
+            break;
+    }
+}
 
-        if ((gMain.newKeys & (R_BUTTON | DPAD_RIGHT)) && sStartMenu->page + 1 < sStartMenu->totalPages)
-            sStartMenu->page++;
-        else if ((gMain.newKeys & (L_BUTTON | DPAD_LEFT)) && sStartMenu->page > 0)
-            sStartMenu->page--;
+static void StartMenu_MainCB(void)
+{
+    RunTasks();
+    AnimateSprites();
+    BuildOamBuffer();
+    DoScheduledBgTilemapCopiesToVram();
+    UpdatePaletteFade();
+}
 
-        if (sStartMenu->page != oldPage)
+static void StartMenu_VBlankCB(void)
+{
+    LoadOam();
+    ProcessSpriteCopyRequests();
+    TransferPlttBuffer();
+
+    if (gSaveBlock4Ptr->optionsScrollBgs == OPTIONS_SCROLL_BGS_ON)
+    {
+        ChangeBgX(2, 64, BG_COORD_ADD);
+        ChangeBgY(2, 64, BG_COORD_ADD);
+    }
+}
+
+static bool8 StartMenu_DoGfxSetup(void)
+{
+    switch (gMain.state)
+    {
+    case 0:
+        DmaClearLarge16(3, (void *)VRAM, VRAM_SIZE, 0x1000)
+        SetVBlankHBlankCallbacksToNull();
+        ClearScheduledBgCopiesToVram();
+        ResetVramOamAndBgCntRegs();
+        gMain.state++;
+        break;
+    case 1:
+        ScanlineEffect_Stop();
+        FreeAllSpritePalettes();
+        ResetPaletteFade();
+        ResetSpriteData();
+        ResetTasks();
+        gMain.state++;
+        break;
+    case 2:
+        if (StartMenu_InitBgs())
         {
-            StartMenu_DestroySprites();
-            StartMenu_DestroyLRButtons();
-            FreeSpriteTilesByTag(TAG_ICON_GFX);
-            FreeSpritePaletteByTag(TAG_ICON_PAL);
+            sStartMenuDataPtr->gfxLoadState = 0;
+            gMain.state++;
+        }
+        else
+        {
+            StartMenu_FadeAndBail();
+            return TRUE;
+        }
+        break;
+    case 3:
+        if (StartMenu_LoadGraphics() == TRUE)
+            gMain.state++;
+        break;
+    case 4:
+        StartMenu_InitWindows();
+        gMain.state++;
+        break;
+    case 5:
+        PrintMapNameAndTime(); // print all sprites
+        //CreateIconBox();
+        CreatePartyMonIcons();
+        StartMenu_DisplayHP();
+        CreatePartyMonStatuses();
+        gMain.state++;
+        break;
+    case 6:
+        CreateTask(Task_StartMenu_WaitFadeIn, 0);
+        BlendPalettes(PALETTES_ALL, 16, RGB_BLACK);
+        gMain.state++;
+        break;
+    case 7:
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 16, 0, RGB_BLACK);
+        gMain.state++;
+        break;
+    default:
+        SetVBlankCallback(StartMenu_VBlankCB);
+        SetMainCallback2(StartMenu_MainCB);
+        return TRUE;
+    }
+    return FALSE;
+}
 
-            StartMenu_LoadSprites();
-            StartMenu_CreateSprites();
-            StartMenu_CreateLRButtons(sStartMenu->page, sStartMenu->totalPages);
+#define TryFree(ptr) ({        \
+    void ** ptr__ = (void **)&(ptr);   \
+    if (*ptr__ != NULL)                \
+        Free(*ptr__);                  \
+})
 
-            u8 entries[MAX_ICONS_PER_PAGE], count;
-            GetVisibleMenuEntriesForPage(entries, &count);
+static void StartMenu_FreeResources(void)
+{
+    TryFree(sStartMenuDataPtr);
+    TryFree(sBg1TilemapBuffer);
+    TryFree(sBg2TilemapBuffer);
+    DestroyCursor();
+    RemoveStartMenuScrollIndicatorArrows();
+    DestroyAllMenuButtons();
+    //DestroyIconBoxes();
+    DestroyMonIcons();
+    DestroyStatusSprites();
+    FreeAllWindowBuffers();    
+}
 
-            bool8 found = FALSE;
-            for (u8 i = 0; i < count; i++)
-            {
-                if (entries[i] == oldSelection)
-                {
-                    menuSelected = oldSelection;
-                    found = TRUE;
-                    break;
-                }
-            }
+#undef TryFree
 
-            if (!found && count > 0)
-                menuSelected = entries[0];
+static void Task_StartMenu_WaitFadeAndBail(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        SetMainCallback2(sStartMenuDataPtr->savedCallback);
+        StartMenu_FreeResources();
+        DestroyTask(taskId);
+    }
+}
 
-            StartMenu_UpdateMenuName();
-            sStartMenu->flag = 0;
-            PlaySE(SE_SELECT);
+static void StartMenu_FadeAndBail(void)
+{
+    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+    CreateTask(Task_StartMenu_WaitFadeAndBail, 0);
+    SetVBlankCallback(StartMenu_VBlankCB);
+    SetMainCallback2(StartMenu_MainCB);
+}
+
+static void Task_StartMenu_WaitFadeIn(u8 taskId)
+{
+    if (!gPaletteFade.active)
+        gTasks[taskId].func = Task_StartMenu_Main;
+}
+
+static void Task_StartMenu_TurnOff(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        SetMainCallback2(sStartMenuDataPtr->savedCallback);
+        StartMenu_FreeResources();
+        DestroyTask(taskId);
+    }
+}
+
+
+static bool8 StartMenu_InitBgs(void) // This function sets the bg tilemap buffers for each bg and initializes them, shows them, and turns sprites on
+{
+    ResetAllBgsCoordinates();
+    sBg1TilemapBuffer = Alloc(0x800);
+    if (sBg1TilemapBuffer == NULL)
+        return FALSE;
+    memset(sBg1TilemapBuffer, 0, 0x800);
+
+    sBg2TilemapBuffer = Alloc(0x800);
+    if (sBg2TilemapBuffer == NULL)
+        return FALSE;
+    memset(sBg2TilemapBuffer, 0, 0x800);
+    
+    ResetBgsAndClearDma3BusyFlags(0);
+    InitBgsFromTemplates(0, sStartMenuBgTemplates, NELEMS(sStartMenuBgTemplates));
+    SetBgTilemapBuffer(1, sBg1TilemapBuffer);
+    SetBgTilemapBuffer(2, sBg2TilemapBuffer);
+    ScheduleBgCopyTilemapToVram(1);
+    ScheduleBgCopyTilemapToVram(2);
+    SetGpuReg(REG_OFFSET_DISPCNT, DISPCNT_OBJ_ON | DISPCNT_OBJ_1D_MAP);
+    ShowBg(0);
+    ShowBg(1);
+    ShowBg(2);
+    return TRUE;
+}
+
+static bool8 StartMenu_LoadGraphics(void) // Load the Tilesets, Tilemaps, Spritesheets, and Palettes for Everything
+{
+    switch (sStartMenuDataPtr->gfxLoadState)
+    {
+    case 0:
+        ResetTempTileDataBuffers();
+        DecompressAndCopyTileDataToVram(1, sStartMenuTiles, 0, 0, 0);
+        DecompressAndCopyTileDataToVram(2, sScrollBgTiles, 0, 0, 0);
+        sStartMenuDataPtr->gfxLoadState++;
+        break;
+    case 1:
+        if (FreeTempTileDataBuffersIfPossible() != TRUE)
+        {
+            DecompressDataWithHeaderWram(sStartMenuTilemap, sBg1TilemapBuffer);
+            DecompressDataWithHeaderWram(sScrollBgTilemap, sBg2TilemapBuffer);
+            sStartMenuDataPtr->gfxLoadState++;
+        }
+        break;
+    case 2:
+    {
+        struct SpritePalette cursorPal = {sSpritePal_Cursor.data, sSpritePal_Cursor.tag};
+        LoadPalette(sStartMenuPalette, PLTT_ID(0), PLTT_SIZE_4BPP);
+        LoadPalette(sHPBar_Pal, PLTT_ID(1), PLTT_SIZE_4BPP);
+
+        //LoadCompressedSpriteSheet(&sSpriteSheet_IconBox);
+        //LoadSpritePalette(&sSpritePal_IconBox);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Cursor);
+        LoadSpritePalette(&cursorPal);
+        LoadCompressedSpriteSheet(&sSpriteSheet_StatusIcons);
+        LoadSpritePalette(&sSpritePalette_StatusIcons);
+        LoadSpriteSheet(&sSpriteSheet_MenuButtonA);
+        LoadSpritePalette(&sSpritePalette_MenuButtonA);
+        LoadSpriteSheet(&sSpriteSheet_MenuButtonB);
+        LoadSpritePalette(&sSpritePalette_MenuButtonB);
+
+        StartMenu_CreateButtons();
+        StartMenu_UpdateVisibleButtons();  
+        InitCursorInPlace();
+        CreateCursor();
+
+        PlaceStartMenuScrollIndicatorArrows();
+
+        sStartMenuDataPtr->gfxLoadState++;
+        break;
+    }
+    default:
+        sStartMenuDataPtr->gfxLoadState = 0;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static void PlaceStartMenuScrollIndicatorArrows(void)
+{
+    if (TOTAL_MENU_OPTIONS <= VISIBLE_BUTTONS)
+    {
+        if (sStartMenuDataPtr->scrollIndicatorArrowPairId != SPRITE_NONE)
+        {
+            RemoveScrollIndicatorArrowPair(sStartMenuDataPtr->scrollIndicatorArrowPairId);
+            sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
+        }
+        return;
+    }
+
+    u8 hiddenOptions = TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS;
+
+    if (sStartMenuDataPtr->scrollIndicatorArrowPairId == SPRITE_NONE)
+    {
+        sStartMenuDataPtr->scrollIndicatorArrowPairId = AddScrollIndicatorArrowPairParameterized(
+            2,
+            171,
+            20,
+            140,
+            hiddenOptions,
+            110,
+            110,
+            &sStartMenuDataPtr->scrollOffset
+        );
+    }
+}
+
+static void RemoveStartMenuScrollIndicatorArrows(void)
+{
+    if (sStartMenuDataPtr->scrollIndicatorArrowPairId != SPRITE_NONE)
+    {
+        RemoveScrollIndicatorArrowPair(sStartMenuDataPtr->scrollIndicatorArrowPairId);
+        sStartMenuDataPtr->scrollIndicatorArrowPairId = SPRITE_NONE;
+    }
+}
+
+static void StartMenu_CreateButtons(void)
+{
+    u8 i;
+    for (i = 0; i < VISIBLE_BUTTONS; i++)
+    {
+        u8 menuIndex = sStartMenuDataPtr->scrollOffset + i;
+        const struct SpriteTemplate *template;
+
+        if (menuIndex < START_MENU_GROUP_B_START)
+            template = &sSpriteTemplate_MenuButtonA;
+        else
+            template = &sSpriteTemplate_MenuButtonB;
+
+        sStartMenuDataPtr->MenuButtonSpriteIds[i * 2] =
+            CreateSprite(template,
+                         START_MENU_BUTTON_X_1,
+                         START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
+                         0);
+
+        sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1] =
+            CreateSprite(template,
+                         START_MENU_BUTTON_X_2,
+                         START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
+                         0);
+    }
+}
+
+static void StartMenu_UpdateVisibleButtons(void)
+{
+    u8 i, menuIndex;
+    for (i = 0; i < VISIBLE_BUTTONS; i++)
+    {
+        menuIndex = sStartMenuDataPtr->scrollOffset + i;
+
+        u8 leftId = sStartMenuDataPtr->MenuButtonSpriteIds[i * 2];
+        u8 rightId = sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1];
+
+        const struct SpriteTemplate *expectedTemplate =
+            (menuIndex < START_MENU_GROUP_B_START)
+                ? &sSpriteTemplate_MenuButtonA
+                : &sSpriteTemplate_MenuButtonB;
+
+        bool8 recreateLeft = (leftId == SPRITE_NONE || gSprites[leftId].template != expectedTemplate);
+        bool8 recreateRight = (rightId == SPRITE_NONE || gSprites[rightId].template != expectedTemplate);
+
+        if (recreateLeft)
+        {
+            if (leftId != SPRITE_NONE)
+                DestroySprite(&gSprites[leftId]);
+
+            sStartMenuDataPtr->MenuButtonSpriteIds[i * 2] =
+                CreateSprite(expectedTemplate,
+                             START_MENU_BUTTON_X_1,
+                             START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
+                             0);
+        }
+        else
+        {
+            gSprites[leftId].y = START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING;
+        }
+
+        if (recreateRight)
+        {
+            if (rightId != SPRITE_NONE)
+                DestroySprite(&gSprites[rightId]);
+
+            sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1] =
+                CreateSprite(expectedTemplate,
+                             START_MENU_BUTTON_X_2,
+                             START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING,
+                             0);
+        }
+        else
+        {
+            gSprites[rightId].y = START_MENU_BUTTON_Y_START + i * START_MENU_BUTTON_Y_SPACING;
+        }
+
+        u8 animIdx = (menuIndex < START_MENU_GROUP_B_START)
+            ? menuIndex
+            : menuIndex - START_MENU_GROUP_B_START;
+
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i * 2]],
+                        (menuIndex < START_MENU_GROUP_B_START)
+                            ? sButtonAnimIndicesA[animIdx][0]
+                            : sButtonAnimIndicesB[animIdx][0]);
+
+        StartSpriteAnim(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i * 2 + 1]],
+                        (menuIndex < START_MENU_GROUP_B_START)
+                            ? sButtonAnimIndicesA[animIdx][1]
+                            : sButtonAnimIndicesB[animIdx][1]);
+    }
+}
+
+static void DestroyAllMenuButtons(void)
+{
+    for (int i = 0; i < START_MENU_BUTTON_A_COUNT; i++)
+    {
+        if (sStartMenuDataPtr->MenuButtonSpriteIds[i] != SPRITE_NONE)
+        {
+            DestroySprite(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i]]);
+            sStartMenuDataPtr->MenuButtonSpriteIds[i] = SPRITE_NONE;
+        }
+    }
+    
+    for (int i = 0; i < START_MENU_BUTTON_B_COUNT; i++)
+    {
+        if (sStartMenuDataPtr->MenuButtonSpriteIds[i] != SPRITE_NONE)
+        {
+            DestroySprite(&gSprites[sStartMenuDataPtr->MenuButtonSpriteIds[i]]);
+            sStartMenuDataPtr->MenuButtonSpriteIds[i] = SPRITE_NONE;
+        }
+    }
+}
+
+static void StartMenu_InitWindows(void)
+{
+    InitWindows(sStartMenuWindowTemplates);
+    DeactivateAllTextPrinters();
+    ScheduleBgCopyTilemapToVram(0);
+    
+    FillWindowPixelBuffer(WINDOW_HP_BARS, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+    PutWindowTilemap(WINDOW_HP_BARS);
+    CopyWindowToVram(WINDOW_HP_BARS, COPYWIN_FULL);
+
+    FillWindowPixelBuffer(WINDOW_TOP_BAR, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+    PutWindowTilemap(WINDOW_TOP_BAR);
+    CopyWindowToVram(WINDOW_TOP_BAR, COPYWIN_FULL);
+
+    FillWindowPixelBuffer(WINDOW_BOTTOM_BAR, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+    PutWindowTilemap(WINDOW_BOTTOM_BAR);
+    CopyWindowToVram(WINDOW_BOTTOM_BAR, COPYWIN_FULL);
+    
+    ScheduleBgCopyTilemapToVram(2);
+}
+
+static const u8 sText_ConfirmSave[] = _("Confirm Save");
+static const u8 sText_CancelSave[] = _("Cancel");
+static const u8 sA_ButtonGfx[] = INCBIN_U8("graphics/start_menu/a_button.4bpp");
+static const u8 sB_ButtonGfx[] = INCBIN_U8("graphics/start_menu/b_button.4bpp");
+
+static void PrintSaveConfirmToWindow()
+{
+    const u8 *str = sText_ConfirmSave;
+    const u8 *str2 = sText_CancelSave;
+    u8 sConfirmTextColors[] = {TEXT_COLOR_TRANSPARENT, 2, 9};
+    u8 x = 62;
+    u8 x2 = x + 101;
+    u8 y = 0;
+    
+    FillWindowPixelBuffer(WINDOW_BOTTOM_BAR, PIXEL_FILL(5));
+    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sA_ButtonGfx, x - 11, 4, 8, 8);
+    AddTextPrinterParameterized4(WINDOW_BOTTOM_BAR, 1, x, y, 0, 0, sConfirmTextColors, 0xFF, str);
+    BlitBitmapToWindow(WINDOW_BOTTOM_BAR, sB_ButtonGfx, x2 - 11, 4, 8, 8);
+    AddTextPrinterParameterized4(WINDOW_BOTTOM_BAR, 1, x2, y, 0, 0, sConfirmTextColors, 0xFF, str2);
+    PutWindowTilemap(WINDOW_BOTTOM_BAR);
+    CopyWindowToVram(WINDOW_BOTTOM_BAR, COPYWIN_FULL);
+}
+
+static const u8 sText_Sunday[] = _("Sunday");
+static const u8 sText_Monday[] = _("Monday");
+static const u8 sText_Tuesday[] = _("Tuesday");
+static const u8 sText_Wednesday[] = _("Wednesday");
+static const u8 sText_Thursday[] = _("Thursday");
+static const u8 sText_Friday[] = _("Friday");
+static const u8 sText_Saturday[] = _("Saturday");
+
+static const u8 * const sDayOfWeekStrings[7] =
+{
+    sText_Sunday,
+    sText_Monday,
+    sText_Tuesday,
+    sText_Wednesday,
+    sText_Thursday,
+    sText_Friday,
+    sText_Saturday,
+};
+
+static const u8 sText_AM[] = _("AM");
+static const u8 sText_PM[] = _("PM");
+
+static void PrintMapNameAndTime(void)
+{
+    u8 mapDisplayHeader[24];
+    u8 *withoutPrefixPtr;
+    u8 x;
+    const u8 *str, *suffix = NULL;
+    u8 sTimeTextColors[] = {TEXT_COLOR_TRANSPARENT, 2, 9};
+
+    u16 hours;
+    u16 minutes;
+    u16 dayOfWeek;
+    s32 width;
+    u32 y, totalWidth;
+
+    FillWindowPixelBuffer(WINDOW_TOP_BAR, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+
+    withoutPrefixPtr = &(mapDisplayHeader[3]);
+    GetMapName(withoutPrefixPtr, gMapHeader.regionMapSectionId, 0);
+    x = GetStringRightAlignXOffset(FONT_NORMAL, withoutPrefixPtr, 80);
+    mapDisplayHeader[0] = EXT_CTRL_CODE_BEGIN;
+    mapDisplayHeader[1] = EXT_CTRL_CODE_HIGHLIGHT;
+    mapDisplayHeader[2] = TEXT_COLOR_TRANSPARENT;
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x + 148, 0, sTimeTextColors, TEXT_SKIP_DRAW, mapDisplayHeader); // Print Map Name
+
+    RtcCalcLocalTime();
+
+    hours = gLocalTime.hours;
+
+    if (gSaveBlock4Ptr->optionsClockMode == OPTIONS_CLOCK_MODE_12HR)
+    {
+        if (gLocalTime.hours < 12)
+        {
+            hours = (gLocalTime.hours == 0) ? 12 : gLocalTime.hours;
+            suffix = sText_AM;
+        }
+        else if (gLocalTime.hours == 12)
+        {
+            hours = 12;
+            suffix = sText_PM;
+        }
+        else
+        {
+            hours = gLocalTime.hours - 12;
+            suffix = sText_PM;
         }
     }
 
-    // Menu activation
-    else if (sStartMenu->loadState == 1)
+    minutes = gLocalTime.minutes;
+    dayOfWeek = gLocalTime.days % 7;
+    if (hours > 999)
+        hours = 999;
+    if (minutes > 59)
+        minutes = 59;
+    width = GetStringWidth(FONT_NORMAL, gText_Colon2, 0);
+    x = 96;
+    y = 0;
+
+    totalWidth = width + 30;
+    x -= totalWidth;
+
+    str = sDayOfWeekStrings[dayOfWeek];
+
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, 10, y, sTimeTextColors, TEXT_SKIP_DRAW, str); // print day of week
+    ConvertIntToDecimalStringN(gStringVar4, hours, STR_CONV_MODE_RIGHT_ALIGN, 3);
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gStringVar4); // these three print the time, you can put the colon to only print half the time to flash it if you want
+    x += 18;
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gText_Colon2);
+    x += width;
+    ConvertIntToDecimalStringN(gStringVar4, minutes, STR_CONV_MODE_LEADING_ZEROS, 2);
+    AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gStringVar4);
+
+    if (suffix != NULL)
     {
-        if (menuSelected != MENU_SAVE)
-            StartMenu_OpenMenu();
+        width = GetStringWidth(FONT_NORMAL, gStringVar4, 0) + 3; // CHAR_SPACE is 3 pixels wide
+        x += width;
+        StringExpandPlaceholders(gStringVar4, suffix);
+        AddTextPrinterParameterized3(WINDOW_TOP_BAR, FONT_NORMAL, x, y, sTimeTextColors, TEXT_SKIP_DRAW, gStringVar4);
+    }
+
+    PutWindowTilemap(WINDOW_TOP_BAR);
+    CopyWindowToVram(WINDOW_TOP_BAR, COPYWIN_FULL);
+}
+
+void Task_OpenPokedexFromStartMenu(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        IncrementGameStat(GAME_STAT_CHECKED_POKEDEX);
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_OpenPokedex);
+        DestroyTask(taskId);
+    }
+}
+
+void Task_OpenPokemonPartyFromStartMenu(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_PartyMenuFromStartMenu);
+    }
+}
+
+void Task_OpenBagFromStartMenu(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_BagMenuFromStartMenu);
+    }
+}
+
+void Task_OpenTrainerCardFromStartMenu(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        DmaClearLarge16(3, (void *)VRAM, VRAM_SIZE, 0x1000)
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+
+        if (FlagGet(FLAG_SYS_FRONTIER_PASS))
+            ShowFrontierPass(CB2_ReturnToStartMenu);
         else
-            DoCleanUpAndStartSaveMenu();
+            ShowPlayerTrainerCard(CB2_ReturnToStartMenu);
     }
 }
 
-static void StartMenu_SafariZone_HandleInput_DPADDOWN(void) {
-  sStartMenu->flag = 0;
-
-  switch (menuSelected) {
-    case MENU_OPTIONS:
-      menuSelected = MENU_FLAG;
-      break;
-    default:
-      PlaySE(SE_SELECT);
-      if (menuSelected == MENU_FLAG) {
-        menuSelected = MENU_POKEDEX;
-      } else if (menuSelected == MENU_BAG) {
-        menuSelected = MENU_TRAINER_CARD;
-      } else if (menuSelected == MENU_TRAINER_CARD) {
-        menuSelected = MENU_OPTIONS;
-      } else {
-        menuSelected++;
-      }
-      break;
-  }
-  StartMenu_UpdateMenuName();
-}
-
-static void StartMenu_SafariZone_HandleInput_DPADUP(void) {
-  sStartMenu->flag = 0;
-
-  switch (menuSelected) {
-    case MENU_FLAG:
-      menuSelected = MENU_OPTIONS;
-      break;
-    default:
-      PlaySE(SE_SELECT);
-      if (menuSelected == MENU_POKEDEX) {
-        menuSelected = MENU_FLAG;
-      } else if (menuSelected == MENU_OPTIONS) {
-        menuSelected = MENU_TRAINER_CARD;
-      } else if (menuSelected == MENU_TRAINER_CARD) {
-        menuSelected = MENU_BAG;
-      } else {
-        menuSelected--;
-      }
-      break;
-  }
-  StartMenu_UpdateMenuName();
-}
-
-static void Task_StartMenu_SafariZone_HandleMainInput(u8 taskId) {
-  u32 index;
-  if (sStartMenu->loadState == 0 && !gPaletteFade.active) {
-    index = IndexOfSpritePaletteTag(TAG_ICON_PAL);
-    LoadPalette(sIconPal, OBJ_PLTT_ID(index), PLTT_SIZE_4BPP); 
-  }
-
-  //StartMenu_UpdateClockDisplay();
-  if (JOY_NEW(A_BUTTON)) {
-    if (sStartMenu->loadState == 0) {
-      if (menuSelected != MENU_FLAG) {
-        FadeScreen(FADE_TO_BLACK, 0);
-      }
-      sStartMenu->loadState = 1;
-    }
-  } else if (JOY_NEW(B_BUTTON) && sStartMenu->loadState == 0) {
-    PlaySE(SE_SELECT);
-    StartMenu_ExitAndClearTilemap();  
-    DestroyTask(taskId);
-  } else if (gMain.newKeys & DPAD_DOWN && sStartMenu->loadState == 0) {
-    StartMenu_SafariZone_HandleInput_DPADDOWN();
-  } else if (gMain.newKeys & DPAD_UP && sStartMenu->loadState == 0) {
-    StartMenu_SafariZone_HandleInput_DPADUP();
-  } else if (sStartMenu->loadState == 1) {
-    if (menuSelected != MENU_FLAG) {
-      StartMenu_OpenMenu();
-    } else {
-      DoCleanUpAndStartSafariZoneRetire();
-    }
-  }
-}
-
-static u8 GetTotalPageCount(void)
+void Task_OpenQuestsStartMenu(u8 taskId)
 {
-    u8 entries[12]; // Max total possible
-    u8 count;
-    GetVisibleMenuEntriesForPage(entries, &count);
-    return (count + MAX_ICONS_PER_PAGE - 1) / MAX_ICONS_PER_PAGE;
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+		PlayRainStoppingSoundEffect();
+		CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_OpenQuestMenuFromStartMenu);
+    }
 }
 
-static void CB2_OpenQuestMenuFromStartMenu(void)
+void Task_OpenOptionsMenuStartMenu(u8 taskId)
 {
-    QuestMenu_Init(0, CB2_ReturnToFieldWithOpenMenu);
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_InitOptionMenu); 
+        gMain.savedCallback = CB2_ReturnToStartMenu;
+    }
 }
+
+void Task_OpenDexNavStartMenu(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_OpenDexNavFromStartMenu);
+    }
+}
+
+void Task_ReturnToFieldOnSave(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        StartMenu_FreeResources();
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        SetMainCallback2(CB2_ReturnToField); 
+    }
+}
+
+#define sFrameToSecondTimer data[6]
+
+void Task_HandleSaveConfirmation(u8 taskId)
+{
+    if(JOY_NEW(A_BUTTON)) //confirm and leave
+    {
+        PlaySE(SE_SELECT);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        gTasks[taskId].func = Task_ReturnToFieldOnSave;
+        gFieldCallback = StartMenu_SaveCallback;
+        return;
+    }
+
+    if(JOY_NEW(B_BUTTON)) // back to normal Menu Control
+    {
+        PlaySE(SE_SELECT);
+        FillWindowPixelBuffer(WINDOW_BOTTOM_BAR, PIXEL_FILL(TEXT_COLOR_TRANSPARENT));
+        PutWindowTilemap(WINDOW_BOTTOM_BAR);
+        CopyWindowToVram(WINDOW_BOTTOM_BAR, COPYWIN_FULL);
+        gTasks[taskId].func = Task_StartMenu_Main;
+        return;
+    }
+
+    if(gTasks[taskId].sFrameToSecondTimer >= 60) // every 60 frames update the time
+    {
+        PrintMapNameAndTime();
+        gTasks[taskId].sFrameToSecondTimer = 0;
+    }
+
+    gTasks[taskId].sFrameToSecondTimer++;
+}
+
+static void Task_StartMenu_Main(u8 taskId)
+{
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_PC_OFF);
+        BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+        gTasks[taskId].func = Task_StartMenu_TurnOff;
+    }
+
+    if (JOY_NEW(DPAD_UP))
+    {
+        if (sStartMenuDataPtr->selector_y == 0)
+        {
+            if (sStartMenuDataPtr->scrollOffset == 0)
+            {
+                sStartMenuDataPtr->scrollOffset = MAX_SCROLL_OFFSET;
+                sStartMenuDataPtr->selector_y = VISIBLE_BUTTONS - 1;
+            }
+            else
+            {
+                sStartMenuDataPtr->scrollOffset--;
+            }
+        }
+        else
+        {
+            sStartMenuDataPtr->selector_y--;
+        }
+    }
+
+    if (JOY_NEW(DPAD_DOWN))
+    {
+        if (sStartMenuDataPtr->selector_y == VISIBLE_BUTTONS - 1)
+        {
+            if (sStartMenuDataPtr->scrollOffset + VISIBLE_BUTTONS >= TOTAL_MENU_OPTIONS)
+            {
+                // Wrap to top
+                sStartMenuDataPtr->scrollOffset = 0;
+                sStartMenuDataPtr->selector_y = 0;
+            }
+            else
+            {
+                sStartMenuDataPtr->scrollOffset++;
+            }
+        }
+        else
+        {
+            if (sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y + 1 >= TOTAL_MENU_OPTIONS)
+            {
+                sStartMenuDataPtr->scrollOffset = 0;
+                sStartMenuDataPtr->selector_y = 0;
+            }
+            else
+            {
+                sStartMenuDataPtr->selector_y++;
+            }
+        }
+    }
+
+    gSelectedMenu = sStartMenuDataPtr->scrollOffset + sStartMenuDataPtr->selector_y;
+    gSavedSelectorY = sStartMenuDataPtr->selector_y;
+
+    StartMenu_UpdateVisibleButtons();
+
+    if (JOY_NEW(A_BUTTON))
+    {
+        switch(gSelectedMenu)
+        {
+            case START_MENU_POKEDEX:
+                if(FlagGet(FLAG_SYS_POKEDEX_GET))
+                {
+                    PlaySE(SE_SELECT);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_OpenPokedexFromStartMenu;
+                }
+                else
+                {
+                    PlaySE(SE_BOO);
+                }
+                break;
+            case START_MENU_POKEMON:
+                if(FlagGet(FLAG_SYS_POKEMON_GET))
+                {
+                    PlaySE(SE_SELECT);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_OpenPokemonPartyFromStartMenu;
+                }
+                else
+                {
+                    PlaySE(SE_BOO);
+                }
+                break;
+            case START_MENU_BAG:
+                PlaySE(SE_SELECT);
+                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                gTasks[taskId].func = Task_OpenBagFromStartMenu;
+                break;
+            case START_MENU_CARD:
+                PlaySE(SE_SELECT);
+                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                gTasks[taskId].func = Task_OpenTrainerCardFromStartMenu;
+                break;
+            case START_MENU_QUESTS:
+                if(FlagGet(FLAG_SYS_QUEST_MENU_GET))
+                {
+                    PlaySE(SE_SELECT);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_OpenQuestsStartMenu;
+                }
+                else
+                {
+                    PlaySE(SE_BOO);
+                }
+                break;
+            case START_MENU_OPTIONS:
+                PlaySE(SE_SELECT);
+                BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                gTasks[taskId].func = Task_OpenOptionsMenuStartMenu;
+                break;
+            case START_MENU_DEXNAV:
+                if(FlagGet(FLAG_SYS_DEXNAV_GET))
+                {
+                    PlaySE(SE_SELECT);
+                    BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+                    gTasks[taskId].func = Task_OpenDexNavStartMenu;
+                }
+                else
+                {
+                    PlaySE(SE_BOO);
+                }
+                break;
+        }
+    }
+
+    if (JOY_NEW(START_BUTTON)) // If start button pressed go to Save Confirmation Control Task
+    {
+        PrintSaveConfirmToWindow();
+        gTasks[taskId].func = Task_HandleSaveConfirmation;
+    }
+
+    if (gTasks[taskId].sFrameToSecondTimer >= 60) // every 60 frames update the time
+    {
+        PrintMapNameAndTime();
+        gTasks[taskId].sFrameToSecondTimer = 0;
+    }
+    gTasks[taskId].sFrameToSecondTimer++;
+}
+
+#undef sFrameToSecondTimer
