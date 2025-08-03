@@ -17,14 +17,14 @@ struct StartMenuResources
     u8 scrollIndicatorArrowPairId;
 };
 
-enum StartMenuWindowIds
+enum
 {
     WINDOW_HP_BARS,
     WINDOW_TOP_BAR,
     WINDOW_BOTTOM_BAR,
 };
 
-enum StartMenuBoxes
+enum
 {
     START_MENU_POKEDEX,
     START_MENU_POKEMON,
@@ -44,7 +44,7 @@ enum StartMenuBoxes
 #define VISIBLE_BUTTONS     4
 #define MAX_SCROLL_OFFSET   (TOTAL_MENU_OPTIONS - VISIBLE_BUTTONS)
 
-enum MenuButtons
+enum
 {
     START_MENU_BUTTON_POKEDEX1,
     START_MENU_BUTTON_POKEDEX2,
