@@ -233,6 +233,12 @@ static const u8 *const sFrameTypeOptions[] = {
     gText_FrameTypeAqua,    // Previously Type 2
     gText_FrameTypeWhite,   // Previously Type 3
     gText_FrameTypeYellow,  // Previously Type 4
+    gText_FrameTypeBlue,    // Previously Type 5
+    gText_FrameTypeGreen,   // Previously Type 6
+    gText_FrameTypePurple,  // Previously Type 7
+    gText_FrameTypeOrange,  // Previously Type 8
+    gText_FrameTypePink,    // Previously Type 9
+    gText_FrameTypeTealGray // Previously Type 10
 };
 
 static const u8 *const sScrollBgsOptions[] = {
