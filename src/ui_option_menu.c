@@ -1035,7 +1035,6 @@ static int ProcessInput_Options_Three(int selection)
     return XOptions_ProcessInput(3, selection);
 }
 
-// Process Input functions ****SPECIFIC****
 static int ProcessInput_Sound(int selection)
 {
     if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))

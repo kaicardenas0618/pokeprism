@@ -269,6 +269,10 @@ extern const u8 gText_BattleStyleShift[];
 extern const u8 gText_BattleStyleSet[];
 extern const u8 gText_FrameType[];
 extern const u8 gText_FrameTypeNumber[];
+extern const u8 gText_FrameTypeRed[];
+extern const u8 gText_FrameTypeAqua[];
+extern const u8 gText_FrameTypeWhite[];
+extern const u8 gText_FrameTypeYellow[];
 extern const u8 gText_ScrollBgsOn[];
 extern const u8 gText_ScrollBgsOff[];
 extern const u8 gText_ClockMode12Hr[];
@@ -2639,5 +2643,9 @@ extern const u8 gText_CannotSendMonToBoxHM[];
 // Buttons
 extern const u8 gText_RButton[];
 extern const u8 gText_LButton[];
+extern const u8 gText_DPadLeft[];
+extern const u8 gText_DPadRight[];
+extern const u8 gText_DPadUp[];
+extern const u8 gText_DPadDown[];
 
 #endif // GUARD_STRINGS_H
