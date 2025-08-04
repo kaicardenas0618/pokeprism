@@ -1288,23 +1288,42 @@ static void DrawChoices_FrameType(int selection, int y)
 static void DrawChoices_ScrollBgs(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_INTERFACE_SCROLLBGS);
-    u8 styles[2] = {0};
-    styles[selection] = 1;
+    const u8 *choiceText = sScrollBgsOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, gText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    DrawOptionMenuChoice(gText_ScrollBgsOn, 104, y, styles[0], active);
-    DrawOptionMenuChoice(gText_ScrollBgsOff, GetStringRightAlignXOffset(1, gText_ScrollBgsOff, 198), y, styles[1], active);
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
+
+    if (selection < SCROLL_BGS_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
 static void DrawChoices_ClockMode(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_INTERFACE_CLOCKMODE);
-    u8 styles[2] = {0};
-    styles[selection] = 1;
+    const u8 *choiceText = sClockModeOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, gText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    DrawOptionMenuChoice(gText_ClockMode12Hr, 104, y, styles[0], active);
-    DrawOptionMenuChoice(gText_ClockMode24Hr, GetStringRightAlignXOffset(1, gText_ClockMode24Hr, 198), y, styles[1], active);
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
+
+    if (selection < CLOCK_MODE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
-
 
 // Background tilemap
 #define TILE_TOP_CORNER_L 0x1A2 // 418
