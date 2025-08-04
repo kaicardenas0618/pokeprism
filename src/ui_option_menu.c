@@ -47,6 +47,7 @@ enum
 {
     MENUITEM_INTERFACE_FRAMETYPE,
     MENUITEM_INTERFACE_SCROLLBGS,
+    MENUITEM_INTERFACE_CLOCKMODE,
     MENUITEM_INTERFACE_COUNT,
 };
 
@@ -176,6 +177,7 @@ static void DrawChoices_Sound(int selection, int y);
 static void DrawChoices_ButtonMode(int selection, int y);
 static void DrawChoices_FrameType(int selection, int y);
 static void DrawChoices_ScrollBgs(int selection, int y);
+static void DrawChoices_ClockMode(int selection, int y);
 static void DrawBgWindowFrames(void);
 
 // EWRAM vars
@@ -226,6 +228,7 @@ struct // MENU_INTERFACE
 {
     [MENUITEM_INTERFACE_FRAMETYPE] = {DrawChoices_FrameType,   ProcessInput_FrameType},
     [MENUITEM_INTERFACE_SCROLLBGS] = {DrawChoices_ScrollBgs,   ProcessInput_Options_Two},
+    [MENUITEM_INTERFACE_CLOCKMODE] = {DrawChoices_ClockMode,   ProcessInput_Options_Two},
 };
 
 
@@ -246,6 +249,7 @@ static const u8 *const sOptionMenuItemsNamesInterface[MENUITEM_INTERFACE_COUNT] 
 {
     [MENUITEM_INTERFACE_FRAMETYPE] = gText_Frame,
     [MENUITEM_INTERFACE_SCROLLBGS] = gText_ScrollBgs,
+    [MENUITEM_INTERFACE_CLOCKMODE] = gText_ClockMode,
 };
 
 
@@ -314,6 +318,9 @@ static bool8 CheckConditions(int selection)
                 case MENUITEM_INTERFACE_SCROLLBGS:
                     return TRUE;
                     break;
+                case MENUITEM_INTERFACE_CLOCKMODE:
+                    return TRUE;
+                    break;
                 default:
                 case MENUITEM_INTERFACE_COUNT:
                     return TRUE;
@@ -340,6 +347,7 @@ static const u8 sText_Desc_BattleStyle_Set[]    = _("No free switch after fainti
 
 static const u8 sText_Desc_FrameType[]          = _("Choose the frame surrounding the\nwindows.");
 static const u8 sText_Desc_ScrollBgs[]          = _("Toggles the scrolling of the UI\nmenu backgrounds.");
+static const u8 sText_Desc_ClockMode[]          = _("Changes the clock display between\n12-hour and 24-hour format.");
 
 static const u8 *const sOptionMenuItemDescriptionsGeneral[MENUITEM_GENERAL_COUNT][3] =
 {
@@ -358,6 +366,7 @@ static const u8 *const sOptionMenuItemDescriptionsInterface[MENUITEM_INTERFACE_C
 {
     [MENUITEM_INTERFACE_FRAMETYPE] = {sText_Desc_FrameType,        sText_Empty},
     [MENUITEM_INTERFACE_SCROLLBGS] = {sText_Desc_ScrollBgs,        sText_Empty},
+    [MENUITEM_INTERFACE_CLOCKMODE] = {sText_Desc_ClockMode,        sText_Empty},
 };
 
 
@@ -370,17 +379,15 @@ static const u8 *const OptionTextDescription(void)
     {
         default:
         case MENU_GENERAL:
-            selection = sOptions->selGeneral[menuItem];
-            if (menuItem == MENUITEM_GENERAL_TEXTSPEED)
-                selection = 0;
+            selection = 0;
             return sOptionMenuItemDescriptionsGeneral[menuItem][selection];
             break;
         case MENU_BATTLE:
-            selection = sOptions->selBattle[menuItem];
+            selection = 0;
             return sOptionMenuItemDescriptionsBattle[menuItem][selection];
             break;
         case MENU_INTERFACE:
-            selection = sOptions->selInterface[menuItem];
+            selection = 0;
             return sOptionMenuItemDescriptionsInterface[menuItem][selection];
             break;
     }
@@ -440,17 +447,17 @@ static void DrawTopBarText(void)
     switch (sOptions->submenu)
     {
         case MENU_GENERAL:
-            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 90, 1, color, 0, sText_TopBar_General);
+            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 86, 1, color, 0, sText_TopBar_General);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 2, 1, color, 0, sText_TopBar_Left);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 221, 1, color, 0, sText_TopBar_Right);
             break;
         case MENU_BATTLE:
-            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 92, 1, color, 0, sText_TopBar_Battle);
+            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 88, 1, color, 0, sText_TopBar_Battle);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 2, 1, color, 0, sText_TopBar_Left);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 221, 1, color, 0, sText_TopBar_Right);
             break;
         case MENU_INTERFACE:
-            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 84, 1, color, 0, sText_TopBar_Interface);
+            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 80, 1, color, 0, sText_TopBar_Interface);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 2, 1, color, 0, sText_TopBar_Left);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 221, 1, color, 0, sText_TopBar_Right);
             break;
@@ -660,6 +667,7 @@ void CB2_InitUIOptionMenu(void)
 
         sOptions->selInterface[MENUITEM_INTERFACE_FRAMETYPE]  = gSaveBlock4Ptr->optionsWindowFrameType;
         sOptions->selInterface[MENUITEM_INTERFACE_SCROLLBGS]  = gSaveBlock4Ptr->optionsScrollBgs;
+        sOptions->selInterface[MENUITEM_INTERFACE_CLOCKMODE]  = gSaveBlock4Ptr->optionsClockMode;
 
         sOptions->submenu = MENU_GENERAL;
 
@@ -683,7 +691,19 @@ void CB2_InitUIOptionMenu(void)
     case 10:
         CreateTask(Task_OptionMenuFadeIn, 0);
         
-        sOptions->arrowTaskId = AddScrollIndicatorArrowPairParameterized(SCROLL_ARROW_UP, 240 / 2, 20, 110, MENUITEM_GENERAL_COUNT - 1, 110, 110, 0);
+        if (MenuItemCount() <= OPTIONS_ON_SCREEN) // Draw the scrolling arrows based on options in the menu
+        {
+            if (sOptions->arrowTaskId != TASK_NONE)
+            {
+                sOptions->arrowTaskId = TASK_NONE;
+            }
+        }
+        else
+        {
+            if (sOptions->arrowTaskId == TASK_NONE)
+                sOptions->arrowTaskId  = AddScrollIndicatorArrowPairParameterized(SCROLL_ARROW_UP, 240 / 2, 20, 110, MenuItemCount() - 1, 110, 110, 0);
+
+        }
 
         for (i = 0; i < min(OPTIONS_ON_SCREEN, MenuItemCount()); i++)
             DrawChoices(i, i * Y_DIFF);
@@ -882,6 +902,7 @@ static void Task_OptionMenuSave(u8 taskId)
 
     gSaveBlock4Ptr->optionsWindowFrameType  = sOptions->selInterface[MENUITEM_INTERFACE_FRAMETYPE];
     gSaveBlock4Ptr->optionsScrollBgs        = sOptions->selInterface[MENUITEM_INTERFACE_SCROLLBGS];
+    gSaveBlock4Ptr->optionsClockMode        = sOptions->selInterface[MENUITEM_INTERFACE_CLOCKMODE];
 
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
     gTasks[taskId].func = Task_OptionMenuFadeOut;
@@ -1051,7 +1072,7 @@ static int ProcessInput_FrameType(int selection)
     return selection;
 }
 
-// Draw Choices functions ****GENERIC****
+
 static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style, bool8 active)
 {
     bool8 choosen = FALSE;
@@ -1186,6 +1207,16 @@ static void DrawChoices_ScrollBgs(int selection, int y)
 
     DrawOptionMenuChoice(gText_ScrollBgsOn, 104, y, styles[0], active);
     DrawOptionMenuChoice(gText_ScrollBgsOff, GetStringRightAlignXOffset(1, gText_ScrollBgsOff, 198), y, styles[1], active);
+}
+
+static void DrawChoices_ClockMode(int selection, int y)
+{
+    bool8 active = CheckConditions(MENUITEM_INTERFACE_CLOCKMODE);
+    u8 styles[2] = {0};
+    styles[selection] = 1;
+
+    DrawOptionMenuChoice(gText_ClockMode12Hr, 104, y, styles[0], active);
+    DrawOptionMenuChoice(gText_ClockMode24Hr, GetStringRightAlignXOffset(1, gText_ClockMode24Hr, 198), y, styles[1], active);
 }
 
 
