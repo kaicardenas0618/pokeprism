@@ -198,6 +198,61 @@ static const u32 sScrollBgTiles[] = INCBIN_U32("graphics/option_menu/scroll_tile
 static const u32 sScrollBgTilemap[] = INCBIN_U32("graphics/option_menu/scroll_tiles.bin.lz");
 static const u16 sScrollBgPalette[] = INCBIN_U16("graphics/option_menu/scroll_tiles.gbapal");
 
+// Option Texts
+static const u8 *const sTextSpeedOptions[] = {
+    gText_TextSpeedSlow,
+    gText_TextSpeedMid,
+    gText_TextSpeedFast,
+};
+
+static const u8 *const sBattleSceneOptions[] = {
+    gText_BattleSceneOn,
+    gText_BattleSceneOff,
+};
+
+static const u8 *const sBattleStyleOptions[] = {
+    gText_BattleStyleShift,
+    gText_BattleStyleSet,
+};
+
+static const u8 *const sSoundOptions[] = {
+    gText_SoundMono,
+    gText_SoundStereo,
+};
+
+static const u8 *const sButtonModeOptions[] = {
+    gText_ButtonTypeNormal,
+    gText_ButtonTypeLR,
+    gText_ButtonTypeLEqualsA,
+};
+
+static const u8 *const sFrameTypeOptions[] = {
+    gText_FrameTypeRed,     // Previously Type 1
+    gText_FrameTypeAqua,    // Previously Type 2
+    gText_FrameTypeWhite,   // Previously Type 3
+    gText_FrameTypeYellow,  // Previously Type 4
+};
+
+static const u8 *const sScrollBgsOptions[] = {
+    gText_ScrollBgsOn,
+    gText_ScrollBgsOff,
+};
+
+static const u8 *const sClockModeOptions[] = {
+    gText_ClockMode12Hr,
+    gText_ClockMode24Hr,
+};
+
+#define TEXT_SPEED_OPTIONS_COUNT       ARRAY_COUNT(sTextSpeedOptions)
+#define BATTLE_SCENE_OPTIONS_COUNT     ARRAY_COUNT(sBattleSceneOptions)
+#define BATTLE_STYLE_OPTIONS_COUNT     ARRAY_COUNT(sBattleStyleOptions)
+#define SOUND_OPTIONS_COUNT            ARRAY_COUNT(sSoundOptions)
+#define BUTTON_MODE_OPTIONS_COUNT      ARRAY_COUNT(sButtonModeOptions)
+#define FRAME_TYPE_OPTIONS_COUNT       ARRAY_COUNT(sFrameTypeOptions)
+#define SCROLL_BGS_OPTIONS_COUNT       ARRAY_COUNT(sScrollBgsOptions)
+#define CLOCK_MODE_OPTIONS_COUNT       ARRAY_COUNT(sClockModeOptions)
+
+
 // Menu draw and input functions
 struct // MENU_GENERAL
 {
@@ -1115,23 +1170,53 @@ static void ReDrawAll(void)
 static void DrawChoices_TextSpeed(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_GENERAL_TEXTSPEED);
-    u8 styles[3] = {0};
-    int xMid = GetMiddleX(gText_TextSpeedSlow, gText_TextSpeedMid, gText_TextSpeedFast);
-    styles[selection] = 1;
+    const u8 *leftArrow = gText_DPadLeft;
+    const u8 *rightArrow = gText_DPadRight;
+    const u8 *choiceText;
+    s32 xLeft, xChoice, xRight;
+    s32 leftWidth, choiceWidth;
 
-    DrawOptionMenuChoice(gText_TextSpeedSlow, 104, y, styles[0], active);
-    DrawOptionMenuChoice(gText_TextSpeedMid, xMid, y, styles[1], active);
-    DrawOptionMenuChoice(gText_TextSpeedFast, GetStringRightAlignXOffset(1, gText_TextSpeedFast, 198), y, styles[2], active);
+    if (selection >= TEXT_SPEED_OPTIONS_COUNT)
+        selection = 0;
+
+    choiceText = sTextSpeedOptions[selection % TEXT_SPEED_OPTIONS_COUNT];
+
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    leftWidth = GetStringWidth(FONT_NORMAL, leftArrow, 0);
+    choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+
+    xChoice = 152 - (choiceWidth / 2);
+    xLeft = xChoice - leftWidth - 4;
+    xRight = xChoice + choiceWidth + 4;
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, leftArrow, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
+
+    if (selection < TEXT_SPEED_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, rightArrow, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
 static void DrawChoices_Sound(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_GENERAL_SOUND);
-    u8 styles[2] = {0};
-    styles[selection] = 1;
+    const u8 *choiceText = sSoundOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, gText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
 
-    DrawOptionMenuChoice(gText_SoundMono, 104, y, styles[0], active);
-    DrawOptionMenuChoice(gText_SoundStereo, GetStringRightAlignXOffset(FONT_NORMAL, gText_SoundStereo, 198), y, styles[1], active);
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
+
+    if (selection < SOUND_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 
 static void DrawChoices_ButtonMode(int selection, int y)
