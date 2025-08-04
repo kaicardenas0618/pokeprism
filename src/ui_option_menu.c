@@ -33,6 +33,7 @@ enum
     MENUITEM_GENERAL_TEXTSPEED,
     MENUITEM_GENERAL_SOUND,
     MENUITEM_GENERAL_BUTTONMODE,
+    MENUITEM_GENERAL_SHINYODDS,
     MENUITEM_GENERAL_COUNT,
 };
 
@@ -162,6 +163,7 @@ static void ScrollAll(int direction); // to bottom or top
 static int ProcessInput_TextSpeed(int selection);
 static int ProcessInput_Sound(int selection);
 static int ProcessInput_ButtonMode(int selection);
+static int ProcessInput_ShinyOdds(int selection);
 static int ProcessInput_BattleScene(int selection);
 static int ProcessInput_BattleStyle(int selection);
 static int ProcessInput_FrameType(int selection);
@@ -179,6 +181,7 @@ static void DrawChoices_BattleScene(int selection, int y);
 static void DrawChoices_BattleStyle(int selection, int y);
 static void DrawChoices_Sound(int selection, int y);
 static void DrawChoices_ButtonMode(int selection, int y);
+static void DrawChoices_ShinyOdds(int selection, int y);
 static void DrawChoices_FrameType(int selection, int y);
 static void DrawChoices_ScrollBgs(int selection, int y);
 static void DrawChoices_ClockMode(int selection, int y);
@@ -210,16 +213,6 @@ static const u8 *const sTextSpeedOptions[] = {
     gText_TextSpeedFast,
 };
 
-static const u8 *const sBattleSceneOptions[] = {
-    gText_BattleSceneOn,
-    gText_BattleSceneOff,
-};
-
-static const u8 *const sBattleStyleOptions[] = {
-    gText_BattleStyleShift,
-    gText_BattleStyleSet,
-};
-
 static const u8 *const sSoundOptions[] = {
     gText_SoundMono,
     gText_SoundStereo,
@@ -229,6 +222,24 @@ static const u8 *const sButtonModeOptions[] = {
     gText_ButtonTypeNormal,
     gText_ButtonTypeLR,
     gText_ButtonTypeLEqualsA,
+};
+
+static const u8 *const sShinyOddsOptions[] = {
+    gText_ShinyOdds8192,
+    gText_ShinyOdds4096,
+    gText_ShinyOdds2048,
+    gText_ShinyOdds1024,
+    gText_ShinyOdds512,
+};
+
+static const u8 *const sBattleSceneOptions[] = {
+    gText_BattleSceneOn,
+    gText_BattleSceneOff,
+};
+
+static const u8 *const sBattleStyleOptions[] = {
+    gText_BattleStyleShift,
+    gText_BattleStyleSet,
 };
 
 static const u8 *const sFrameTypeOptions[] = {
@@ -268,6 +279,7 @@ static const u8 *const sIVEVDisplayOptions[] = {
 #define SCROLL_BGS_OPTIONS_COUNT       ARRAY_COUNT(sScrollBgsOptions)
 #define CLOCK_MODE_OPTIONS_COUNT       ARRAY_COUNT(sClockModeOptions)
 #define IV_EV_DISPLAY_OPTIONS_COUNT    ARRAY_COUNT(sIVEVDisplayOptions)
+#define SHINY_ODDS_OPTIONS_COUNT       ARRAY_COUNT(sShinyOddsOptions)
 
 // Menu draw and input functions
 struct // MENU_GENERAL
@@ -279,6 +291,7 @@ struct // MENU_GENERAL
     [MENUITEM_GENERAL_TEXTSPEED]    = {DrawChoices_TextSpeed,   ProcessInput_TextSpeed},
     [MENUITEM_GENERAL_SOUND]        = {DrawChoices_Sound,       ProcessInput_Sound},
     [MENUITEM_GENERAL_BUTTONMODE]   = {DrawChoices_ButtonMode,  ProcessInput_ButtonMode},
+    [MENUITEM_GENERAL_SHINYODDS]    = {DrawChoices_ShinyOdds,   ProcessInput_ShinyOdds},
 };
 
 struct // MENU_BATTLE
@@ -309,6 +322,7 @@ static const u8 *const sOptionMenuItemsNamesGeneral[MENUITEM_GENERAL_COUNT] =
     [MENUITEM_GENERAL_TEXTSPEED]   = gText_TextSpeed,
     [MENUITEM_GENERAL_SOUND]       = gText_Sound,
     [MENUITEM_GENERAL_BUTTONMODE]  = gText_ButtonMode,
+    [MENUITEM_GENERAL_SHINYODDS]   = gText_ShinyOdds,
 };
 
 static const u8 *const sOptionMenuItemsNamesBattle[MENUITEM_BATTLE_COUNT] =
@@ -365,6 +379,9 @@ static bool8 CheckConditions(int selection)
                 case MENUITEM_GENERAL_COUNT:
                     return TRUE;
                     break;
+                case MENUITEM_GENERAL_SHINYODDS:
+                    return TRUE;
+                    break;
             }
             break;
         case MENU_BATTLE:
@@ -415,6 +432,7 @@ static const u8 sText_Desc_SoundStereo[]        = _("Play the left and right aud
 static const u8 sText_Desc_ButtonMode[]         = _("All buttons work as normal.");
 static const u8 sText_Desc_ButtonMode_LR[]      = _("On some screens the L and R buttons\nact as left and right.");
 static const u8 sText_Desc_ButtonMode_LA[]      = _("The L button acts as another A\nbutton for one-handed play.");
+static const u8 sText_Desc_ShinyOdds[]          = _("Adjust the odds of encountering\nshiny Pokémon.");
 
 static const u8 sText_Desc_BattleScene_On[]     = _("Show the POKéMON battle animations.");
 static const u8 sText_Desc_BattleScene_Off[]    = _("Skip the POKéMON battle animations.");
@@ -431,6 +449,7 @@ static const u8 *const sOptionMenuItemDescriptionsGeneral[MENUITEM_GENERAL_COUNT
     [MENUITEM_GENERAL_TEXTSPEED]   = {sText_Desc_TextSpeed,            sText_Empty},
     [MENUITEM_GENERAL_SOUND]       = {sText_Desc_SoundMono,            sText_Empty},
     [MENUITEM_GENERAL_BUTTONMODE]  = {sText_Desc_ButtonMode,           sText_Empty},
+    [MENUITEM_GENERAL_SHINYODDS]   = {sText_Desc_ShinyOdds,            sText_Empty},
 };
 
 static const u8 *const sOptionMenuItemDescriptionsBattle[MENUITEM_BATTLE_COUNT][2] =
@@ -739,6 +758,7 @@ void CB2_InitUIOptionMenu(void)
         sOptions->selGeneral[MENUITEM_GENERAL_TEXTSPEED]   = gSaveBlock4Ptr->optionsTextSpeed;
         sOptions->selGeneral[MENUITEM_GENERAL_SOUND]       = gSaveBlock4Ptr->optionsSound;
         sOptions->selGeneral[MENUITEM_GENERAL_BUTTONMODE]  = gSaveBlock4Ptr->optionsButtonMode;
+        sOptions->selGeneral[MENUITEM_GENERAL_SHINYODDS]   = gSaveBlock4Ptr->optionsShinyOdds;
 
         sOptions->selBattle[MENUITEM_BATTLE_BATTLESCENE] = gSaveBlock4Ptr->optionsBattleScene;
         sOptions->selBattle[MENUITEM_BATTLE_BATTLESTYLE] = gSaveBlock4Ptr->optionsBattleStyle;
@@ -975,6 +995,7 @@ static void Task_OptionMenuSave(u8 taskId)
     gSaveBlock4Ptr->optionsTextSpeed        = sOptions->selGeneral[MENUITEM_GENERAL_TEXTSPEED];
     gSaveBlock4Ptr->optionsSound            = sOptions->selGeneral[MENUITEM_GENERAL_SOUND];
     gSaveBlock4Ptr->optionsButtonMode       = sOptions->selGeneral[MENUITEM_GENERAL_BUTTONMODE];
+    gSaveBlock4Ptr->optionsShinyOdds        = sOptions->selGeneral[MENUITEM_GENERAL_SHINYODDS];
 
     gSaveBlock4Ptr->optionsBattleScene      = sOptions->selBattle[MENUITEM_BATTLE_BATTLESCENE];
     gSaveBlock4Ptr->optionsBattleStyle      = sOptions->selBattle[MENUITEM_BATTLE_BATTLESTYLE];
@@ -1036,6 +1057,7 @@ static void ScrollMenu(int direction)
     DrawLeftSideOptionText(menuItem, (pos * Y_DIFF) + 1);
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_GFX);
 }
+
 static void ScrollAll(int direction) // to bottom or top
 {
     int i, y, menuItem, pos;
@@ -1111,6 +1133,20 @@ static int ProcessInput_ButtonMode(int selection)
         selection--;
     }
     else if (JOY_NEW(DPAD_RIGHT) && selection < BUTTON_MODE_OPTIONS_COUNT - 1)
+    {
+        selection++;
+    }
+
+    return selection;
+}
+
+static int ProcessInput_ShinyOdds(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < SHINY_ODDS_OPTIONS_COUNT - 1)
     {
         selection++;
     }
@@ -1320,6 +1356,26 @@ static void DrawChoices_ButtonMode(int selection, int y)
     DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
 
     if (selection < BUTTON_MODE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
+}
+
+static void DrawChoices_ShinyOdds(int selection, int y)
+{
+    bool8 active = CheckConditions(MENUITEM_GENERAL_SHINYODDS);
+    const u8 *choiceText = sShinyOddsOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, gText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
+
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
+
+    if (selection < SHINY_ODDS_OPTIONS_COUNT - 1)
         AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 

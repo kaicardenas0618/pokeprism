@@ -164,6 +164,12 @@
 #define OPTIONS_IV_EV_GRADED    0
 #define OPTIONS_IV_EV_EXACT     1
 
+#define OPTIONS_SHINY_ODDS_8192 0
+#define OPTIONS_SHINY_ODDS_4096 1
+#define OPTIONS_SHINY_ODDS_2048 2
+#define OPTIONS_SHINY_ODDS_1024 3
+#define OPTIONS_SHINY_ODDS_512  4
+
 #define DIR_NONE        0
 #define DIR_SOUTH       1
 #define DIR_NORTH       2

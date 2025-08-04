@@ -101,6 +101,10 @@ static void SetDefaultOptions(void)
     gSaveBlock4Ptr->optionsSound = OPTIONS_SOUND_MONO;
     gSaveBlock4Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SHIFT;
     gSaveBlock4Ptr->optionsBattleScene = FALSE;
+    gSaveBlock4Ptr->optionsShinyOdds = OPTIONS_SHINY_ODDS_4096;
+    gSaveBlock4Ptr->optionsIVEVDisplay = OPTIONS_IV_EV_GRADED;
+    gSaveBlock4Ptr->optionsScrollBgs = OPTIONS_SCROLL_BGS_ON;
+    gSaveBlock4Ptr->optionsClockMode = OPTIONS_CLOCK_MODE_12HR;
     gSaveBlock2Ptr->regionMapZoom = FALSE;
 }
 
