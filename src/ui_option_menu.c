@@ -158,11 +158,14 @@ static void Task_OptionMenuSave(u8 taskId);
 static void Task_OptionMenuFadeOut(u8 taskId);
 static void ScrollMenu(int direction);
 static void ScrollAll(int direction); // to bottom or top
-static int XOptions_ProcessInput(int x, int selection);
-static int ProcessInput_Options_Two(int selection);
-static int ProcessInput_Options_Three(int selection);
+static int ProcessInput_TextSpeed(int selection);
 static int ProcessInput_Sound(int selection);
+static int ProcessInput_ButtonMode(int selection);
+static int ProcessInput_BattleScene(int selection);
+static int ProcessInput_BattleStyle(int selection);
 static int ProcessInput_FrameType(int selection);
+static int ProcessInput_ScrollBgs(int selection);
+static int ProcessInput_ClockMode(int selection);
 static const u8 *const OptionTextDescription(void);
 static const u8 *const OptionTextRight(u8 menuItem);
 static u8 MenuItemCount(void);
@@ -259,9 +262,9 @@ struct // MENU_GENERAL
     int (*processInput)(int selection);
 } static const sItemFunctionsGeneral[MENUITEM_GENERAL_COUNT] =
 {
-    [MENUITEM_GENERAL_TEXTSPEED]    = {DrawChoices_TextSpeed,   ProcessInput_Options_Three},
+    [MENUITEM_GENERAL_TEXTSPEED]    = {DrawChoices_TextSpeed,   ProcessInput_TextSpeed},
     [MENUITEM_GENERAL_SOUND]        = {DrawChoices_Sound,       ProcessInput_Sound},
-    [MENUITEM_GENERAL_BUTTONMODE]   = {DrawChoices_ButtonMode,  ProcessInput_Options_Three},
+    [MENUITEM_GENERAL_BUTTONMODE]   = {DrawChoices_ButtonMode,  ProcessInput_ButtonMode},
 };
 
 struct // MENU_BATTLE
@@ -270,8 +273,8 @@ struct // MENU_BATTLE
     int (*processInput)(int selection);
 } static const sItemFunctionsBattle[MENUITEM_BATTLE_COUNT] =
 {
-    [MENUITEM_BATTLE_BATTLESCENE]  = {DrawChoices_BattleScene, ProcessInput_Options_Two},
-    [MENUITEM_BATTLE_BATTLESTYLE]  = {DrawChoices_BattleStyle, ProcessInput_Options_Two},
+    [MENUITEM_BATTLE_BATTLESCENE]  = {DrawChoices_BattleScene, ProcessInput_BattleScene},
+    [MENUITEM_BATTLE_BATTLESTYLE]  = {DrawChoices_BattleStyle, ProcessInput_BattleStyle},
 };
 
 struct // MENU_INTERFACE
@@ -281,8 +284,8 @@ struct // MENU_INTERFACE
 } static const sItemFunctionsInterface[MENUITEM_INTERFACE_COUNT] =
 {
     [MENUITEM_INTERFACE_FRAMETYPE] = {DrawChoices_FrameType,   ProcessInput_FrameType},
-    [MENUITEM_INTERFACE_SCROLLBGS] = {DrawChoices_ScrollBgs,   ProcessInput_Options_Two},
-    [MENUITEM_INTERFACE_CLOCKMODE] = {DrawChoices_ClockMode,   ProcessInput_Options_Two},
+    [MENUITEM_INTERFACE_SCROLLBGS] = {DrawChoices_ScrollBgs,   ProcessInput_ScrollBgs},
+    [MENUITEM_INTERFACE_CLOCKMODE] = {DrawChoices_ClockMode,   ProcessInput_ClockMode},
 };
 
 
@@ -1048,40 +1051,73 @@ static void ScrollAll(int direction) // to bottom or top
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_GFX);
 }
 
-static int XOptions_ProcessInput(int x, int selection)
+static int ProcessInput_TextSpeed(int selection)
 {
-    if (JOY_NEW(DPAD_RIGHT))
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
     {
-        if (++selection > (x - 1))
-            selection = 0;
+        selection--;
     }
-    if (JOY_NEW(DPAD_LEFT))
+    else if (JOY_NEW(DPAD_RIGHT) && selection < TEXT_SPEED_OPTIONS_COUNT - 1)
     {
-        if (--selection < 0)
-            selection = (x - 1);
+        selection++;
     }
-    return selection;
-}
-
-static int ProcessInput_Options_Two(int selection)
-{
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
-        selection ^= 1;
 
     return selection;
-}
-
-static int ProcessInput_Options_Three(int selection)
-{
-    return XOptions_ProcessInput(3, selection);
 }
 
 static int ProcessInput_Sound(int selection)
 {
-    if (JOY_NEW(DPAD_LEFT | DPAD_RIGHT))
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
     {
-        selection ^= 1;
+        selection--;
         SetPokemonCryStereo(selection);
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < SOUND_OPTIONS_COUNT - 1)
+    {
+        selection++;
+        SetPokemonCryStereo(selection);
+    }
+
+    return selection;
+}
+
+static int ProcessInput_ButtonMode(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < BUTTON_MODE_OPTIONS_COUNT - 1)
+    {
+        selection++;
+    }
+
+    return selection;
+}
+
+static int ProcessInput_BattleScene(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < BATTLE_SCENE_OPTIONS_COUNT - 1)
+    {
+        selection++;
+    }
+
+    return selection;
+}
+
+static int ProcessInput_BattleStyle(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < BATTLE_STYLE_OPTIONS_COUNT - 1)
+    {
+        selection++;
     }
 
     return selection;
@@ -1093,8 +1129,6 @@ static int ProcessInput_FrameType(int selection)
     {
         if (selection < WINDOW_FRAMES_COUNT - 1)
             selection++;
-        else
-            selection = 0;
 
         LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
         LoadPalette(GetWindowFrameTilesPal(selection)->pal, 0x70, 0x20);
@@ -1103,12 +1137,39 @@ static int ProcessInput_FrameType(int selection)
     {
         if (selection != 0)
             selection--;
-        else
-            selection = WINDOW_FRAMES_COUNT - 1;
 
         LoadBgTiles(1, GetWindowFrameTilesPal(selection)->tiles, 0x120, 0x1A2);
         LoadPalette(GetWindowFrameTilesPal(selection)->pal, 0x70, 0x20);
     }
+    return selection;
+}
+
+static int ProcessInput_ScrollBgs(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < SCROLL_BGS_OPTIONS_COUNT - 1)
+    {
+        selection++;
+    }
+    
+    gSaveBlock4Ptr->optionsScrollBgs = selection;
+    return selection;
+}
+
+static int ProcessInput_ClockMode(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < CLOCK_MODE_OPTIONS_COUNT - 1)
+    {
+        selection++;
+    }
+
     return selection;
 }
 
@@ -1152,7 +1213,7 @@ static void ReDrawAll(void)
     CopyWindowToVram(WIN_OPTIONS, COPYWIN_GFX);
 }
 
-// Process Input functions ****SPECIFIC****
+// Process Input functions
 static void DrawChoices_TextSpeed(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_GENERAL_TEXTSPEED);
