@@ -1516,5 +1516,3 @@ const u8 gText_SubQuest2_Desc20[] = _("Description Sub 20");
 
 const u8 gText_DPadLeft[] = _("{DPAD_LEFT} ");
 const u8 gText_DPadRight[] = _(" {DPAD_RIGHT}");
-const u8 gText_DPadUp[] = _(" {DPAD_UP}");
-const u8 gText_DPadDown[] = _(" {DPAD_DOWN}");

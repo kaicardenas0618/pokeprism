@@ -2645,7 +2645,5 @@ extern const u8 gText_RButton[];
 extern const u8 gText_LButton[];
 extern const u8 gText_DPadLeft[];
 extern const u8 gText_DPadRight[];
-extern const u8 gText_DPadUp[];
-extern const u8 gText_DPadDown[];
 
 #endif // GUARD_STRINGS_H
