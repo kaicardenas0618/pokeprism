@@ -189,21 +189,6 @@ static const u32 sScrollBgTiles[] = INCBIN_U32("graphics/option_menu/scroll_tile
 static const u32 sScrollBgTilemap[] = INCBIN_U32("graphics/option_menu/scroll_tiles.bin.lz");
 static const u16 sScrollBgPalette[] = INCBIN_U16("graphics/option_menu/scroll_tiles.gbapal");
 
-#define TEXT_COLOR_OPTIONS_WHITE                1
-#define TEXT_COLOR_OPTIONS_GRAY_FG              2
-#define TEXT_COLOR_OPTIONS_GRAY_SHADOW          3
-#define TEXT_COLOR_OPTIONS_GRAY_LIGHT_FG        4
-#define TEXT_COLOR_OPTIONS_ORANGE_FG            5
-#define TEXT_COLOR_OPTIONS_ORANGE_SHADOW        6
-#define TEXT_COLOR_OPTIONS_RED_FG               7
-#define TEXT_COLOR_OPTIONS_RED_SHADOW           8
-#define TEXT_COLOR_OPTIONS_GREEN_FG             9
-#define TEXT_COLOR_OPTIONS_GREEN_SHADOW         10
-#define TEXT_COLOR_OPTIONS_GREEN_DARK_FG        11
-#define TEXT_COLOR_OPTIONS_GREEN_DARK_SHADOW    12
-#define TEXT_COLOR_OPTIONS_RED_DARK_FG          13
-#define TEXT_COLOR_OPTIONS_RED_DARK_SHADOW      14
-
 // Menu draw and input functions
 struct // MENU_MAIN
 {
