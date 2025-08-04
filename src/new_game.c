@@ -100,7 +100,7 @@ static void SetDefaultOptions(void)
     gSaveBlock4Ptr->optionsWindowFrameType = 0;
     gSaveBlock4Ptr->optionsSound = OPTIONS_SOUND_MONO;
     gSaveBlock4Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SHIFT;
-    gSaveBlock4Ptr->optionsBattleSceneOff = FALSE;
+    gSaveBlock4Ptr->optionsBattleScene = FALSE;
     gSaveBlock2Ptr->regionMapZoom = FALSE;
 }
 

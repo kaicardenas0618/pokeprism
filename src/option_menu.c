@@ -234,7 +234,7 @@ void CB2_InitOptionMenu(void)
 
         gTasks[taskId].tMenuSelection = 0;
         gTasks[taskId].tTextSpeed = gSaveBlock4Ptr->optionsTextSpeed;
-        gTasks[taskId].tBattleSceneOff = gSaveBlock4Ptr->optionsBattleSceneOff;
+        gTasks[taskId].tBattleSceneOff = gSaveBlock4Ptr->optionsBattleScene;
         gTasks[taskId].tBattleStyle = gSaveBlock4Ptr->optionsBattleStyle;
         gTasks[taskId].tSound = gSaveBlock4Ptr->optionsSound;
         gTasks[taskId].tButtonMode = gSaveBlock4Ptr->optionsButtonMode;
@@ -356,7 +356,7 @@ static void Task_OptionMenuProcessInput(u8 taskId)
 static void Task_OptionMenuSave(u8 taskId)
 {
     gSaveBlock4Ptr->optionsTextSpeed = gTasks[taskId].tTextSpeed;
-    gSaveBlock4Ptr->optionsBattleSceneOff = gTasks[taskId].tBattleSceneOff;
+    gSaveBlock4Ptr->optionsBattleScene = gTasks[taskId].tBattleSceneOff;
     gSaveBlock4Ptr->optionsBattleStyle = gTasks[taskId].tBattleStyle;
     gSaveBlock4Ptr->optionsSound = gTasks[taskId].tSound;
     gSaveBlock4Ptr->optionsButtonMode = gTasks[taskId].tButtonMode;
