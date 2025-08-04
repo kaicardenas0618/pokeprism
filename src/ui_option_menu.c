@@ -48,6 +48,7 @@ enum
     MENUITEM_INTERFACE_FRAMETYPE,
     MENUITEM_INTERFACE_SCROLLBGS,
     MENUITEM_INTERFACE_CLOCKMODE,
+    MENUITEM_INTERFACE_IVEVDISPLAY,
     MENUITEM_INTERFACE_COUNT,
 };
 
@@ -166,6 +167,7 @@ static int ProcessInput_BattleStyle(int selection);
 static int ProcessInput_FrameType(int selection);
 static int ProcessInput_ScrollBgs(int selection);
 static int ProcessInput_ClockMode(int selection);
+static int ProcessInput_IVEVDisplay(int selection);
 static const u8 *const OptionTextDescription(void);
 static const u8 *const OptionTextRight(u8 menuItem);
 static u8 MenuItemCount(void);
@@ -180,6 +182,7 @@ static void DrawChoices_ButtonMode(int selection, int y);
 static void DrawChoices_FrameType(int selection, int y);
 static void DrawChoices_ScrollBgs(int selection, int y);
 static void DrawChoices_ClockMode(int selection, int y);
+static void DrawChoices_IVEVDisplay(int selection, int y);
 static void DrawBgWindowFrames(void);
 
 // EWRAM vars
@@ -251,6 +254,11 @@ static const u8 *const sClockModeOptions[] = {
     gText_ClockMode24Hr,
 };
 
+static const u8 *const sIVEVDisplayOptions[] = {
+    gText_IVEVDisplayGraded,
+    gText_IVEVDisplayExact,
+};
+
 #define TEXT_SPEED_OPTIONS_COUNT       ARRAY_COUNT(sTextSpeedOptions)
 #define BATTLE_SCENE_OPTIONS_COUNT     ARRAY_COUNT(sBattleSceneOptions)
 #define BATTLE_STYLE_OPTIONS_COUNT     ARRAY_COUNT(sBattleStyleOptions)
@@ -259,7 +267,7 @@ static const u8 *const sClockModeOptions[] = {
 #define FRAME_TYPE_OPTIONS_COUNT       ARRAY_COUNT(sFrameTypeOptions)
 #define SCROLL_BGS_OPTIONS_COUNT       ARRAY_COUNT(sScrollBgsOptions)
 #define CLOCK_MODE_OPTIONS_COUNT       ARRAY_COUNT(sClockModeOptions)
-
+#define IV_EV_DISPLAY_OPTIONS_COUNT    ARRAY_COUNT(sIVEVDisplayOptions)
 
 // Menu draw and input functions
 struct // MENU_GENERAL
@@ -279,8 +287,8 @@ struct // MENU_BATTLE
     int (*processInput)(int selection);
 } static const sItemFunctionsBattle[MENUITEM_BATTLE_COUNT] =
 {
-    [MENUITEM_BATTLE_BATTLESCENE]  = {DrawChoices_BattleScene, ProcessInput_BattleScene},
-    [MENUITEM_BATTLE_BATTLESTYLE]  = {DrawChoices_BattleStyle, ProcessInput_BattleStyle},
+    [MENUITEM_BATTLE_BATTLESCENE]    = {DrawChoices_BattleScene, ProcessInput_BattleScene},
+    [MENUITEM_BATTLE_BATTLESTYLE]    = {DrawChoices_BattleStyle, ProcessInput_BattleStyle},
 };
 
 struct // MENU_INTERFACE
@@ -289,9 +297,10 @@ struct // MENU_INTERFACE
     int (*processInput)(int selection);
 } static const sItemFunctionsInterface[MENUITEM_INTERFACE_COUNT] =
 {
-    [MENUITEM_INTERFACE_FRAMETYPE] = {DrawChoices_FrameType,   ProcessInput_FrameType},
-    [MENUITEM_INTERFACE_SCROLLBGS] = {DrawChoices_ScrollBgs,   ProcessInput_ScrollBgs},
-    [MENUITEM_INTERFACE_CLOCKMODE] = {DrawChoices_ClockMode,   ProcessInput_ClockMode},
+    [MENUITEM_INTERFACE_FRAMETYPE]   = {DrawChoices_FrameType,   ProcessInput_FrameType},
+    [MENUITEM_INTERFACE_SCROLLBGS]   = {DrawChoices_ScrollBgs,   ProcessInput_ScrollBgs},
+    [MENUITEM_INTERFACE_CLOCKMODE]   = {DrawChoices_ClockMode,   ProcessInput_ClockMode},
+    [MENUITEM_INTERFACE_IVEVDISPLAY] = {DrawChoices_IVEVDisplay, ProcessInput_IVEVDisplay},
 };
 
 
@@ -310,9 +319,10 @@ static const u8 *const sOptionMenuItemsNamesBattle[MENUITEM_BATTLE_COUNT] =
 
 static const u8 *const sOptionMenuItemsNamesInterface[MENUITEM_INTERFACE_COUNT] =
 {
-    [MENUITEM_INTERFACE_FRAMETYPE] = gText_Frame,
-    [MENUITEM_INTERFACE_SCROLLBGS] = gText_ScrollBgs,
-    [MENUITEM_INTERFACE_CLOCKMODE] = gText_ClockMode,
+    [MENUITEM_INTERFACE_FRAMETYPE]   = gText_Frame,
+    [MENUITEM_INTERFACE_SCROLLBGS]   = gText_ScrollBgs,
+    [MENUITEM_INTERFACE_CLOCKMODE]   = gText_ClockMode,
+    [MENUITEM_INTERFACE_IVEVDISPLAY] = gText_IVEVs,
 };
 
 
@@ -384,6 +394,9 @@ static bool8 CheckConditions(int selection)
                 case MENUITEM_INTERFACE_CLOCKMODE:
                     return TRUE;
                     break;
+                case MENUITEM_INTERFACE_IVEVDISPLAY:
+                    return TRUE;
+                    break;
                 default:
                 case MENUITEM_INTERFACE_COUNT:
                     return TRUE;
@@ -411,25 +424,27 @@ static const u8 sText_Desc_BattleStyle_Set[]    = _("No free switch after fainti
 static const u8 sText_Desc_FrameType[]          = _("Choose the frame surrounding the\nwindows.");
 static const u8 sText_Desc_ScrollBgs[]          = _("Toggles the scrolling of the UI\nmenu backgrounds.");
 static const u8 sText_Desc_ClockMode[]          = _("Changes the clock display between\n12-hour and 24-hour format.");
+static const u8 sText_Desc_IVEVDisplay[]        = _("Choose how IVs and EVs are displayed\nin the summary screen.");
 
-static const u8 *const sOptionMenuItemDescriptionsGeneral[MENUITEM_GENERAL_COUNT][3] =
+static const u8 *const sOptionMenuItemDescriptionsGeneral[MENUITEM_GENERAL_COUNT][2] =
 {
-    [MENUITEM_GENERAL_TEXTSPEED]   = {sText_Desc_TextSpeed,            sText_Empty,                sText_Empty},
-    [MENUITEM_GENERAL_SOUND]       = {sText_Desc_SoundMono,            sText_Desc_SoundStereo,     sText_Empty},
-    [MENUITEM_GENERAL_BUTTONMODE]  = {sText_Desc_ButtonMode,           sText_Desc_ButtonMode_LR,   sText_Desc_ButtonMode_LA},
+    [MENUITEM_GENERAL_TEXTSPEED]   = {sText_Desc_TextSpeed,            sText_Empty},
+    [MENUITEM_GENERAL_SOUND]       = {sText_Desc_SoundMono,            sText_Empty},
+    [MENUITEM_GENERAL_BUTTONMODE]  = {sText_Desc_ButtonMode,           sText_Empty},
 };
 
-static const u8 *const sOptionMenuItemDescriptionsBattle[MENUITEM_BATTLE_COUNT][3] =
+static const u8 *const sOptionMenuItemDescriptionsBattle[MENUITEM_BATTLE_COUNT][2] =
 {
-    [MENUITEM_BATTLE_BATTLESCENE] = {sText_Desc_BattleScene_On,       sText_Desc_BattleScene_Off, sText_Empty},
-    [MENUITEM_BATTLE_BATTLESTYLE] = {sText_Desc_BattleStyle_Shift,    sText_Desc_BattleStyle_Set, sText_Empty},
+    [MENUITEM_BATTLE_BATTLESCENE] = {sText_Desc_BattleScene_On,    sText_Empty},
+    [MENUITEM_BATTLE_BATTLESTYLE] = {sText_Desc_BattleStyle_Shift, sText_Empty},
 };
 
 static const u8 *const sOptionMenuItemDescriptionsInterface[MENUITEM_INTERFACE_COUNT][2] =
 {
-    [MENUITEM_INTERFACE_FRAMETYPE] = {sText_Desc_FrameType,        sText_Empty},
-    [MENUITEM_INTERFACE_SCROLLBGS] = {sText_Desc_ScrollBgs,        sText_Empty},
-    [MENUITEM_INTERFACE_CLOCKMODE] = {sText_Desc_ClockMode,        sText_Empty},
+    [MENUITEM_INTERFACE_FRAMETYPE]   = {sText_Desc_FrameType,        sText_Empty},
+    [MENUITEM_INTERFACE_SCROLLBGS]   = {sText_Desc_ScrollBgs,        sText_Empty},
+    [MENUITEM_INTERFACE_CLOCKMODE]   = {sText_Desc_ClockMode,        sText_Empty},
+    [MENUITEM_INTERFACE_IVEVDISPLAY] = {sText_Desc_IVEVDisplay,      sText_Empty},
 };
 
 
@@ -728,9 +743,10 @@ void CB2_InitUIOptionMenu(void)
         sOptions->selBattle[MENUITEM_BATTLE_BATTLESCENE] = gSaveBlock4Ptr->optionsBattleScene;
         sOptions->selBattle[MENUITEM_BATTLE_BATTLESTYLE] = gSaveBlock4Ptr->optionsBattleStyle;
 
-        sOptions->selInterface[MENUITEM_INTERFACE_FRAMETYPE]  = gSaveBlock4Ptr->optionsWindowFrameType;
-        sOptions->selInterface[MENUITEM_INTERFACE_SCROLLBGS]  = gSaveBlock4Ptr->optionsScrollBgs;
-        sOptions->selInterface[MENUITEM_INTERFACE_CLOCKMODE]  = gSaveBlock4Ptr->optionsClockMode;
+        sOptions->selInterface[MENUITEM_INTERFACE_FRAMETYPE]   = gSaveBlock4Ptr->optionsWindowFrameType;
+        sOptions->selInterface[MENUITEM_INTERFACE_SCROLLBGS]   = gSaveBlock4Ptr->optionsScrollBgs;
+        sOptions->selInterface[MENUITEM_INTERFACE_CLOCKMODE]   = gSaveBlock4Ptr->optionsClockMode;
+        sOptions->selInterface[MENUITEM_INTERFACE_IVEVDISPLAY] = gSaveBlock4Ptr->optionsIVEVDisplay;
 
         sOptions->submenu = MENU_GENERAL;
 
@@ -966,6 +982,7 @@ static void Task_OptionMenuSave(u8 taskId)
     gSaveBlock4Ptr->optionsWindowFrameType  = sOptions->selInterface[MENUITEM_INTERFACE_FRAMETYPE];
     gSaveBlock4Ptr->optionsScrollBgs        = sOptions->selInterface[MENUITEM_INTERFACE_SCROLLBGS];
     gSaveBlock4Ptr->optionsClockMode        = sOptions->selInterface[MENUITEM_INTERFACE_CLOCKMODE];
+    gSaveBlock4Ptr->optionsIVEVDisplay      = sOptions->selInterface[MENUITEM_INTERFACE_IVEVDISPLAY];
 
     BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 0x10, RGB_BLACK);
     gTasks[taskId].func = Task_OptionMenuFadeOut;
@@ -1172,6 +1189,20 @@ static int ProcessInput_ClockMode(int selection)
         selection--;
     }
     else if (JOY_NEW(DPAD_RIGHT) && selection < CLOCK_MODE_OPTIONS_COUNT - 1)
+    {
+        selection++;
+    }
+
+    return selection;
+}
+
+static int ProcessInput_IVEVDisplay(int selection)
+{
+    if (JOY_NEW(DPAD_LEFT) && selection > 0)
+    {
+        selection--;
+    }
+    else if (JOY_NEW(DPAD_RIGHT) && selection < IV_EV_DISPLAY_OPTIONS_COUNT - 1)
     {
         selection++;
     }
@@ -1389,6 +1420,26 @@ static void DrawChoices_ClockMode(int selection, int y)
     DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
 
     if (selection < CLOCK_MODE_OPTIONS_COUNT - 1)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
+}
+
+static void DrawChoices_IVEVDisplay(int selection, int y)
+{
+    bool8 active = CheckConditions(MENUITEM_INTERFACE_IVEVDISPLAY);
+    const u8 *choiceText = sIVEVDisplayOptions[selection];
+    s32 choiceWidth = GetStringWidth(FONT_NORMAL, choiceText, 0);
+    s32 xChoice = 152 - (choiceWidth / 2);
+    s32 xLeft = xChoice - GetStringWidth(FONT_NORMAL, gText_DPadLeft, 0) - 4;
+    s32 xRight = xChoice + choiceWidth + 4;
+
+    FillWindowPixelRect(WIN_OPTIONS, PIXEL_FILL(1), 104, y, 96, 16);
+
+    if (selection > 0)
+        AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadLeft, xLeft, y, TEXT_SKIP_DRAW, NULL);
+
+    DrawOptionMenuChoice(choiceText, xChoice, y, 1, active);
+
+    if (selection < IV_EV_DISPLAY_OPTIONS_COUNT - 1)
         AddTextPrinterParameterized(WIN_OPTIONS, FONT_NORMAL, gText_DPadRight, xRight, y, TEXT_SKIP_DRAW, NULL);
 }
 

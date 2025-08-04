@@ -994,6 +994,7 @@ const u8 gText_BattleStyle[] = _("Battle Style");
 const u8 gText_Frame[] = _("Frame Type");
 const u8 gText_ScrollBgs[] = _("Scrolling BGs");
 const u8 gText_ClockMode[] = _("Clock Mode");
+const u8 gText_IVEVs[] = _("IV & EV Display");
 const u8 gText_OptionMenuCancel[] = _("CANCEL");
 
 const u8 gText_TextSpeedSlow[] = _("Slow");
@@ -1024,6 +1025,8 @@ const u8 gText_ScrollBgsOn[] = _("On");
 const u8 gText_ScrollBgsOff[] = _("Off");
 const u8 gText_ClockMode12Hr[] = _("12-Hour");
 const u8 gText_ClockMode24Hr[] = _("24-Hour");
+const u8 gText_IVEVDisplayGraded[] = _("Graded");
+const u8 gText_IVEVDisplayExact[] = _("Exact");
 
 const u8 gText_NumPlayerLink[] = _("{STR_VAR_1}P LINK");
 const u8 gText_BronzeCard[] = _("BRONZE");

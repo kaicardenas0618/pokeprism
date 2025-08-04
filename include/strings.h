@@ -253,6 +253,7 @@ extern const u8 gText_BattleStyle[];
 extern const u8 gText_Frame[];
 extern const u8 gText_ScrollBgs[];
 extern const u8 gText_ClockMode[];
+extern const u8 gText_IVEVs[];
 extern const u8 gText_OptionMenuCancel[];
 
 extern const u8 gText_TextSpeedSlow[];
@@ -283,6 +284,8 @@ extern const u8 gText_ScrollBgsOn[];
 extern const u8 gText_ScrollBgsOff[];
 extern const u8 gText_ClockMode12Hr[];
 extern const u8 gText_ClockMode24Hr[];
+extern const u8 gText_IVEVDisplayGraded[];
+extern const u8 gText_IVEVDisplayExact[];
 
 // Battle pyramid menu texts
 extern const u8 gText_BattlePyramidConfirmRest[];

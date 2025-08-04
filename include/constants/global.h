@@ -161,6 +161,9 @@
 #define OPTIONS_CLOCK_MODE_12HR 0
 #define OPTIONS_CLOCK_MODE_24HR 1
 
+#define OPTIONS_IV_EV_GRADED    0
+#define OPTIONS_IV_EV_EXACT     1
+
 #define DIR_NONE        0
 #define DIR_SOUTH       1
 #define DIR_NORTH       2
