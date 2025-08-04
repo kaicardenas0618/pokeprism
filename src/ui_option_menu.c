@@ -60,7 +60,7 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
         .tilemapTop = 0,
         .width = 30,
         .height = 2,
-        .paletteNum = 1,
+        .paletteNum = 0,
         .baseBlock = 2
     },
     {//WIN_OPTIONS
@@ -69,7 +69,7 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
         .tilemapTop = 3,
         .width = 26,
         .height = 10,
-        .paletteNum = 1,
+        .paletteNum = 0,
         .baseBlock = 62
     },
     {//WIN_DESCRIPTION
@@ -78,7 +78,7 @@ static const struct WindowTemplate sOptionMenuWinTemplates[] =
         .tilemapTop = 15,
         .width = 26,
         .height = 4,
-        .paletteNum = 1,
+        .paletteNum = 0,
         .baseBlock = 500
     },
     DUMMY_WIN_TEMPLATE
@@ -154,8 +154,6 @@ static int GetMiddleX(const u8 *txt1, const u8 *txt2, const u8 *txt3);
 static int XOptions_ProcessInput(int x, int selection);
 static int ProcessInput_Options_Two(int selection);
 static int ProcessInput_Options_Three(int selection);
-static int ProcessInput_Options_Four(int selection);
-static int ProcessInput_Options_Eleven(int selection);
 static int ProcessInput_Sound(int selection);
 static int ProcessInput_FrameType(int selection);
 static const u8 *const OptionTextDescription(void);
@@ -163,7 +161,6 @@ static const u8 *const OptionTextRight(u8 menuItem);
 static u8 MenuItemCount(void);
 static void DrawDescriptionText(void);
 static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style, bool8 active);
-static void DrawChoices_Options_Three(const u8 *const *const strings, int selection, int y, bool8 active);
 static void ReDrawAll(void);
 static void DrawChoices_TextSpeed(int selection, int y);
 static void DrawChoices_BattleScene(int selection, int y);
@@ -214,10 +211,10 @@ struct // MENU_MAIN
     int (*processInput)(int selection);
 } static const sItemFunctionsMain[MENUITEM_MAIN_COUNT] =
 {
-    [MENUITEM_MAIN_TEXTSPEED]    = {DrawChoices_TextSpeed,   ProcessInput_Options_Four},
+    [MENUITEM_MAIN_TEXTSPEED]    = {DrawChoices_TextSpeed,   ProcessInput_Options_Three},
     [MENUITEM_MAIN_BATTLESCENE]  = {DrawChoices_BattleScene, ProcessInput_Options_Two},
     [MENUITEM_MAIN_BATTLESTYLE]  = {DrawChoices_BattleStyle, ProcessInput_Options_Two},
-    [MENUITEM_MAIN_SOUND]        = {DrawChoices_Sound,       ProcessInput_Options_Two},
+    [MENUITEM_MAIN_SOUND]        = {DrawChoices_Sound,       ProcessInput_Sound},
     [MENUITEM_MAIN_BUTTONMODE]   = {DrawChoices_ButtonMode,  ProcessInput_Options_Three},
     [MENUITEM_MAIN_FRAMETYPE]    = {DrawChoices_FrameType,   ProcessInput_FrameType},
 };
@@ -398,24 +395,26 @@ static void VBlankCB(void)
 }
 
 static const u8 sText_TopBar_Main[]         = _("GENERAL");
-static const u8 sText_TopBar_Main_Right[]   = _("{R_BUTTON}CUSTOM");
+static const u8 sText_TopBar_Main_Right[]   = _("{R_BUTTON}");
 static const u8 sText_TopBar_Custom[]       = _("CUSTOM");
-static const u8 sText_TopBar_Custom_Left[]  = _("{L_BUTTON}GENERAL");
+static const u8 sText_TopBar_Custom_Left[]  = _("{L_BUTTON}");
 
 static void DrawTopBarText(void)
 {
-    const u8 color[3] = { 0, TEXT_COLOR_WHITE, TEXT_COLOR_OPTIONS_GRAY_FG };
+    const u8 color[3] = {0, 2, 10};
 
     FillWindowPixelBuffer(WIN_TOPBAR, PIXEL_FILL(0));
     switch (sOptions->submenu)
     {
         case MENU_MAIN:
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 105, 1, color, 0, sText_TopBar_Main);
-            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 190, 1, color, 0, sText_TopBar_Main_Right);
+            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 2, 1, color, 0, sText_TopBar_Custom_Left);
+            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 221, 1, color, 0, sText_TopBar_Main_Right);
             break;
         case MENU_CUSTOM:
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 105, 1, color, 0, sText_TopBar_Custom);
             AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 2, 1, color, 0, sText_TopBar_Custom_Left);
+            AddTextPrinterParameterized3(WIN_TOPBAR, FONT_SMALL, 221, 1, color, 0, sText_TopBar_Main_Right);
             break;
     }
     PutWindowTilemap(WIN_TOPBAR);
@@ -434,63 +433,45 @@ static void DrawOptionMenuTexts(void) //left side text
 
 static void DrawDescriptionText(void)
 {
-    u8 color_gray[3];
-    color_gray[0] = TEXT_COLOR_TRANSPARENT;
-    color_gray[1] = TEXT_COLOR_OPTIONS_GRAY_FG;
-    color_gray[2] = TEXT_COLOR_OPTIONS_GRAY_SHADOW;
+    u8 color[3];
+    color[0] = 0;
+    color[1] = 2;
+    color[2] = 10;
         
     FillWindowPixelBuffer(WIN_DESCRIPTION, PIXEL_FILL(1));
-    AddTextPrinterParameterized4(WIN_DESCRIPTION, FONT_NORMAL, 8, 1, 0, 0, color_gray, TEXT_SKIP_DRAW, OptionTextDescription());
+    AddTextPrinterParameterized4(WIN_DESCRIPTION, FONT_NORMAL, 8, 1, 0, 0, color, TEXT_SKIP_DRAW, OptionTextDescription());
     CopyWindowToVram(WIN_DESCRIPTION, COPYWIN_FULL);
 }
 
 static void DrawLeftSideOptionText(int selection, int y)
 {
-    u8 color_yellow[3];
-    u8 color_gray[3];
+    u8 color[3];
 
-    color_yellow[0] = TEXT_COLOR_TRANSPARENT;
-    color_yellow[1] = TEXT_COLOR_WHITE;
-    color_yellow[2] = TEXT_COLOR_OPTIONS_GRAY_FG;
-    color_gray[0] = TEXT_COLOR_TRANSPARENT;
-    color_gray[1] = TEXT_COLOR_WHITE;
-    color_gray[2] = TEXT_COLOR_OPTIONS_GRAY_SHADOW;
+    color[0] = 0;
+    color[1] = 2;
+    color[2] = 10;
 
-    if (CheckConditions(selection))
-        AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y, 0, 0, color_yellow, TEXT_SKIP_DRAW, OptionTextRight(selection));
-    else
-        AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y, 0, 0, color_gray, TEXT_SKIP_DRAW, OptionTextRight(selection));
+    AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, 8, y, 0, 0, color, TEXT_SKIP_DRAW, OptionTextRight(selection));
 }
 
 static void DrawRightSideChoiceText(const u8 *text, int x, int y, bool8 choosen, bool8 active)
 {
-    u8 color_red[3];
-    u8 color_gray[3];
+    u8 colorSelected[3];
+    u8 color[3];
 
-    if (active)
-    {
-        color_red[0] = TEXT_COLOR_TRANSPARENT;
-        color_red[1] = TEXT_COLOR_OPTIONS_ORANGE_FG;
-        color_red[2] = TEXT_COLOR_OPTIONS_GRAY_FG;
-        color_gray[0] = TEXT_COLOR_TRANSPARENT;
-        color_gray[1] = TEXT_COLOR_OPTIONS_WHITE;
-        color_gray[2] = TEXT_COLOR_OPTIONS_GRAY_FG;
-    }
-    else
-    {
-        color_red[0] = TEXT_COLOR_TRANSPARENT;
-        color_red[1] = TEXT_COLOR_OPTIONS_WHITE;
-        color_red[2] = TEXT_COLOR_OPTIONS_GRAY_FG;
-        color_gray[0] = TEXT_COLOR_TRANSPARENT;
-        color_gray[1] = TEXT_COLOR_OPTIONS_WHITE;
-        color_gray[2] = TEXT_COLOR_OPTIONS_GRAY_FG;
-    }
+    color[0] = 0;
+    color[1] = 2;
+    color[2] = 10;
+
+    colorSelected[0] = 0;
+    colorSelected[1] = 5;
+    colorSelected[2] = 10;
 
 
     if (choosen)
-        AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, x, y, 0, 0, color_red, TEXT_SKIP_DRAW, text);
+        AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, x, y, 0, 0, colorSelected, TEXT_SKIP_DRAW, text);
     else
-        AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, x, y, 0, 0, color_gray, TEXT_SKIP_DRAW, text);
+        AddTextPrinterParameterized4(WIN_OPTIONS, FONT_NORMAL, x, y, 0, 0, color, TEXT_SKIP_DRAW, text);
 }
 
 static void DrawChoices(u32 id, int y) //right side draw function
@@ -512,7 +493,7 @@ static void HighlightOptionMenuItem(void)
 {
     int cursor = sOptions->visibleCursor[sOptions->submenu];
 
-    SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(8, 232));
+    SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(13, 231));
     SetGpuReg(REG_OFFSET_WIN0V, WIN_RANGE(cursor * Y_DIFF + 24, cursor * Y_DIFF + 40));
 }
 
@@ -545,8 +526,8 @@ static bool8 OptionsMenu_LoadGraphics(void) // Load all the tilesets, tilemaps, 
         }
         break;
     case 4:
-        LoadPalette(sOptionsMenuPalette, 64, 32);
-        LoadPalette(sScrollBgPalette, 32, 32);
+        LoadPalette(sOptionsMenuPalette, PLTT_ID(2), PLTT_SIZE_4BPP);
+        LoadPalette(sScrollBgPalette, PLTT_ID(3), PLTT_SIZE_4BPP);
         sOptions->gfxLoadState++;
         break;
     default:
@@ -558,7 +539,7 @@ static bool8 OptionsMenu_LoadGraphics(void) // Load all the tilesets, tilemaps, 
 
 void CB2_InitUIOptionMenu(void)
 {
-    u32 i, taskId;
+    u32 i;
     switch (gMain.state)
     {
     default:
@@ -619,12 +600,12 @@ void CB2_InitUIOptionMenu(void)
         }
         break;
     case 4:
-        LoadPalette(sOptionMenuBg_Pal, 0, sizeof(sOptionMenuBg_Pal));
+        LoadPalette(sOptionMenuBg_Pal, PLTT_ID(1), PLTT_SIZE_4BPP);
         LoadPalette(GetWindowFrameTilesPal(gSaveBlock4Ptr->optionsWindowFrameType)->pal, 0x70, 0x20);
         gMain.state++;
         break;
     case 5:
-        LoadPalette(sOptionMenuText_Pal, 16, sizeof(sOptionMenuText_Pal));
+        LoadPalette(sOptionMenuText_Pal, PLTT_ID(0), PLTT_SIZE_4BPP);
         gMain.state++;
         break;
     case 6:
@@ -657,7 +638,7 @@ void CB2_InitUIOptionMenu(void)
         gMain.state++;
         break;
     case 10:
-        taskId = CreateTask(Task_OptionMenuFadeIn, 0);
+        CreateTask(Task_OptionMenuFadeIn, 0);
         
         sOptions->arrowTaskId = AddScrollIndicatorArrowPairParameterized(SCROLL_ARROW_UP, 240 / 2, 20, 110, MENUITEM_MAIN_COUNT - 1, 110, 110, 0);
 
@@ -709,7 +690,6 @@ static void Task_OptionMenuFadeIn(u8 taskId)
 
 static void Task_OptionMenuProcessInput(u8 taskId)
 {
-    int i = 0;
     u8 optionsToDraw = min(OPTIONS_ON_SCREEN , MenuItemCount());
 
     if (JOY_NEW(B_BUTTON))
@@ -969,16 +949,6 @@ static int ProcessInput_Options_Three(int selection)
     return XOptions_ProcessInput(3, selection);
 }
 
-static int ProcessInput_Options_Four(int selection)
-{
-    return XOptions_ProcessInput(4, selection);
-}
-
-static int ProcessInput_Options_Eleven(int selection)
-{
-    return XOptions_ProcessInput(11, selection);
-}
-
 // Process Input functions ****SPECIFIC****
 static int ProcessInput_Sound(int selection)
 {
@@ -1026,18 +996,6 @@ static void DrawOptionMenuChoice(const u8 *text, u8 x, u8 y, u8 style, bool8 act
     DrawRightSideChoiceText(text, x, y+1, choosen, active);
 }
 
-static void DrawChoices_Options_Three(const u8 *const *const strings, int selection, int y, bool8 active)
-{
-    u8 styles[3] = {0};
-    styles[selection] = 1;
-
-    int xMid = GetMiddleX(strings[0], strings[1], strings[2]);
-
-    DrawOptionMenuChoice(strings[0], 104, y, styles[0], active);
-    DrawOptionMenuChoice(strings[1], xMid, y, styles[1], active);
-    DrawOptionMenuChoice(strings[2], GetStringRightAlignXOffset(1, strings[2], 198), y, styles[2], active);
-}
-
 static void ReDrawAll(void)
 {
     u8 menuItem = sOptions->menuCursor[sOptions->submenu] - sOptions->visibleCursor[sOptions->submenu];
@@ -1069,11 +1027,16 @@ static void ReDrawAll(void)
 }
 
 // Process Input functions ****SPECIFIC****
-static const u8 *const sTextSpeedStrings[] = {gText_TextSpeedSlow, gText_TextSpeedMid, gText_TextSpeedFast};
 static void DrawChoices_TextSpeed(int selection, int y)
 {
     bool8 active = CheckConditions(MENUITEM_MAIN_TEXTSPEED);
-    DrawChoices_Options_Three(sTextSpeedStrings, selection, y, active);
+    u8 styles[3] = {0};
+    int xMid = GetMiddleX(gText_TextSpeedSlow, gText_TextSpeedMid, gText_TextSpeedFast);
+    styles[selection] = 1;
+
+    DrawOptionMenuChoice(gText_TextSpeedSlow, 104, y, styles[0], active);
+    DrawOptionMenuChoice(gText_TextSpeedMid, xMid, y, styles[1], active);
+    DrawOptionMenuChoice(gText_TextSpeedFast, GetStringRightAlignXOffset(1, gText_TextSpeedFast, 198), y, styles[2], active);
 }
 
 static void DrawChoices_BattleScene(int selection, int y)
