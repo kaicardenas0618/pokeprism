@@ -1,5 +1,6 @@
 #include "global.h"
 #include "option_menu.h"
+#include "ui_option_menu.h"
 #include "bg.h"
 #include "gpu_regs.h"
 #include "international_string_util.h"
@@ -149,6 +150,12 @@ static void VBlankCB(void)
 
 void CB2_InitOptionMenu(void)
 {
+    if (O_UI_OPTION_MENU)
+    {
+        CB2_InitUIOptionMenu();
+        return;
+    }
+
     switch (gMain.state)
     {
     default:
