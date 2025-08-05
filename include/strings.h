@@ -242,6 +242,57 @@ extern const u8 gText_SavingBadges[];
 extern const u8 gText_SavingPokedex[];
 extern const u8 gText_SavingTime[];
 
+// option menu texts
+extern const u8 gText_Option[];
+extern const u8 gText_OptionMenu[];
+extern const u8 gText_TextSpeed[];
+extern const u8 gText_Sound[];
+extern const u8 gText_ButtonMode[];
+extern const u8 gText_ShinyOdds[];
+extern const u8 gText_BattleScene[];
+extern const u8 gText_BattleStyle[];
+extern const u8 gText_Frame[];
+extern const u8 gText_ScrollBgs[];
+extern const u8 gText_ClockMode[];
+extern const u8 gText_IVEVs[];
+extern const u8 gText_OptionMenuCancel[];
+
+extern const u8 gText_TextSpeedSlow[];
+extern const u8 gText_TextSpeedMid[];
+extern const u8 gText_TextSpeedFast[];
+extern const u8 gText_SoundMono[];
+extern const u8 gText_SoundStereo[];
+extern const u8 gText_ButtonTypeNormal[];
+extern const u8 gText_ButtonTypeLR[];
+extern const u8 gText_ButtonTypeLEqualsA[];
+extern const u8 gText_ShinyOdds8192[];
+extern const u8 gText_ShinyOdds4096[];
+extern const u8 gText_ShinyOdds2048[];
+extern const u8 gText_ShinyOdds1024[];
+extern const u8 gText_ShinyOdds512[];
+extern const u8 gText_BattleSceneOn[];
+extern const u8 gText_BattleSceneOff[];
+extern const u8 gText_BattleStyleShift[];
+extern const u8 gText_BattleStyleSet[];
+extern const u8 gText_FrameType[];
+extern const u8 gText_FrameTypeNumber[];
+extern const u8 gText_FrameTypeRed[];
+extern const u8 gText_FrameTypeAqua[];
+extern const u8 gText_FrameTypeWhite[];
+extern const u8 gText_FrameTypeYellow[];
+extern const u8 gText_FrameTypeBlue[];
+extern const u8 gText_FrameTypeGreen[];
+extern const u8 gText_FrameTypePurple[];
+extern const u8 gText_FrameTypeOrange[];
+extern const u8 gText_FrameTypePink[];
+extern const u8 gText_FrameTypeTealGray[];
+extern const u8 gText_ScrollBgsOn[];
+extern const u8 gText_ScrollBgsOff[];
+extern const u8 gText_ClockMode12Hr[];
+extern const u8 gText_ClockMode24Hr[];
+extern const u8 gText_IVEVDisplayGraded[];
+extern const u8 gText_IVEVDisplayExact[];
+
 // Battle pyramid menu texts
 extern const u8 gText_BattlePyramidConfirmRest[];
 extern const u8 gText_BattlePyramidConfirmRetire[];
@@ -2607,5 +2658,7 @@ extern const u8 gText_CannotSendMonToBoxHM[];
 // Buttons
 extern const u8 gText_RButton[];
 extern const u8 gText_LButton[];
+extern const u8 gText_DPadLeft[];
+extern const u8 gText_DPadRight[];
 
 #endif // GUARD_STRINGS_H

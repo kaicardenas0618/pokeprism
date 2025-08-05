@@ -243,14 +243,16 @@ struct NPCFollower
 
 struct SaveBlock4
 {
-    u8 optionsButtonMode;
     u16 optionsTextSpeed:3;
-    u16 optionsWindowFrameType:5;
     u16 optionsSound:1;
+    u8 optionsButtonMode;
+    u16 optionsShinyOdds:5;
+    u16 optionsBattleScene:1;
     u16 optionsBattleStyle:1;
-    u16 optionsBattleSceneOff:1;
+    u16 optionsWindowFrameType:11;
     u16 optionsScrollBgs:1;
     u16 optionsClockMode:1;
+    u16 optionsIVEVDisplay:1;
     u8 questData[QUEST_FLAGS_COUNT * QUEST_STATES];
     u8 subQuests[SUB_FLAGS_COUNT];
 };

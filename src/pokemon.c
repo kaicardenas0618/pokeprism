@@ -1059,7 +1059,16 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     else if (otIdType == OT_ID_PRESET)
     {
         value = fixedOtId;
-        isShiny = GET_SHINY_VALUE(value, hasFixedPersonality ? fixedPersonality : personality) < SHINY_ODDS;
+        if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_8192)
+            isShiny = GET_SHINY_VALUE(value, hasFixedPersonality ? fixedPersonality : personality) < 8;
+        else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_4096)
+            isShiny = GET_SHINY_VALUE(value, hasFixedPersonality ? fixedPersonality : personality) < 16;
+        else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_2048)
+            isShiny = GET_SHINY_VALUE(value, hasFixedPersonality ? fixedPersonality : personality) < 32;
+        else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_1024)
+            isShiny = GET_SHINY_VALUE(value, hasFixedPersonality ? fixedPersonality : personality) < 64;
+        else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_512)
+            isShiny = GET_SHINY_VALUE(value, hasFixedPersonality ? fixedPersonality : personality) < 128;
     }
     else // Player is the OT
     {
@@ -1095,14 +1104,57 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
                 totalRerolls += CalculateChainFishingShinyRolls();
             if (gDexNavSpecies)
                 totalRerolls += CalculateDexNavShinyRolls();
-
-            while (GET_SHINY_VALUE(value, personality) >= SHINY_ODDS && totalRerolls > 0)
+            
+            if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_8192)
             {
-                personality = Random32();
-                totalRerolls--;
-            }
+                while (GET_SHINY_VALUE(value, personality) >= 8 && totalRerolls > 0)
+                {
+                    personality = Random32();
+                    totalRerolls--;
+                }
 
-            isShiny = GET_SHINY_VALUE(value, personality) < SHINY_ODDS;
+                isShiny = GET_SHINY_VALUE(value, personality) < 8;
+            }
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_4096)
+            {
+                while (GET_SHINY_VALUE(value, personality) >= 16 && totalRerolls > 0)
+                {
+                    personality = Random32();
+                    totalRerolls--;
+                }
+
+                isShiny = GET_SHINY_VALUE(value, personality) < 16;
+            }
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_2048)
+            {
+                while (GET_SHINY_VALUE(value, personality) >= 32 && totalRerolls > 0)
+                {
+                    personality = Random32();
+                    totalRerolls--;
+                }
+
+                isShiny = GET_SHINY_VALUE(value, personality) < 32;
+            }
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_1024)
+            {
+                while (GET_SHINY_VALUE(value, personality) >= 64 && totalRerolls > 0)
+                {
+                    personality = Random32();
+                    totalRerolls--;
+                }
+
+                isShiny = GET_SHINY_VALUE(value, personality) < 64;
+            }
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_512)
+            {
+                while (GET_SHINY_VALUE(value, personality) >= 128 && totalRerolls > 0)
+                {
+                    personality = Random32();
+                    totalRerolls--;
+                }
+
+                isShiny = GET_SHINY_VALUE(value, personality) < 128;
+            }
         }
     }
 
@@ -2808,7 +2860,16 @@ u32 GetBoxMonData3(struct BoxPokemon *boxMon, s32 field, u8 *data)
         case MON_DATA_IS_SHINY:
         {
             u32 shinyValue = GET_SHINY_VALUE(boxMon->otId, boxMon->personality);
-            retVal = (shinyValue < SHINY_ODDS) ^ boxMon->shinyModifier;
+            if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_8192)
+                retVal = (shinyValue < 8) ^ boxMon->shinyModifier;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_4096)
+                retVal = (shinyValue < 16) ^ boxMon->shinyModifier;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_2048)
+                retVal = (shinyValue < 32) ^ boxMon->shinyModifier;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_1024)
+                retVal = (shinyValue < 64) ^ boxMon->shinyModifier;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_512)
+                retVal = (shinyValue < 128) ^ boxMon->shinyModifier;
             break;
         }
         case MON_DATA_HIDDEN_NATURE:
@@ -3221,7 +3282,16 @@ void SetBoxMonData(struct BoxPokemon *boxMon, s32 field, const void *dataArg)
             u32 shinyValue = GET_SHINY_VALUE(boxMon->otId, boxMon->personality);
             bool32 isShiny;
             SET8(isShiny);
-            boxMon->shinyModifier = (shinyValue < SHINY_ODDS) ^ isShiny;
+            if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_8192)
+                boxMon->shinyModifier = (shinyValue < 8) ^ isShiny;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_4096)
+                boxMon->shinyModifier = (shinyValue < 16) ^ isShiny;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_2048)
+                boxMon->shinyModifier = (shinyValue < 32) ^ isShiny;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_1024)
+                boxMon->shinyModifier = (shinyValue < 64) ^ isShiny;
+            else if (gSaveBlock4Ptr->optionsShinyOdds == OPTIONS_SHINY_ODDS_512)
+                boxMon->shinyModifier = (shinyValue < 128) ^ isShiny;
             break;
         }
         case MON_DATA_HIDDEN_NATURE:
