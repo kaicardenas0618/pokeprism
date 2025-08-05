@@ -426,44 +426,39 @@ static bool8 CheckConditions(int selection)
 
 // Descriptions
 static const u8 sText_Empty[]                   = _("");
-static const u8 sText_Desc_TextSpeed[]          = _("Choose one of the four text-display\nspeeds.");
-static const u8 sText_Desc_SoundMono[]          = _("Sound is the same in all speakers.\nRecommended for original hardware.");
-static const u8 sText_Desc_SoundStereo[]        = _("Play the left and right audio channel\nseperatly. Great with headphones.");
-static const u8 sText_Desc_ButtonMode[]         = _("All buttons work as normal.");
-static const u8 sText_Desc_ButtonMode_LR[]      = _("On some screens the L and R buttons\nact as left and right.");
-static const u8 sText_Desc_ButtonMode_LA[]      = _("The L button acts as another A\nbutton for one-handed play.");
+static const u8 sText_Desc_TextSpeed[]          = _("Choose one of the 3 text-display\nspeeds.");
+static const u8 sText_Desc_Sound[]              = _("Changes the sound mode. Mono is\nrecommended for original hardware.");
+static const u8 sText_Desc_ButtonMode[]         = _("Changes the functions of the\nbuttons.");
 static const u8 sText_Desc_ShinyOdds[]          = _("Adjust the odds of encountering\nshiny Pokémon.");
 
-static const u8 sText_Desc_BattleScene_On[]     = _("Show the POKéMON battle animations.");
-static const u8 sText_Desc_BattleScene_Off[]    = _("Skip the POKéMON battle animations.");
-static const u8 sText_Desc_BattleStyle_Shift[]  = _("Get the option to switch your\nPOKéMON after the enemies faints.");
-static const u8 sText_Desc_BattleStyle_Set[]    = _("No free switch after fainting the\nenemies POKéMON.");
+static const u8 sText_Desc_BattleScene[]     = _("Chooses whether to show battle\nanimations.");
+static const u8 sText_Desc_BattleStyle[]  = _("Set: No switching after KO.\nShift: Switch prompt after KO.");
 
 static const u8 sText_Desc_FrameType[]          = _("Choose the frame surrounding the\nwindows.");
 static const u8 sText_Desc_ScrollBgs[]          = _("Toggles the scrolling of the UI\nmenu backgrounds.");
 static const u8 sText_Desc_ClockMode[]          = _("Changes the clock display between\n12-hour and 24-hour format.");
 static const u8 sText_Desc_IVEVDisplay[]        = _("Choose how IVs and EVs are displayed\nin the summary screen.");
 
-static const u8 *const sOptionMenuItemDescriptionsGeneral[MENUITEM_GENERAL_COUNT][2] =
+static const u8 *const sOptionMenuItemDescriptionsGeneral[MENUITEM_GENERAL_COUNT][1] =
 {
-    [MENUITEM_GENERAL_TEXTSPEED]   = {sText_Desc_TextSpeed,            sText_Empty},
-    [MENUITEM_GENERAL_SOUND]       = {sText_Desc_SoundMono,            sText_Empty},
-    [MENUITEM_GENERAL_BUTTONMODE]  = {sText_Desc_ButtonMode,           sText_Empty},
-    [MENUITEM_GENERAL_SHINYODDS]   = {sText_Desc_ShinyOdds,            sText_Empty},
+    [MENUITEM_GENERAL_TEXTSPEED]   = {sText_Desc_TextSpeed},
+    [MENUITEM_GENERAL_SOUND]       = {sText_Desc_Sound},
+    [MENUITEM_GENERAL_BUTTONMODE]  = {sText_Desc_ButtonMode},
+    [MENUITEM_GENERAL_SHINYODDS]   = {sText_Desc_ShinyOdds},
 };
 
-static const u8 *const sOptionMenuItemDescriptionsBattle[MENUITEM_BATTLE_COUNT][2] =
+static const u8 *const sOptionMenuItemDescriptionsBattle[MENUITEM_BATTLE_COUNT][1] =
 {
-    [MENUITEM_BATTLE_BATTLESCENE] = {sText_Desc_BattleScene_On,    sText_Empty},
-    [MENUITEM_BATTLE_BATTLESTYLE] = {sText_Desc_BattleStyle_Shift, sText_Empty},
+    [MENUITEM_BATTLE_BATTLESCENE] = {sText_Desc_BattleScene},
+    [MENUITEM_BATTLE_BATTLESTYLE] = {sText_Desc_BattleStyle},
 };
 
-static const u8 *const sOptionMenuItemDescriptionsInterface[MENUITEM_INTERFACE_COUNT][2] =
+static const u8 *const sOptionMenuItemDescriptionsInterface[MENUITEM_INTERFACE_COUNT][1] =
 {
-    [MENUITEM_INTERFACE_FRAMETYPE]   = {sText_Desc_FrameType,        sText_Empty},
-    [MENUITEM_INTERFACE_SCROLLBGS]   = {sText_Desc_ScrollBgs,        sText_Empty},
-    [MENUITEM_INTERFACE_CLOCKMODE]   = {sText_Desc_ClockMode,        sText_Empty},
-    [MENUITEM_INTERFACE_IVEVDISPLAY] = {sText_Desc_IVEVDisplay,      sText_Empty},
+    [MENUITEM_INTERFACE_FRAMETYPE]   = {sText_Desc_FrameType,},
+    [MENUITEM_INTERFACE_SCROLLBGS]   = {sText_Desc_ScrollBgs},
+    [MENUITEM_INTERFACE_CLOCKMODE]   = {sText_Desc_ClockMode},
+    [MENUITEM_INTERFACE_IVEVDISPLAY] = {sText_Desc_IVEVDisplay},
 };
 
 
